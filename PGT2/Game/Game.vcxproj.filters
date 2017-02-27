@@ -15,18 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\Downloads\OgreWikiTutorialFramework_1-9\BaseApplication.cpp">
+    <ClCompile Include="TutorialApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\Downloads\OgreWikiTutorialFramework_1-9\TutorialApplication.cpp">
+    <ClCompile Include="BaseApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Downloads\OgreWikiTutorialFramework_1-9\BaseApplication.h">
+    <ClInclude Include="BaseApplication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Downloads\OgreWikiTutorialFramework_1-9\TutorialApplication.h">
+    <ClInclude Include="TutorialApplication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

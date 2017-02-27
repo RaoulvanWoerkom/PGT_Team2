@@ -19,12 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\Downloads\OgreWikiTutorialFramework_1-9\BaseApplication.cpp" />
-    <ClCompile Include="..\..\..\..\Downloads\OgreWikiTutorialFramework_1-9\TutorialApplication.cpp" />
+    <ClCompile Include="BaseApplication.cpp" />
+    <ClCompile Include="TutorialApplication.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Downloads\OgreWikiTutorialFramework_1-9\BaseApplication.h" />
-    <ClInclude Include="..\..\..\..\Downloads\OgreWikiTutorialFramework_1-9\TutorialApplication.h" />
+    <ClInclude Include="BaseApplication.h" />
+    <ClInclude Include="TutorialApplication.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{523EAB39-AA76-4ECF-B8DF-836843209AF4}</ProjectGuid>
