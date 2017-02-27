@@ -1,0 +1,6 @@
+﻿  TutorialApplication.cpp
+  BaseApplication.cpp
+  Generating Code...
+cl : Command line warning D9028: minimal rebuild failure, reverting to normal build
+  Game.vcxproj -> C:\Users\User\Documents\PGT_Team2\PGT2\Debug\Game.exe
+          1 file(s) copied.
