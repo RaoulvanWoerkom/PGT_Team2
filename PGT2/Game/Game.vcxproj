@@ -19,12 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BaseApplication.cpp" />
-    <ClCompile Include="TestApplication.cpp" />
+    <ClInclude Include="src\BaseApplication.h" />
+    <ClInclude Include="src\TestApplication.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BaseApplication.h" />
-    <ClInclude Include="TestApplication.h" />
+    <ClCompile Include="src\BaseApplication.cpp" />
+    <ClCompile Include="src\TestApplication.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{523EAB39-AA76-4ECF-B8DF-836843209AF4}</ProjectGuid>
