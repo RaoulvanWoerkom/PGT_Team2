@@ -5,6 +5,8 @@ addons:
     token:
       secure: "SONAR_TOKEN" # encrypted value of your token
   branches:
+    - citest
+    - CiTest
     - master
     - CITest
 
