@@ -19,13 +19,13 @@ cmake_minimum_required(VERSION 2.6)
 set(APP "OgreApp")
  
 set(HDRS
-	./src/BaseApplication.h
-	./src/TutorialApplication.h
+	./PGT2/Game/src/BaseApplication.h
+	./PGT2/Game/src/TutorialApplication.h
 )
  
 set(SRCS
-	./src/BaseApplication.cpp
-	./src/TutorialApplication.cpp
+	./PGT2/Game/src/BaseApplication.cpp
+	./PGT2/Game/src/TutorialApplication.cpp
 )
  
 include("tools/cmake/common.cmake") 
