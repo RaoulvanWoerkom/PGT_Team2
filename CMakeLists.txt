@@ -20,12 +20,12 @@ set(APP "OgreApp")
  
 set(HDRS
 	./PGT2/Game/src/BaseApplication.h
-	./PGT2/Game/src/TutorialApplication.h
+	./PGT2/Game/src/TestApplication.h
 )
  
 set(SRCS
 	./PGT2/Game/src/BaseApplication.cpp
-	./PGT2/Game/src/TutorialApplication.cpp
+	./PGT2/Game/src/TestApplication.cpp
 )
  
 include("tools/cmake/common.cmake") 
