@@ -11,6 +11,7 @@ install:
 script:
   - chmod +x tools/ci/build.sh
   - tools/ci/build.sh
+  - sonar-scanner
 
 sudo: required
 
