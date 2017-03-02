@@ -1,6 +1,7 @@
 language: cpp
 
 before_install:
+  - chmod +x gradlew
   - tools/ci/before-install.sh
 
 install:
