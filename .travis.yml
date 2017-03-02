@@ -5,9 +5,11 @@ before_install:
   - tools/ci/before-install.sh
 
 install:
+  - chmod +x tools/ci/install.sh
   - tools/ci/install.sh
 
 script:
+  - chmod +x tools/ci/build.sh
   - tools/ci/build.sh
 
 sudo: required
