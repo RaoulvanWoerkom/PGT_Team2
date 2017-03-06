@@ -26,16 +26,17 @@ install:
 script:
   - chmod +x tools/ci/build.sh
 
-  - build-wrapper --out-dir build tools/ci/build.sh
+  - build-wrapper-linux-x86-64 --out-dir build tools/ci/build.sh
 
   #- make clean
 
   # Execute some tests
   #- make test
   
-  # Run SonarQube analysis
+after_success:
+# Run SonarQube analysis
   - sonar-scanner
-
+  
 sudo: required
 
 matrix:
