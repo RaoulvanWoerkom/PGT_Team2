@@ -1,3 +1,4 @@
+dist: trusty
 language: cpp
 
 cache:
@@ -7,12 +8,12 @@ cache:
 notifications:
   email: false
 
-#addons:
-#  sonarqube:
-#  branches:
-#    - master
-#    - CITest
-#    - shadow
+addons:
+  sonarqube:
+  branches:
+    - master
+    - CITest
+    - shadow
 
 before_install:
   - chmod +x tools/ci/before-install.sh
@@ -24,16 +25,18 @@ install:
 
 script:
   - chmod +x tools/ci/build.sh
-  - tools/ci/build.sh
-  
-  # Wraps the compilation with the Build Wrapper to generate configuration (used
-  # later by the SonarQube Scanner) into the "build" folder
-  # build-wrapper-linux-x86-64 --out-dir build 
-  
-  # Disable Sonar for now
-  # sonar-scanner
 
-sudo: required
+  - tools/ci/build.sh
+
+  #- make clean
+
+  # Execute some tests
+  #- make test
+  
+  # Run SonarQube analysis
+  - sonar-scanner
+
+sudo: false
 
 matrix:
   include:
