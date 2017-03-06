@@ -26,7 +26,7 @@ install:
 script:
   - chmod +x tools/ci/build.sh
 
-  - tools/ci/build.sh
+  - build-wrapper --out-dir build tools/ci/build.sh
 
   #- make clean
 
