@@ -1,0 +1,50 @@
+language: cpp
+
+addons:
+  sonarqube:
+    token:
+      secure: "SONAR_TOKEN" # encrypted value of your token
+  branches:
+    - citest
+    - CiTest
+    - master
+    - CITest
+
+before_install:
+  - chmod +x tools/ci/before-install.sh
+  - tools/ci/before-install.sh
+
+install:
+  - chmod +x tools/ci/install.sh
+  - tools/ci/install.sh
+
+script:
+  - chmod +x tools/ci/build.sh
+  - tools/ci/build.sh
+  - sonar-scanner
+
+sudo: required
+
+matrix:
+  include:
+
+    - os: linux
+      dist: precise
+      compiler: gcc
+      env: OGRE_VERSION=1.9
+
+    - os: linux
+      dist: trusty
+      compiler: gcc
+      env: OGRE_VERSION=1.9
+
+    - os: linux
+      dist: precise
+      compiler: clang
+      env: OGRE_VERSION=1.9
+
+    - os: linux
+      dist: trusty
+      compiler: clang
+      env: OGRE_VERSION=1.9
+
