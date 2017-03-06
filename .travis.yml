@@ -1,5 +1,12 @@
 language: cpp
 
+cache:
+  directories:
+    - '$HOME/.sonar/cache'
+
+notifications:
+  email: false
+
 addons:
   sonarqube:
   branches:
@@ -19,6 +26,11 @@ install:
 script:
   - chmod +x tools/ci/build.sh
   - tools/ci/build.sh
+  
+  # Wraps the compilation with the Build Wrapper to generate configuration (used
+  # later by the SonarQube Scanner) into the "build" folder
+  - build-wrapper-linux-x86-64 --out-dir build 
+  
   - sonar-scanner
 
 sudo: required
