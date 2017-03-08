@@ -10,4 +10,14 @@
     <LocalDebuggerWorkingDirectory>$(OGRE_HOME)\Bin\$(Configuration)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommand>$(OGRE_HOME)\Bin\$(Configuration)\$(ProjectName).exe</LocalDebuggerCommand>
+    <LocalDebuggerCommandArguments>$(OGRE_HOME)\Bin\$(Configuration)</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommand>$(OGRE_HOME)\Bin\$(Configuration)\$(ProjectName).exe</LocalDebuggerCommand>
+    <LocalDebuggerCommandArguments>$(OGRE_HOME)\Bin\$(Configuration)</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>

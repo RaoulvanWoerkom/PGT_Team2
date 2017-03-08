@@ -33,9 +33,13 @@ void TestApplication::createViewports()
 
 void TestApplication::createScene()
 {
-	mSceneMgr->setAmbientLight(Ogre::ColourValue(0, 0, 0));
-	mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
+	createLight();
+	createPlane();
+	createSphere();
+}
 
+void TestApplication::createPlane()
+{
 	// Create ground
 	Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
 
@@ -49,6 +53,13 @@ void TestApplication::createScene()
 
 	groundEntity->setMaterialName("Examples/Rockwall");
 	groundEntity->setCastShadows(false);
+}
+
+
+void TestApplication::createLight()
+{
+	mSceneMgr->setAmbientLight(Ogre::ColourValue::White);
+	mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
 
 	// Directional light
 	Ogre::Light* directionalLight = mSceneMgr->createLight("DirectionalLight");
@@ -58,9 +69,93 @@ void TestApplication::createScene()
 	directionalLight->setSpecularColour(Ogre::ColourValue(.3, .3, .3));
 
 	directionalLight->setDirection(Ogre::Vector3(0, -1, 1));
-
 }
 
+void TestApplication::createSphere()
+{
+	Ogre::Entity *sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
+	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));
+	ballNode->attachObject(sphereEntity);
+}
+
+bool iDown = false;
+bool jDown = false;
+bool kDown = false;
+bool lDown = false;
+
+bool TestApplication::keyPressed(const OIS::KeyEvent& ke)
+{
+	switch (ke.key)
+	{
+		case OIS::KC_I:
+			iDown = true;
+			break;
+		case OIS::KC_J:
+			jDown = true;
+			break;
+		case OIS::KC_K:
+			kDown = true;
+			break;
+		case OIS::KC_L:
+			lDown = true;
+			break;
+		default:
+			break;
+	}
+	return BaseApplication::keyPressed(ke);
+}
+
+bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
+{
+	switch (ke.key)
+	{
+	case OIS::KC_I:
+		iDown = false;
+		break;
+	case OIS::KC_J:
+		jDown = false;
+		break;
+	case OIS::KC_K:
+		kDown = false;
+		break;
+	case OIS::KC_L:
+		lDown = false;
+		break;
+	default:
+		break;
+	}
+
+	return BaseApplication::keyReleased(ke);
+}
+
+
+bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
+{
+	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
+	if (iDown)
+	{
+		movePos.z = -0.1f;
+	}
+	if (jDown)
+	{
+		movePos.x = -0.1f;
+	}
+	if (kDown)
+	{
+		movePos.z = 0.1f;
+	}
+	if (lDown)
+	{
+		movePos.x = 0.1f;
+	}
+
+	Ogre::Vector3 currPos = ballNode->getPosition();
+
+	Ogre::Vector3 newPos = currPos + movePos;
+	ballNode->setPosition(newPos);
+
+	return BaseApplication::frameRenderingQueued(evt);
+}
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN
