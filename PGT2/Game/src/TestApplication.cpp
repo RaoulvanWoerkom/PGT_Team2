@@ -1,6 +1,7 @@
 #include "TestApplication.h"
 #include "../OgreText.h"
 #include <sstream>
+#include <iomanip>
 
 const float moveSpeed = 100;
 const int totalGameTime = 60;
@@ -42,7 +43,6 @@ void TestApplication::createViewports()
 void TestApplication::init()
 {
 	remainingTime = totalGameTime;
-	previousTime = INT32_MAX;
 	timer = new Ogre::Timer();
 	timer->reset();
 	timerText = new OgreText();
@@ -245,14 +245,13 @@ void TestApplication::showScore(double score)
 }
 
 
-void TestApplication::updateRemainingTime(int elapsedTime)
+void TestApplication::updateRemainingTime(double elapsedTime)
 {
-	if (elapsedTime > previousTime)
-	{
-		remainingTime--;
-		timerText->setText("Time: " + static_cast<std::ostringstream*>(&(std::ostringstream() << remainingTime))->str());    // Text to be displayed
-	}
-	previousTime = elapsedTime;
+	remainingTime = totalGameTime - elapsedTime;
+	stringstream stream;
+	stream << std::fixed << std::setprecision(1) << remainingTime; 	// Set number of digits after the decimal point to 1, for the timer display.
+	std::string timeRepresentation = stream.str();
+	timerText->setText("Time: " + timeRepresentation);
 }
 
 
@@ -309,7 +308,7 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 
 bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	int elapsedTime = (int) (timer->getMilliseconds() / 1000);
+	double elapsedTime =  (timer->getMilliseconds() / 1000.0);
 	updateRemainingTime(elapsedTime);
 	showScore(1);
 
@@ -332,10 +331,6 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	}
 
 	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
-	// Ogre::Vector3 currPos = ballNode->getPosition();
-
-	// Ogre::Vector3 newPos = currPos + movePos;
-	// ballNode->setPosition(newPos);
 
 	return BaseApplication::frameRenderingQueued(evt);
 }
