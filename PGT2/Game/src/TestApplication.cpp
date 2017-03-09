@@ -3,11 +3,10 @@
 #include <sstream>
 
 const float moveSpeed = 100;
-<<<<<<< Updated upstream
+const int totalGameTime = 60;
+
 #include "Ogre.h"
-=======
 OgreText *timerText;
->>>>>>> Stashed changes
 
 TestApplication::TestApplication(void)
 {
@@ -42,10 +41,14 @@ void TestApplication::createViewports()
 
 void TestApplication::init()
 {
-	timerText = new OgreText();
-	previousTime = 0;
+	remainingTime = totalGameTime;
+	previousTime = INT32_MAX;
 	timer = new Ogre::Timer();
 	timer->reset();
+	timerText = new OgreText();
+	timerText->setPos(0.4f, 0.1f);        // Text position, using relative co-ordinates
+	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
+	timerText->setText("Time: 60");
 }
 
 void TestApplication::createScene()
@@ -241,15 +244,15 @@ void TestApplication::showScore(double score)
 
 }
 
-void TestApplication::showTime(double time)
+
+void TestApplication::updateRemainingTime(int elapsedTime)
 {
-	if (time > previousTime)
+	if (elapsedTime > previousTime)
 	{
-		timerText->setText("Time: " + static_cast<std::ostringstream*>(&(std::ostringstream() << time))->str());
-		timerText->setPos(0.4f, 0.1f);
-		timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);
+		remainingTime--;
+		timerText->setText("Time: " + static_cast<std::ostringstream*>(&(std::ostringstream() << remainingTime))->str());    // Text to be displayed
 	}
-	previousTime = time;
+	previousTime = elapsedTime;
 }
 
 
@@ -306,8 +309,8 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 
 bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	int time_in_seconds = (int) (timer->getMilliseconds() / 1000);
-	showTime(time_in_seconds);
+	int elapsedTime = (int) (timer->getMilliseconds() / 1000);
+	updateRemainingTime(elapsedTime);
 	showScore(1);
 
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
