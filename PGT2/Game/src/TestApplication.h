@@ -19,12 +19,20 @@ protected:
 	virtual void createSphere();
 	virtual void showScore(double score);
 
-	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
+	void GetMeshInformation(const Ogre::MeshPtr mesh,
+		size_t &vertex_count,
+		Ogre::Vector3* &vertices,
+		size_t &index_count,
+		unsigned long* &indices,
+		const Ogre::Vector3 &position,
+		const Ogre::Quaternion &orient,
+		const Ogre::Vector3 &scale);
 
+	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 	virtual bool keyPressed(const OIS::KeyEvent& ke);
 	virtual bool keyReleased(const OIS::KeyEvent& ke);
-
 };
 
 
 #endif // #ifndef __TestApplication_h_
+
