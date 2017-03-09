@@ -7,6 +7,7 @@ const float moveSpeed = 100;
 const int totalGameTime = 60;
 
 #include "Ogre.h"
+OgreText *scoreText;
 OgreText *timerText;
 
 TestApplication::TestApplication(void)
@@ -45,10 +46,12 @@ void TestApplication::init()
 	remainingTime = totalGameTime;
 	timer = new Ogre::Timer();
 	timer->reset();
+	scoreText = new OgreText();
+	scoreText->setPos(0.1f, 0.1f);        // Text position, using relative co-ordinates
+	scoreText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
 	timerText = new OgreText();
 	timerText->setPos(0.4f, 0.1f);        // Text position, using relative co-ordinates
 	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
-	timerText->setText("Time: 60");
 }
 
 void TestApplication::createScene()
@@ -236,12 +239,8 @@ void TestApplication::GetMeshInformation(const Ogre::MeshPtr mesh,
 
 void TestApplication::showScore(double score)
 {
-	OgreText *textItem = new OgreText;
-	textItem->setText("Score: " + static_cast<std::ostringstream*>(&(std::ostringstream() << score))->str());    // Text to be displayed
+	scoreText->setText("Score: " + static_cast<std::ostringstream*>(&(std::ostringstream() << score))->str());    // Text to be displayed
 										  // Now it is possible to use the Ogre::String as parameter too
-	textItem->setPos(0.1f, 0.1f);        // Text position, using relative co-ordinates
-	textItem->setCol(1.0f, 1.0f, 1.0f, 0.5f);    // Text colour (Red, Green, Blue, Alpha)
-
 }
 
 
@@ -308,8 +307,8 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 
 bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	double elapsedTime =  (timer->getMilliseconds() / 1000.0);
-	updateRemainingTime(elapsedTime);
+	double elapsedSeconds =  timer->getMilliseconds() / 1000.0;
+	updateRemainingTime(elapsedSeconds);
 	showScore(1);
 
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
