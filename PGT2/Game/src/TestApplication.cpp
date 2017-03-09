@@ -2,6 +2,8 @@
 #include "../OgreText.h"
 #include <sstream>
 
+const float moveSpeed = 100;
+
 TestApplication::TestApplication(void)
 {
 }
@@ -150,25 +152,26 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
 	if (iDown)
 	{
-		movePos.z = -0.1f;
+		movePos.z = -moveSpeed;
 	}
 	if (jDown)
 	{
-		movePos.x = -0.1f;
+		movePos.x = -moveSpeed;
 	}
 	if (kDown)
 	{
-		movePos.z = 0.1f;
+		movePos.z = moveSpeed;
 	}
 	if (lDown)
 	{
-		movePos.x = 0.1f;
+		movePos.x = moveSpeed;
 	}
 
-	Ogre::Vector3 currPos = ballNode->getPosition();
+	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
+	// Ogre::Vector3 currPos = ballNode->getPosition();
 
-	Ogre::Vector3 newPos = currPos + movePos;
-	ballNode->setPosition(newPos);
+	// Ogre::Vector3 newPos = currPos + movePos;
+	// ballNode->setPosition(newPos);
 
 	return BaseApplication::frameRenderingQueued(evt);
 }
