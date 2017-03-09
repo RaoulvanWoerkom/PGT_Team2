@@ -1,13 +1,13 @@
 #include "TestApplication.h"
 #include "../OgreText.h"
 #include <sstream>
+#include <iomanip>
 
 const float moveSpeed = 100;
-<<<<<<< Updated upstream
+const int totalGameTime = 60;
+
 #include "Ogre.h"
-=======
 OgreText *timerText;
->>>>>>> Stashed changes
 
 TestApplication::TestApplication(void)
 {
@@ -42,10 +42,13 @@ void TestApplication::createViewports()
 
 void TestApplication::init()
 {
-	timerText = new OgreText();
-	previousTime = 0;
+	remainingTime = totalGameTime;
 	timer = new Ogre::Timer();
 	timer->reset();
+	timerText = new OgreText();
+	timerText->setPos(0.4f, 0.1f);        // Text position, using relative co-ordinates
+	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
+	timerText->setText("Time: 60");
 }
 
 void TestApplication::createScene()
@@ -241,15 +244,14 @@ void TestApplication::showScore(double score)
 
 }
 
-void TestApplication::showTime(double time)
+
+void TestApplication::updateRemainingTime(double elapsedTime)
 {
-	if (time > previousTime)
-	{
-		timerText->setText("Time: " + static_cast<std::ostringstream*>(&(std::ostringstream() << time))->str());
-		timerText->setPos(0.4f, 0.1f);
-		timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);
-	}
-	previousTime = time;
+	remainingTime = totalGameTime - elapsedTime;
+	stringstream stream;
+	stream << std::fixed << std::setprecision(1) << remainingTime; 	// Set number of digits after the decimal point to 1, for the timer display.
+	std::string timeRepresentation = stream.str();
+	timerText->setText("Time: " + timeRepresentation);
 }
 
 
@@ -306,8 +308,8 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 
 bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	int time_in_seconds = (int) (timer->getMilliseconds() / 1000);
-	showTime(time_in_seconds);
+	double elapsedTime =  (timer->getMilliseconds() / 1000.0);
+	updateRemainingTime(elapsedTime);
 	showScore(1);
 
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
@@ -329,10 +331,6 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	}
 
 	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
-	// Ogre::Vector3 currPos = ballNode->getPosition();
-
-	// Ogre::Vector3 newPos = currPos + movePos;
-	// ballNode->setPosition(newPos);
 
 	return BaseApplication::frameRenderingQueued(evt);
 }

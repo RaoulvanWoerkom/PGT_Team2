@@ -10,7 +10,7 @@ public:
 	virtual ~TestApplication();
 	Ogre::SceneNode* ballNode;
 	Ogre::Timer* timer;
-	int previousTime;
+	double remainingTime;
 
 protected:
 	virtual void createScene();
@@ -21,7 +21,7 @@ protected:
 	virtual void createViewports();
 	virtual void createSphere();
 	virtual void showScore(double score);
-	virtual void showTime(double time);
+	virtual void updateRemainingTime(double elapsedTime);
 
 	void GetMeshInformation(const Ogre::MeshPtr mesh,
 		size_t &vertex_count,
