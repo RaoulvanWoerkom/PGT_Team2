@@ -1,4 +1,6 @@
 #include "TestApplication.h"
+#include "../OgreText.h"
+#include <sstream>
 
 TestApplication::TestApplication(void)
 {
@@ -78,6 +80,18 @@ void TestApplication::createSphere()
 	ballNode->attachObject(sphereEntity);
 }
 
+void TestApplication::showScore(double score)
+{
+	OgreText *textItem = new OgreText;
+	textItem->setText("Score: " + static_cast<std::ostringstream*>(&(std::ostringstream() << score))->str());    // Text to be displayed
+										  // Now it is possible to use the Ogre::String as parameter too
+	textItem->setPos(0.1f, 0.1f);        // Text position, using relative co-ordinates
+	textItem->setCol(1.0f, 1.0f, 1.0f, 0.5f);    // Text colour (Red, Green, Blue, Alpha)
+
+	//delete textItem;
+}
+
+
 bool iDown = false;
 bool jDown = false;
 bool kDown = false;
@@ -131,6 +145,8 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 
 bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
+	showScore(1);
+
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
 	if (iDown)
 	{

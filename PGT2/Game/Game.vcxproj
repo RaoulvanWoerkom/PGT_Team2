@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="OgreText.h" />
     <ClInclude Include="src\BaseApplication.h" />
     <ClInclude Include="src\TestApplication.h" />
   </ItemGroup>

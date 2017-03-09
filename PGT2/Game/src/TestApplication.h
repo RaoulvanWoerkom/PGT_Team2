@@ -17,6 +17,7 @@ protected:
 	virtual void createLight();
 	virtual void createViewports();
 	virtual void createSphere();
+	virtual void showScore(double score);
 
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 
