@@ -2,8 +2,11 @@
 #include "../OgreText.h"
 #include <sstream>
 
-const float moveSpeed = 100;
+
 #include "Ogre.h"
+#include "math.h"
+
+const float moveSpeed = 100;
 
 TestApplication::TestApplication(void)
 {
@@ -53,8 +56,10 @@ void TestApplication::createPlane()
 		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
 		plane, 1500, 1500, 20, 20, true, 1, 5, 5, Ogre::Vector3::UNIT_Z);
 
-	Ogre::Entity* groundEntity = mSceneMgr->createEntity("ground");
-	mSceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(groundEntity);
+	groundEntity = mSceneMgr->createEntity("ground");
+	//mSceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(groundEntity);
+	groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	groundNode->attachObject(groundEntity);
 
 	groundEntity->setMaterialName("Examples/Rockwall");
 	groundEntity->setCastShadows(false);
@@ -78,20 +83,133 @@ void TestApplication::createLight()
 
 void TestApplication::createSphere()
 {
-	Ogre::Entity *sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
+	ballEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 
 	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));
-	ballNode->attachObject(sphereEntity);
+	ballNode->attachObject(ballEntity);
 
-	size_t vertex_count, index_count;
-	Ogre::Vector3* vertices;
-	unsigned long* indices;
+	
+}
 
-	GetMeshInformation(sphereEntity->getMesh(), vertex_count, vertices, index_count, indices, ballNode->getPosition(), ballNode->getOrientation(), ballNode->getScale());
-	Ogre::Vector3 kaas = vertices[6];
+bool iDown = false;
+bool jDown = false;
+bool kDown = false;
+bool lDown = false;
+bool yDown = false;
+bool hDown = false;
+bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
+{
+	//showScore(1);
 
-	delete[] vertices;
-	delete[] indices;
+	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
+	
+	if (jDown)
+		movePos.x = -moveSpeed;
+	if (hDown)
+		movePos.y = -moveSpeed;
+	if (iDown)
+		movePos.z = -moveSpeed;
+	if (lDown)
+		movePos.x = moveSpeed;
+	if (yDown)
+		movePos.y = moveSpeed;
+	if (kDown)
+		movePos.z = moveSpeed;
+
+	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
+	
+
+	CheckBallCollision(groundNode, groundEntity);
+
+
+	return BaseApplication::frameRenderingQueued(evt);
+}
+
+void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* entity1)
+{
+
+	size_t vertex_count1, index_count1;
+	Ogre::Vector3* vertices1;
+	unsigned long* indices1;
+
+	GetMeshInformation(entity1->getMesh(), vertex_count1, vertices1, index_count1, indices1, node1->getPosition(), node1->getOrientation(), node1->getScale());
+
+	int max = vertex_count1 - 1;
+	for (size_t i = 0; i < max; i++)
+	{
+		Ogre::Vector3 point1 = vertices1[i];
+		Ogre::Vector3 point2 = vertices1[i+1];
+		Ogre::Vector3 ballPos = ballNode->getPosition();
+
+		std::vector<Ogre::Vector3> collisionCoordinates = FindLineSphereIntersections(point1, point2, ballPos, 99);
+		if (collisionCoordinates.size() > 0)
+		{
+			OutputDebugStringW(L"HITTTTTTTTTTTTTT\n");
+		}
+
+	}
+	
+
+	delete[] vertices1;
+	delete[] indices1;
+}
+
+std::vector<Ogre::Vector3> TestApplication::FindLineSphereIntersections(Ogre::Vector3 linePoint0, Ogre::Vector3 linePoint1, Ogre::Vector3 circleCenter, double circleRadius)
+{
+	std::vector<Ogre::Vector3> ret;
+	double cx = circleCenter.x;
+	double cy = circleCenter.y;
+	double cz = circleCenter.z;
+
+	double px = linePoint0.x;
+	double py = linePoint0.y;
+	double pz = linePoint0.z;
+
+	double vx = linePoint1.x - px;
+	double vy = linePoint1.y - py;
+	double vz = linePoint1.z - pz;
+
+	double A = vx * vx + vy * vy + vz * vz;
+	double B = 2.0 * (px * vx + py * vy + pz * vz - vx * cx - vy * cy - vz * cz);
+	double C = px * px - 2 * px * cx + cx * cx + py * py - 2 * py * cy + cy * cy +
+		pz * pz - 2 * pz * cz + cz * cz - circleRadius * circleRadius;
+
+	// discriminant
+	double D = B * B - 4 * A * C;
+
+	if (D < 0)
+	{
+		return ret;
+	}
+
+	double t1 = (-B - sqrt(D)) / (2.0 * A);
+
+	Ogre::Vector3 solution1 = Ogre::Vector3(linePoint0.x * (1 - t1) + t1 * linePoint1.x,
+		linePoint0.y * (1 - t1) + t1 * linePoint1.y,
+		linePoint0.z * (1 - t1) + t1 * linePoint1.z);
+	if (D == 0)
+	{
+		ret.resize(1);
+		ret[0] = solution1;
+		return ret;
+	}
+
+	double t2 = (-B + sqrt(D)) / (2.0 * A);
+	Ogre::Vector3 solution2 = Ogre::Vector3(linePoint0.x * (1 - t2) + t2 * linePoint1.x,
+		linePoint0.y * (1 - t2) + t2 * linePoint1.y,
+		linePoint0.z * (1 - t2) + t2 * linePoint1.z);
+
+	if (abs(t1 - 0.5) < abs(t2 - 0.5))
+	{
+		ret.resize(2);
+		ret[0] = solution1;
+		ret[1] = solution2;
+		return ret;
+	}
+	ret.resize(2);
+	ret[0] = solution2;
+	ret[1] = solution1;
+	return ret;
 }
 
 void TestApplication::GetMeshInformation(const Ogre::MeshPtr mesh,
@@ -230,10 +348,6 @@ void TestApplication::showScore(double score)
 }
 
 
-bool iDown = false;
-bool jDown = false;
-bool kDown = false;
-bool lDown = false;
 
 bool TestApplication::keyPressed(const OIS::KeyEvent& ke)
 {
@@ -250,6 +364,12 @@ bool TestApplication::keyPressed(const OIS::KeyEvent& ke)
 			break;
 		case OIS::KC_L:
 			lDown = true;
+			break;
+		case OIS::KC_Y:
+			yDown = true;
+			break;
+		case OIS::KC_H:
+			hDown = true;
 			break;
 		default:
 			break;
@@ -273,6 +393,12 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 	case OIS::KC_L:
 		lDown = false;
 		break;
+	case OIS::KC_Y:
+		yDown = false;
+		break;
+	case OIS::KC_H:
+		hDown = false;
+		break;
 	default:
 		break;
 	}
@@ -281,36 +407,7 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 }
 
 
-bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
-{
-	showScore(1);
 
-	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
-	if (iDown)
-	{
-		movePos.z = -moveSpeed;
-	}
-	if (jDown)
-	{
-		movePos.x = -moveSpeed;
-	}
-	if (kDown)
-	{
-		movePos.z = moveSpeed;
-	}
-	if (lDown)
-	{
-		movePos.x = moveSpeed;
-	}
-
-	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
-	// Ogre::Vector3 currPos = ballNode->getPosition();
-
-	// Ogre::Vector3 newPos = currPos + movePos;
-	// ballNode->setPosition(newPos);
-
-	return BaseApplication::frameRenderingQueued(evt);
-}
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN

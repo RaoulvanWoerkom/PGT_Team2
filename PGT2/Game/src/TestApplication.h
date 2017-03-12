@@ -9,6 +9,9 @@ public:
 	TestApplication();
 	virtual ~TestApplication();
 	Ogre::SceneNode* ballNode;
+	Ogre::SceneNode* groundNode;
+	Ogre::Entity* ballEntity;
+	Ogre::Entity* groundEntity;
 
 protected:
 	virtual void createScene();
@@ -18,7 +21,8 @@ protected:
 	virtual void createViewports();
 	virtual void createSphere();
 	virtual void showScore(double score);
-
+	void CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* entity1);
+	std::vector<Ogre::Vector3>  FindLineSphereIntersections(Ogre::Vector3 linePoint0, Ogre::Vector3 linePoint1, Ogre::Vector3 circleCenter, double circleRadius);
 	void GetMeshInformation(const Ogre::MeshPtr mesh,
 		size_t &vertex_count,
 		Ogre::Vector3* &vertices,
