@@ -67,6 +67,7 @@ void TestApplication::createPlane()
 	// Create ground
 	Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
 
+
 	Ogre::MeshManager::getSingleton().createPlane(
 		"ground",
 		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -129,7 +130,7 @@ void TestApplication::GetMeshInformation(const Ogre::MeshPtr mesh,
 	size_t index_offset = 0;
 
 	vertex_count = index_count = 0;
-
+	
 	// Calculate how many vertices and indices we're going to need
 	for (unsigned short i = 0; i < mesh->getNumSubMeshes(); ++i)
 	{

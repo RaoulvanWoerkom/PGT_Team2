@@ -11,7 +11,7 @@ public:
 	Ogre::SceneNode* ballNode;
 	Ogre::Timer* timer;
 	double remainingTime;
-
+	
 protected:
 	virtual void createScene();
 	virtual void init();
