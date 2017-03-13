@@ -21,6 +21,7 @@ protected:
 	virtual void createViewports();
 	virtual void createSphere();
 	virtual void showScore(double score);
+	float clamp(float n, float lower, float upper);
 	void CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* entity1);
 	std::vector<Ogre::Vector3>  FindLineSphereIntersections(Ogre::Vector3 linePoint0, Ogre::Vector3 linePoint1, Ogre::Vector3 circleCenter, double circleRadius);
 	void GetMeshInformation(const Ogre::MeshPtr mesh,
@@ -31,6 +32,7 @@ protected:
 		const Ogre::Vector3 &position,
 		const Ogre::Quaternion &orient,
 		const Ogre::Vector3 &scale);
+	virtual Ogre::Vector3 closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition );
 
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 	virtual bool keyPressed(const OIS::KeyEvent& ke);

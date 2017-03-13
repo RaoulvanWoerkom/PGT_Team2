@@ -2,12 +2,11 @@
 #include "../OgreText.h"
 #include <sstream>
 
-
 #include "Ogre.h"
 #include "math.h"
 
-const float moveSpeed = 100;
-
+const float MOVE_SPEED = 100;
+const float BALL_SIZE = 100;
 TestApplication::TestApplication(void)
 {
 }
@@ -46,11 +45,12 @@ void TestApplication::createScene()
 	createSphere();
 }
 
+Ogre::Vector3 planeNormal;
 void TestApplication::createPlane()
 {
 	// Create ground
 	Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
-
+	planeNormal = plane.normal;
 	Ogre::MeshManager::getSingleton().createPlane(
 		"ground",
 		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -85,7 +85,7 @@ void TestApplication::createSphere()
 {
 	ballEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 
-	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));
+	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, BALL_SIZE, 0));
 	ballNode->attachObject(ballEntity);
 
 	
@@ -104,17 +104,17 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
 	
 	if (jDown)
-		movePos.x = -moveSpeed;
+		movePos.x = -MOVE_SPEED;
 	if (hDown)
-		movePos.y = -moveSpeed;
+		movePos.y = -MOVE_SPEED;
 	if (iDown)
-		movePos.z = -moveSpeed;
+		movePos.z = -MOVE_SPEED;
 	if (lDown)
-		movePos.x = moveSpeed;
+		movePos.x = MOVE_SPEED;
 	if (yDown)
-		movePos.y = moveSpeed;
+		movePos.y = MOVE_SPEED;
 	if (kDown)
-		movePos.z = moveSpeed;
+		movePos.z = MOVE_SPEED;
 
 	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
 	
@@ -134,25 +134,153 @@ void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* e
 
 	GetMeshInformation(entity1->getMesh(), vertex_count1, vertices1, index_count1, indices1, node1->getPosition(), node1->getOrientation(), node1->getScale());
 
-	int max = vertex_count1 - 1;
+	int max = vertex_count1 - 2;
+
+	double shortestLength = 100000000000;
+	int chosenIndex = -1;
+	Ogre::Vector3 closestHitCoordinates;
+	Ogre::Vector3 normalVec = Ogre::Vector3(-1,-1,-1);
+	Ogre::Vector3 ballPos = ballNode->getPosition();
+	
+
 	for (size_t i = 0; i < max; i++)
 	{
 		Ogre::Vector3 point1 = vertices1[i];
 		Ogre::Vector3 point2 = vertices1[i+1];
-		Ogre::Vector3 ballPos = ballNode->getPosition();
+		Ogre::Vector3 point3 = vertices1[i+2];
+		
 
-		std::vector<Ogre::Vector3> collisionCoordinates = FindLineSphereIntersections(point1, point2, ballPos, 99);
-		if (collisionCoordinates.size() > 0)
+		Ogre::Vector3 collPoint = closestPointOnTriangle(point1, point2, point3, ballPos);
+		double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
+		if (dist < BALL_SIZE)
 		{
-			OutputDebugStringW(L"HITTTTTTTTTTTTTT\n");
-		}
+			if (dist < shortestLength)
+			{
+				shortestLength = dist;
+				chosenIndex = i;
+				closestHitCoordinates = collPoint;
 
+			}
+			
+		}
+	}
+	if (chosenIndex >= 0)
+	{
+		double diffDist = BALL_SIZE - shortestLength;
+		//normalVec.normalise();
+		//Ogre::Vector3 diffCollPos = Ogre::Vector3(closestHitCoordinates.x - ballPos.x, closestHitCoordinates.y - ballPos.y, closestHitCoordinates.z - ballPos.z);
+		//diffCollPos.normalise();
+		ballPos += planeNormal * diffDist;
+		ballNode->setPosition(ballPos);
+	
 	}
 	
 
 	delete[] vertices1;
 	delete[] indices1;
 }
+
+float TestApplication::clamp(float n, float lower, float upper) {
+  return std::max(lower, std::min(n, upper));
+}
+
+Ogre::Vector3 TestApplication::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition )
+{
+    Ogre::Vector3 edge0 = point2 - point1;
+    Ogre::Vector3 edge1 = point3 - point1;
+    Ogre::Vector3 v0 = point1 - sourcePosition;
+
+    float a = edge0.dotProduct( edge0 );
+    float b = edge0.dotProduct( edge1 );
+    float c = edge1.dotProduct( edge1 );
+    float d = edge0.dotProduct( v0 );
+    float e = edge1.dotProduct( v0 );
+
+    float det = a*c - b*b;
+    float s = b*e - c*d;
+    float t = b*d - a*e;
+
+    if ( s + t < det )
+    {
+        if ( s < 0.f )
+        {
+            if ( t < 0.f )
+            {
+                if ( d < 0.f )
+                {
+                    s = clamp( -d/a, 0.f, 1.f );
+                    t = 0.f;
+                }
+                else
+                {
+                    s = 0.f;
+                    t = clamp( -e/c, 0.f, 1.f );
+                }
+            }
+            else
+            {
+                s = 0.f;
+                t = clamp( -e/c, 0.f, 1.f );
+            }
+        }
+        else if ( t < 0.f )
+        {
+            s = clamp( -d/a, 0.f, 1.f );
+            t = 0.f;
+        }
+        else
+        {
+            float invDet = 1.f / det;
+            s *= invDet;
+            t *= invDet;
+        }
+    }
+    else
+    {
+        if ( s < 0.f )
+        {
+            float tmp0 = b+d;
+            float tmp1 = c+e;
+            if ( tmp1 > tmp0 )
+            {
+                float numer = tmp1 - tmp0;
+                float denom = a-2*b+c;
+                s = clamp( numer/denom, 0.f, 1.f );
+                t = 1-s;
+            }
+            else
+            {
+                t = clamp( -e/c, 0.f, 1.f );
+                s = 0.f;
+            }
+        }
+        else if ( t < 0.f )
+        {
+            if ( a+d > b+e )
+            {
+                float numer = c+e-b-d;
+                float denom = a-2*b+c;
+                s = clamp( numer/denom, 0.f, 1.f );
+                t = 1-s;
+            }
+            else
+            {
+                s = clamp( -e/c, 0.f, 1.f );
+                t = 0.f;
+            }
+        }
+        else
+        {
+            float numer = c+e-b-d;
+            float denom = a-2*b+c;
+            s = clamp( numer/denom, 0.f, 1.f );
+            t = 1.f - s;
+        }
+    }
+	Ogre::Vector3 ret = point1 + s * edge0 + t * edge1;
+    return ret;
+}
+
 
 std::vector<Ogre::Vector3> TestApplication::FindLineSphereIntersections(Ogre::Vector3 linePoint0, Ogre::Vector3 linePoint1, Ogre::Vector3 circleCenter, double circleRadius)
 {
