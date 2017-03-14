@@ -7,8 +7,9 @@ protected:
 	Ogre::Entity* Entity;
 
 	float InverseMass;
-	Ogre::Vector3 AllForce;
-	Ogre::Vector3 Torque;
+	float Dampening;
+	Ogre::Vector3 ForceAccum;
+	Ogre::Vector3 TorqueAccum;
 	Ogre::Vector3 Velocity;
 	Ogre::Vector3 Rotation;
 	Ogre::Vector3 Acceleration;
@@ -18,10 +19,12 @@ protected:
 
 public:
 	void SetPosition(Ogre::Vector3 &position);
+	Ogre::Vector3 GetPosition();
 	void SetOrientation(Ogre::Quaternion &orientation);
+	Ogre::Quaternion GetOrientation();
 	void AddForce(Ogre::Vector3 &force);
 	void AddTorque(Ogre::Vector3 &torque);
 	void SetIsAwake(const bool awake);
-	void Integrate();
+	void Integrate(float delta);
 };
 
