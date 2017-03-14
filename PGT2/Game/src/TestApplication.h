@@ -33,6 +33,7 @@ protected:
 		const Ogre::Quaternion &orient,
 		const Ogre::Vector3 &scale);
 	virtual Ogre::Vector3 closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition );
+	virtual Ogre::Vector3 TestApplication::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
 
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 	virtual bool keyPressed(const OIS::KeyEvent& ke);

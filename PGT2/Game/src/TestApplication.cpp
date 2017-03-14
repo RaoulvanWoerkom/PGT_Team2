@@ -134,7 +134,7 @@ void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* e
 
 	GetMeshInformation(entity1->getMesh(), vertex_count1, vertices1, index_count1, indices1, node1->getPosition(), node1->getOrientation(), node1->getScale());
 
-	int max = vertex_count1 - 2;
+	
 
 	double shortestLength = 100000000000;
 	int chosenIndex = -1;
@@ -142,14 +142,16 @@ void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* e
 	Ogre::Vector3 normalVec = Ogre::Vector3(-1,-1,-1);
 	Ogre::Vector3 ballPos = ballNode->getPosition();
 	
-
-	for (size_t i = 0; i < max; i++)
+	int max = index_count1 - 3;
+	for (size_t i = 0; i < max; i+=3)
 	{
-		Ogre::Vector3 point1 = vertices1[i];
-		Ogre::Vector3 point2 = vertices1[i+1];
-		Ogre::Vector3 point3 = vertices1[i+2];
-		
-
+		long index1 = indices1[i];
+		long index2 = indices1[i+1];
+		long index3 = indices1[i+2];
+		Ogre::Vector3 point1 = vertices1[index1];
+		Ogre::Vector3 point2 = vertices1[index2];
+		Ogre::Vector3 point3 = vertices1[index3];
+		normalVec = normalVector(point1, point2, point3);
 		Ogre::Vector3 collPoint = closestPointOnTriangle(point1, point2, point3, ballPos);
 		double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
 		if (dist < BALL_SIZE)
@@ -159,23 +161,15 @@ void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* e
 				shortestLength = dist;
 				chosenIndex = i;
 				closestHitCoordinates = collPoint;
-
 			}
-			
 		}
 	}
 	if (chosenIndex >= 0)
 	{
 		double diffDist = BALL_SIZE - shortestLength;
-		//normalVec.normalise();
-		//Ogre::Vector3 diffCollPos = Ogre::Vector3(closestHitCoordinates.x - ballPos.x, closestHitCoordinates.y - ballPos.y, closestHitCoordinates.z - ballPos.z);
-		//diffCollPos.normalise();
-		ballPos += planeNormal * diffDist;
+		ballPos += normalVec * diffDist;
 		ballNode->setPosition(ballPos);
-	
 	}
-	
-
 	delete[] vertices1;
 	delete[] indices1;
 }
@@ -186,158 +180,120 @@ float TestApplication::clamp(float n, float lower, float upper) {
 
 Ogre::Vector3 TestApplication::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition )
 {
-    Ogre::Vector3 edge0 = point2 - point1;
-    Ogre::Vector3 edge1 = point3 - point1;
-    Ogre::Vector3 v0 = point1 - sourcePosition;
+	Ogre::Vector3 edge0 = point2 - point1;
+	Ogre::Vector3 edge1 = point3 - point1;
+	Ogre::Vector3 v0 = point1 - sourcePosition;
 
-    float a = edge0.dotProduct( edge0 );
-    float b = edge0.dotProduct( edge1 );
-    float c = edge1.dotProduct( edge1 );
-    float d = edge0.dotProduct( v0 );
-    float e = edge1.dotProduct( v0 );
+	float a = edge0.dotProduct(edge0);
+	float b = edge0.dotProduct(edge1);
+	float c = edge1.dotProduct(edge1);
+	float d = edge0.dotProduct(v0);
+	float e = edge1.dotProduct(v0);
 
-    float det = a*c - b*b;
-    float s = b*e - c*d;
-    float t = b*d - a*e;
+	float det = a*c - b*b;
+	float s = b*e - c*d;
+	float t = b*d - a*e;
 
-    if ( s + t < det )
-    {
-        if ( s < 0.f )
-        {
-            if ( t < 0.f )
-            {
-                if ( d < 0.f )
-                {
-                    s = clamp( -d/a, 0.f, 1.f );
-                    t = 0.f;
-                }
-                else
-                {
-                    s = 0.f;
-                    t = clamp( -e/c, 0.f, 1.f );
-                }
-            }
-            else
-            {
-                s = 0.f;
-                t = clamp( -e/c, 0.f, 1.f );
-            }
-        }
-        else if ( t < 0.f )
-        {
-            s = clamp( -d/a, 0.f, 1.f );
-            t = 0.f;
-        }
-        else
-        {
-            float invDet = 1.f / det;
-            s *= invDet;
-            t *= invDet;
-        }
-    }
-    else
-    {
-        if ( s < 0.f )
-        {
-            float tmp0 = b+d;
-            float tmp1 = c+e;
-            if ( tmp1 > tmp0 )
-            {
-                float numer = tmp1 - tmp0;
-                float denom = a-2*b+c;
-                s = clamp( numer/denom, 0.f, 1.f );
-                t = 1-s;
-            }
-            else
-            {
-                t = clamp( -e/c, 0.f, 1.f );
-                s = 0.f;
-            }
-        }
-        else if ( t < 0.f )
-        {
-            if ( a+d > b+e )
-            {
-                float numer = c+e-b-d;
-                float denom = a-2*b+c;
-                s = clamp( numer/denom, 0.f, 1.f );
-                t = 1-s;
-            }
-            else
-            {
-                s = clamp( -e/c, 0.f, 1.f );
-                t = 0.f;
-            }
-        }
-        else
-        {
-            float numer = c+e-b-d;
-            float denom = a-2*b+c;
-            s = clamp( numer/denom, 0.f, 1.f );
-            t = 1.f - s;
-        }
-    }
+	if (s + t < det)
+	{
+		if (s < 0.f)
+		{
+			if (t < 0.f)
+			{
+				if (d < 0.f)
+				{
+					s = clamp(-d / a, 0.f, 1.f);
+					t = 0.f;
+				}
+				else
+				{
+					s = 0.f;
+					t = clamp(-e / c, 0.f, 1.f);
+				}
+			}
+			else
+			{
+				s = 0.f;
+				t = clamp(-e / c, 0.f, 1.f);
+			}
+		}
+		else if (t < 0.f)
+		{
+			s = clamp(-d / a, 0.f, 1.f);
+			t = 0.f;
+		}
+		else
+		{
+			float invDet = 1.f / det;
+			s *= invDet;
+			t *= invDet;
+		}
+	}
+	else
+	{
+		if (s < 0.f)
+		{
+			float tmp0 = b + d;
+			float tmp1 = c + e;
+			if (tmp1 > tmp0)
+			{
+				float numer = tmp1 - tmp0;
+				float denom = a - 2 * b + c;
+				s = clamp(numer / denom, 0.f, 1.f);
+				t = 1 - s;
+			}
+			else
+			{
+				t = clamp(-e / c, 0.f, 1.f);
+				s = 0.f;
+			}
+		}
+		else if (t < 0.f)
+		{
+			if (a + d > b + e)
+			{
+				float numer = c + e - b - d;
+				float denom = a - 2 * b + c;
+				s = clamp(numer / denom, 0.f, 1.f);
+				t = 1 - s;
+			}
+			else
+			{
+				s = clamp(-e / c, 0.f, 1.f);
+				t = 0.f;
+			}
+		}
+		else
+		{
+			float numer = c + e - b - d;
+			float denom = a - 2 * b + c;
+			s = clamp(numer / denom, 0.f, 1.f);
+			t = 1.f - s;
+		}
+	}
 	Ogre::Vector3 ret = point1 + s * edge0 + t * edge1;
-    return ret;
+	return ret;
+
 }
 
-
-std::vector<Ogre::Vector3> TestApplication::FindLineSphereIntersections(Ogre::Vector3 linePoint0, Ogre::Vector3 linePoint1, Ogre::Vector3 circleCenter, double circleRadius)
+Ogre::Vector3 TestApplication::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3)
 {
-	std::vector<Ogre::Vector3> ret;
-	double cx = circleCenter.x;
-	double cy = circleCenter.y;
-	double cz = circleCenter.z;
+	long e1x = point2.x - point1.x;
+	long e1y = point2.y - point1.y;
+	long e1z = point2.z - point1.z;
+	
+	long e2x = point3.x - point1.x;
+	long e2y = point3.y - point1.y;
+	long e2z = point3.z - point1.z;
 
-	double px = linePoint0.x;
-	double py = linePoint0.y;
-	double pz = linePoint0.z;
+	long nx = e1y*e2z - e1z*e2y;
+	long ny = e1z*e2x - e1x*e2z;
+	long nz = e1x*e2y - e1y*e2x;
 
-	double vx = linePoint1.x - px;
-	double vy = linePoint1.y - py;
-	double vz = linePoint1.z - pz;
-
-	double A = vx * vx + vy * vy + vz * vz;
-	double B = 2.0 * (px * vx + py * vy + pz * vz - vx * cx - vy * cy - vz * cz);
-	double C = px * px - 2 * px * cx + cx * cx + py * py - 2 * py * cy + cy * cy +
-		pz * pz - 2 * pz * cz + cz * cz - circleRadius * circleRadius;
-
-	// discriminant
-	double D = B * B - 4 * A * C;
-
-	if (D < 0)
-	{
-		return ret;
-	}
-
-	double t1 = (-B - sqrt(D)) / (2.0 * A);
-
-	Ogre::Vector3 solution1 = Ogre::Vector3(linePoint0.x * (1 - t1) + t1 * linePoint1.x,
-		linePoint0.y * (1 - t1) + t1 * linePoint1.y,
-		linePoint0.z * (1 - t1) + t1 * linePoint1.z);
-	if (D == 0)
-	{
-		ret.resize(1);
-		ret[0] = solution1;
-		return ret;
-	}
-
-	double t2 = (-B + sqrt(D)) / (2.0 * A);
-	Ogre::Vector3 solution2 = Ogre::Vector3(linePoint0.x * (1 - t2) + t2 * linePoint1.x,
-		linePoint0.y * (1 - t2) + t2 * linePoint1.y,
-		linePoint0.z * (1 - t2) + t2 * linePoint1.z);
-
-	if (abs(t1 - 0.5) < abs(t2 - 0.5))
-	{
-		ret.resize(2);
-		ret[0] = solution1;
-		ret[1] = solution2;
-		return ret;
-	}
-	ret.resize(2);
-	ret[0] = solution2;
-	ret[1] = solution1;
+	Ogre::Vector3 ret = Ogre::Vector3(nx, ny, nx);
+	ret.normalise();
 	return ret;
+
 }
 
 void TestApplication::GetMeshInformation(const Ogre::MeshPtr mesh,
