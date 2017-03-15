@@ -42,17 +42,17 @@ void RigidBody::Integrate(float delta)
 	{
 		//calculate acceleration with mass and force
 		//TODO calculate angular acceleration with Tensor and Torque
-		RigidBody::Acceleration.addScaledVector(RigidBody::ForceAccum, RigidBody::InverseMass);
+		RigidBody::Acceleration + (RigidBody::ForceAccum * RigidBody::InverseMass);
 
 		//Update velocity with time and acceleration
-		RigidBody::Velocity.addScaledVector(RigidBody::Acceleration, delta);
+		RigidBody::Velocity + (RigidBody::Acceleration * delta);
 
 		//dampen the movement so it stops eventually
 		RigidBody::Velocity *= Ogre::Math().Pow(RigidBody::Dampening, delta);
 
 		//Move Rigidbody with velocity and time
 		Ogre::Vector3 tempPos = RigidBody::GetPosition();
-		tempPos.addScaledVector(RigidBody::Velocity, delta);
+		tempPos + (RigidBody::Velocity * delta);
 		RigidBody::SetPosition(tempPos);
 
 		//TODO Calculate total movement and check if under benchmark: IsAwake = false
