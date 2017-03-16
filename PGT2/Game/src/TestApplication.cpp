@@ -7,6 +7,7 @@ const float moveSpeed = 100;
 const int totalGameTime = 60;
 
 #include "Ogre.h"
+#include "RigidBody.h"
 OgreText *scoreText;
 OgreText *timerText;
 
@@ -100,8 +101,10 @@ void TestApplication::createSphere()
 {
 	Ogre::Entity *sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 
-	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));
+	Ogre::SceneNode *ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));
 	ballNode->attachObject(sphereEntity);
+
+	ballBody = RigidBody(ballNode, sphereEntity);
 
 	size_t vertex_count, index_count;
 	Ogre::Vector3* vertices;
@@ -330,7 +333,9 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 		movePos.x = moveSpeed;
 	}
 
-	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
+	ballBody.AddForce(Ogre::Vector3(5.0f, 1.0f, 0.0f));
+	ballBody.Integrate(0.00003f);
+	//ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
 
 	return BaseApplication::frameRenderingQueued(evt);
 }

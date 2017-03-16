@@ -2,13 +2,14 @@
 #define __TestApplication_h_
 
 #include "BaseApplication.h"
+#include "RigidBody.h"
 
 class TestApplication : public BaseApplication
 {
 public:
 	TestApplication();
 	virtual ~TestApplication();
-	Ogre::SceneNode* ballNode;
+	RigidBody ballBody;
 	Ogre::Timer* timer;
 	double remainingTime;
 	
