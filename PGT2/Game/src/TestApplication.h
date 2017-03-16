@@ -25,22 +25,20 @@ protected:
 	virtual void createLight();
 	virtual void createViewports();
 
-	virtual void createFrameListener();
-	virtual void destroyScene();
 
 private:
-	void defineTerrain(long x, long y);
-	void initBlendMaps(Ogre::Terrain* terrain);
-	void configureTerrainDefaults(Ogre::Light* light);
 
-	bool mTerrainsImported;
-	Ogre::TerrainGroup* mTerrainGroup;
-	Ogre::TerrainGlobalOptions* mTerrainGlobals;
-	OgreBites::Label* mInfoLabel;
+	Ogre::SceneNode* groundNode;
+	Ogre::Entity* groundEntity;
 
 	virtual void createSphere();
 	virtual void showScore(double score);
 	virtual void updateRemainingTime(double elapsedTime);
+
+	void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* entity1);
+	Ogre::Vector3 TestApplication::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
+	float TestApplication::clamp(float n, float lower, float upper);
+	Ogre::Vector3 TestApplication::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);
 
 	void GetMeshInformation(const Ogre::MeshPtr mesh,
 		size_t &vertex_count,
