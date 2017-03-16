@@ -7,8 +7,7 @@
 class RigidBody 
 {
 protected:
-	Ogre::SceneNode* Node; //contains Position & Orientation
-	Ogre::Entity* Entity;
+	
 
 	Ogre::Real InverseMass;
 	float Dampening;
@@ -27,6 +26,9 @@ protected:
 	bool CanSleep;
 
 public:
+	Ogre::SceneNode* Node; //contains Position & Orientation
+	Ogre::Entity* Entity;
+
 	RigidBody(Ogre::SceneNode *node, Ogre::Entity *entity);
 	RigidBody(void);
 	void SetPosition(Ogre::Vector3 &position);

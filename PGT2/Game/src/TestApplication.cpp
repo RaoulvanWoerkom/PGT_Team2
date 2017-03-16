@@ -2,6 +2,8 @@
 #include "../OgreText.h"
 #include <sstream>
 #include <iomanip>
+#include "BaseApplication.h"
+
 
 const float moveSpeed = 100;
 const int BALL_SIZE = 100;
@@ -12,10 +14,7 @@ OgreText *scoreText;
 OgreText *timerText;
 Ogre::Light* directionalLight;
 
-#include <Terrain/OgreTerrain.h>
-#include <Terrain/OgreTerrainGroup.h>
 
-#include "BaseApplication.h"
 
 TestApplication::TestApplication(void)
 {
@@ -27,21 +26,26 @@ TestApplication::~TestApplication(void)
 
 void TestApplication::createCamera()
 {
-	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));
-	// Create the Camera with name PlayerCam
+	
 	mCamera = mSceneMgr->createCamera("PlayerCam");
+	//mCamera->setNearClipDistance(500);
+	
+	
+	
+	/*mCameraMan->setTarget(ballNode);*/
+}
 
-	mCamera->setPosition(Ogre::Vector3(0, 500, 500));
-	mCamera->setNearClipDistance(500);
-	camNode = ballNode->createChildSceneNode();
+void TestApplication::setCameraTarget(Ogre::SceneNode* node)
+{
+	camNode = node->createChildSceneNode();
 	camNode->setPosition(0, 0, 0);
 	camPitchNode = camNode->createChildSceneNode();
 	camPitchNode->setPosition(0, 50, 500);
 	/*mCameraMan = new OgreBites::SdkCameraMan(mCamera);*/
 	camPitchNode->attachObject(mCamera);
-	mCamera->setAutoTracking(true, ballNode);
-	/*mCameraMan->setTarget(ballNode);*/
+	mCamera->setAutoTracking(true, node);
 }
+
 bool TestApplication::mouseMoved(const OIS::MouseEvent &arg)
 {
     if (mTrayMgr->injectMouseMove(arg)) return true;
@@ -114,6 +118,7 @@ void TestApplication::createScene()
 	createLight();
 	createPlane();
 	createSphere();
+	setCameraTarget(ballBody.Node);
 }
 
 void TestApplication::createLight()
@@ -147,13 +152,20 @@ void TestApplication::createPlane()
 
 	groundEntity->setMaterialName("Examples/Rockwall");
 	groundEntity->setCastShadows(false);
+
+	GetMeshInformation(groundEntity->getMesh(), vertex_count, vertices, index_count, indices, groundNode->getPosition(), groundNode->getOrientation(), groundNode->getScale());
+
 }
 
 void TestApplication::createSphere()
 {
-	ballNode->setPosition(0, 200, 0);
-	Ogre::Entity *sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
+	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	ballNode->setPosition(0, 500, 0);
+	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
+	
 	ballNode->attachObject(sphereEntity);
+
+	ballBody = RigidBody(ballNode, sphereEntity);
 }
 
 void TestApplication::GetMeshInformation(const Ogre::MeshPtr mesh,
@@ -367,52 +379,45 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
 	if (iDown)
 	{
-		movePos.z = -moveSpeed;
+		Ogre::Vector3 test = mCamera->getDirection();
+		test.normalise();
+		ballBody.AddForce(test);
 	}
 	if (jDown)
 	{
-		movePos.x = -moveSpeed;
 	}
 	if (kDown)
 	{
-		movePos.z = moveSpeed;
 	}
 	if (lDown)
 	{
-		movePos.x = moveSpeed;
 	}
 
-	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
-
+	//ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
+	ballBody.Integrate(0.00001f);
+	//CheckBallCollision();
 	return BaseApplication::frameRenderingQueued(evt);
 }
 
-void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* entity1)
+void TestApplication::CheckBallCollision()
 {
-
-	size_t vertex_count1, index_count1;
-	Ogre::Vector3* vertices1;
-	unsigned long* indices1;
-
-	GetMeshInformation(entity1->getMesh(), vertex_count1, vertices1, index_count1, indices1, node1->getPosition(), node1->getOrientation(), node1->getScale());
-
-
+	GetMeshInformation(ballBody.Entity->getMesh(), vertex_count, vertices, index_count, indices, ballBody.GetPosition(), ballBody.GetOrientation(), ballBody.Node->getScale());
 
 	double shortestLength = 100000000000;
 	int chosenIndex = -1;
 	Ogre::Vector3 closestHitCoordinates;
 	Ogre::Vector3 normalVec = Ogre::Vector3(-1, -1, -1);
-	Ogre::Vector3 ballPos = ballNode->getPosition();
+	Ogre::Vector3 ballPos = ballBody.Node->getPosition();
 
-	int max = index_count1 - 3;
+	int max = index_count - 3;
 	for (size_t i = 0; i < max; i += 3)
 	{
-		long index1 = indices1[i];
-		long index2 = indices1[i + 1];
-		long index3 = indices1[i + 2];
-		Ogre::Vector3 point1 = vertices1[index1];
-		Ogre::Vector3 point2 = vertices1[index2];
-		Ogre::Vector3 point3 = vertices1[index3];
+		long index1 = indices[i];
+		long index2 = indices[i + 1];
+		long index3 = indices[i + 2];
+		Ogre::Vector3 point1 = vertices[index1];
+		Ogre::Vector3 point2 = vertices[index2];
+		Ogre::Vector3 point3 = vertices[index3];
 		normalVec = normalVector(point1, point2, point3);
 		Ogre::Vector3 collPoint = closestPointOnTriangle(point1, point2, point3, ballPos);
 		double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
@@ -430,10 +435,10 @@ void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* e
 	{
 		double diffDist = BALL_SIZE - shortestLength;
 		ballPos += normalVec * diffDist;
-		ballNode->setPosition(ballPos);
+		ballBody.Node->setPosition(ballPos);
 	}
-	delete[] vertices1;
-	delete[] indices1;
+	delete[] vertices;
+	delete[] indices;
 }
 
 Ogre::Vector3 TestApplication::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition)
