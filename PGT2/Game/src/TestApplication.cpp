@@ -20,13 +20,26 @@ TestApplication::~TestApplication(void)
 
 void TestApplication::createCamera()
 {
+	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));
+	// Create the Camera with name PlayerCam
 	mCamera = mSceneMgr->createCamera("PlayerCam");
 
-	mCamera->setPosition(Ogre::Vector3(0, 300, 500));
-	mCamera->lookAt(Ogre::Vector3(0, 0, 0));
-	mCamera->setNearClipDistance(5);
-
-	mCameraMan = new OgreBites::SdkCameraMan(mCamera);
+	mCamera->setPosition(Ogre::Vector3(0, 500, 500));
+	mCamera->setNearClipDistance(500);
+	camNode = ballNode->createChildSceneNode();
+	camNode->setPosition(0, 0, 0);
+	camPitchNode = camNode->createChildSceneNode();
+	camPitchNode->setPosition(0, 50, 500);
+	/*mCameraMan = new OgreBites::SdkCameraMan(mCamera);*/
+	camPitchNode->attachObject(mCamera);
+	mCamera->setAutoTracking(true, ballNode);
+	/*mCameraMan->setTarget(ballNode);*/
+}
+bool TestApplication::mouseMoved(const OIS::MouseEvent &arg)
+{
+    if (mTrayMgr->injectMouseMove(arg)) return true;
+    camNode->yaw(Ogre::Degree(-arg.state.X.rel * 0.25f));
+    return true;
 }
 
 void TestApplication::createViewports()
@@ -99,7 +112,7 @@ void TestApplication::createSphere()
 {
 	Ogre::Entity *sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 
-	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));
+	/*ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));*/
 	ballNode->attachObject(sphereEntity);
 
 	size_t vertex_count, index_count;
