@@ -1,4 +1,5 @@
 # clean-project
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3a4e09148e73499a80d5071ce60f9d42)](https://www.codacy.com/app/raoulwoerkom/PGT_Team2?utm_source=github.com&utm_medium=referral&utm_content=RaoulvanWoerkom/PGT_Team2&utm_campaign=badger)
 [![Travis build status](https://travis-ci.org/ogre3d/clean-project.svg?branch=master)](https://travis-ci.org/ogre3d/clean-project) [![build status](https://gitlab.com/ci/projects/17554/status.png?ref=master)](https://gitlab.com/ci/projects/17554?ref=master)
 
 A clean ogre project with cmake. It aims to be a start for Ogre based projects and to compile on as much different environment as possible.
