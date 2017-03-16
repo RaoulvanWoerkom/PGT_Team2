@@ -33,6 +33,24 @@ void TestApplication::createCamera()
 	// Create the Camera with name PlayerCam
 	mCamera = mSceneMgr->createCamera("PlayerCam");
 
+<<<<<<< HEAD
+	mCamera->setPosition(Ogre::Vector3(0, 300, 500));
+	mCamera->lookAt(Ogre::Vector3(0, 0, 0));
+	mCamera->setNearClipDistance(5);
+
+	mCameraMan = new OgreBites::SdkCameraMan(mCamera);
+
+	bool infiniteClip =
+		mRoot->getRenderSystem()->getCapabilities()->hasCapability(
+		Ogre::RSC_INFINITE_FAR_PLANE);
+
+	if (infiniteClip)
+		mCamera->setFarClipDistance(0);
+	else
+		//mCamera->setFarClipDistance(932500000);
+		mCamera->setFarClipDistance(1390000);
+
+=======
 	mCamera->setPosition(Ogre::Vector3(0, 500, 500));
 	mCamera->setNearClipDistance(500);
 	camNode = ballNode->createChildSceneNode();
@@ -49,17 +67,7 @@ bool TestApplication::mouseMoved(const OIS::MouseEvent &arg)
     if (mTrayMgr->injectMouseMove(arg)) return true;
     camNode->yaw(Ogre::Degree(-arg.state.X.rel * 0.25f));
     return true;
-
-	bool infiniteClip =
-		mRoot->getRenderSystem()->getCapabilities()->hasCapability(
-		Ogre::RSC_INFINITE_FAR_PLANE);
-
-	if (infiniteClip)
-		mCamera->setFarClipDistance(0);
-	else
-		//mCamera->setFarClipDistance(932500000);
-		mCamera->setFarClipDistance(1390000);
-
+>>>>>>> 2nd_try_3rd_person_camera
 }
 
 void TestApplication::createViewports()
@@ -310,10 +318,13 @@ void TestApplication::createPlane()
 
 void TestApplication::createSphere()
 {
-	ballNode->setPosition(0, 400, 0);
 	Ogre::Entity *sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 
+<<<<<<< HEAD
+	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 400, 0));
+=======
 	/*ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));*/
+>>>>>>> 2nd_try_3rd_person_camera
 	ballNode->attachObject(sphereEntity);
 
 	size_t vertex_count, index_count;

@@ -12,6 +12,8 @@ public:
 	TestApplication();
 	virtual ~TestApplication();
 	Ogre::SceneNode* ballNode;
+	Ogre::SceneNode* camNode;
+	Ogre::SceneNode* camPitchNode;
 	Ogre::Timer* timer;
 	double remainingTime;
 
@@ -52,6 +54,7 @@ private:
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 	virtual bool keyPressed(const OIS::KeyEvent& ke);
 	virtual bool keyReleased(const OIS::KeyEvent& ke);
+    virtual bool mouseMoved(const OIS::MouseEvent &arg);
 };
 
 
