@@ -1,6 +1,7 @@
 #include "stdafx.h"
-#include "CppUnitTest.h"
+//#include "CppUnitTest.h"
 #include "UnitTestSample.h"
+#include "src/TestApplication.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -16,11 +17,13 @@ namespace Testing
 
 			//BaseApplication base_application;
 
-			//TestApplication test = TestApplication();
+			TestApplication test2 = TestApplication();
 
 			//Assert::AreEqual(60.0, test.remainingTime, 1.0, L"Incorrect starting time", LINE_INFO());
 
 			UnitTestSample test = UnitTestSample();
+
+			CPPUNIT_ASS
 
 			//test.count();
 
