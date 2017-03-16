@@ -3,13 +3,14 @@
 #include <sstream>
 #include <iomanip>
 #include "BaseApplication.h"
-
+#include <cmath>
+#include "Ogre.h"
 
 const float moveSpeed = 100;
 const int BALL_SIZE = 100;
 const int START_GAME_TIME = 10;
 
-#include "Ogre.h"
+
 OgreText *scoreText;
 OgreText *timerText;
 Ogre::Light* directionalLight;
@@ -18,6 +19,7 @@ Ogre::Light* directionalLight;
 
 TestApplication::TestApplication(void)
 {
+
 }
 
 TestApplication::~TestApplication(void)
@@ -35,16 +37,6 @@ void TestApplication::createCamera()
 	/*mCameraMan->setTarget(ballNode);*/
 }
 
-void TestApplication::setCameraTarget(Ogre::SceneNode* node)
-{
-	camNode = node->createChildSceneNode();
-	camNode->setPosition(0, 0, 0);
-	camPitchNode = camNode->createChildSceneNode();
-	camPitchNode->setPosition(0, 50, 500);
-	/*mCameraMan = new OgreBites::SdkCameraMan(mCamera);*/
-	camPitchNode->attachObject(mCamera);
-	mCamera->setAutoTracking(true, node);
-}
 
 bool TestApplication::mouseMoved(const OIS::MouseEvent &arg)
 {
@@ -153,20 +145,31 @@ void TestApplication::createPlane()
 	groundEntity->setMaterialName("Examples/Rockwall");
 	groundEntity->setCastShadows(false);
 
-	GetMeshInformation(groundEntity->getMesh(), vertex_count, vertices, index_count, indices, groundNode->getPosition(), groundNode->getOrientation(), groundNode->getScale());
 
 }
 
 void TestApplication::createSphere()
 {
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	ballNode->setPosition(0, 500, 0);
+	ballNode->setPosition(0, 300, 0);
 	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 	
 	ballNode->attachObject(sphereEntity);
 
 	ballBody = RigidBody(ballNode, sphereEntity);
 }
+
+void TestApplication::setCameraTarget(Ogre::SceneNode* node)
+{
+	camNode = node->createChildSceneNode();
+	camNode->setPosition(0, 0, 0);
+	camPitchNode = camNode->createChildSceneNode();
+	camPitchNode->setPosition(0, 50, 800);
+	/*mCameraMan = new OgreBites::SdkCameraMan(mCamera);*/
+	camPitchNode->attachObject(mCamera);
+	mCamera->setAutoTracking(true, node);
+}
+
 
 void TestApplication::GetMeshInformation(const Ogre::MeshPtr mesh,
 	size_t &vertex_count,
@@ -377,14 +380,21 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	showScore(1);
 
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
+	//Ogre::Vector3 test = mCamera->getDirection();
 	if (iDown)
 	{
-		Ogre::Vector3 test = mCamera->getDirection();
-		test.normalise();
-		ballBody.AddForce(test);
+		
+		Ogre::Vector3 cameraWorldPos = camPitchNode->_getDerivedPosition(); //niks werkte dus heb ik maar mijn methode verzonnen
+		Ogre::Vector3 ballWorldPos = ballBody.Node->getPosition();
+		Ogre::Vector3 direction = cameraWorldPos - ballWorldPos;
+		direction.y = 0;
+		direction.normalise();
+		direction = direction * 5; // * speed
+		ballBody.AddForce(-direction);
 	}
 	if (jDown)
 	{
+		//test.normalise();
 	}
 	if (kDown)
 	{
@@ -395,13 +405,17 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
 	//ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
 	ballBody.Integrate(0.00001f);
-	//CheckBallCollision();
+	CheckBallCollision();
 	return BaseApplication::frameRenderingQueued(evt);
 }
 
 void TestApplication::CheckBallCollision()
 {
-	GetMeshInformation(ballBody.Entity->getMesh(), vertex_count, vertices, index_count, indices, ballBody.GetPosition(), ballBody.GetOrientation(), ballBody.Node->getScale());
+
+	size_t vertex_count, index_count;
+	Ogre::Vector3* vertices;
+	unsigned long* indices;
+	GetMeshInformation(groundEntity->getMesh(), vertex_count, vertices, index_count, indices, groundNode->getPosition(), groundNode->getOrientation(), groundNode->getScale());
 
 	double shortestLength = 100000000000;
 	int chosenIndex = -1;

@@ -21,9 +21,6 @@ public:
 	bool isGameOver;
 
 
-	size_t vertex_count, index_count;
-	Ogre::Vector3* vertices;
-	unsigned long* indices;
 
 protected:
 	virtual void createScene();
