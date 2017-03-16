@@ -15,11 +15,15 @@ public:
 	Ogre::SceneNode* camNode;
 	Ogre::SceneNode* camPitchNode;
 	Ogre::Timer* timer;
+	double elapsedTime;
 	double remainingTime;
+	double totalGameTime;
+	bool isGameOver;
 
 protected:
 	virtual void createScene();
 	virtual void init();
+	virtual void initGameOver();
 	virtual void createCamera();
 	virtual void createPlane();
 	virtual void createLight();
@@ -33,7 +37,7 @@ private:
 
 	virtual void createSphere();
 	virtual void showScore(double score);
-	virtual void updateRemainingTime(double elapsedTime);
+	virtual void updateRemainingTime();
 
 	void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* entity1);
 	Ogre::Vector3 TestApplication::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);

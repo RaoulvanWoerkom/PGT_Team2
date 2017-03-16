@@ -4,8 +4,8 @@
 #include <iomanip>
 
 const float moveSpeed = 100;
-const int totalGameTime = 60;
 const int BALL_SIZE = 100;
+const int START_GAME_TIME = 10;
 
 #include "Ogre.h"
 OgreText *scoreText;
@@ -74,7 +74,9 @@ void TestApplication::createViewports()
 
 void TestApplication::init()
 {
-	remainingTime = totalGameTime;
+	isGameOver = false;
+	totalGameTime = START_GAME_TIME;
+	elapsedTime = 0.0;
 	timer = new Ogre::Timer();
 	timer->reset();
 	scoreText = new OgreText();
@@ -84,7 +86,6 @@ void TestApplication::init()
 	timerText->setPos(0.4f, 0.1f);        // Text position, using relative co-ordinates
 	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
 }
-
 
 void getTerrainImage(bool flipX, bool flipY, Ogre::Image& img)
 {
@@ -96,6 +97,16 @@ void getTerrainImage(bool flipX, bool flipY, Ogre::Image& img)
 		img.flipAroundX();
 }
 
+void TestApplication::initGameOver()
+{
+	remainingTime = 0;
+	isGameOver = true;
+
+	OgreText * loseText = new OgreText();
+	loseText->setText("PLAY TIME'S OVER B] \n git gud next time");
+	loseText->setPos(0.4f, 0.2f);
+	loseText->setCol(1.0f, 1.0f, 1.0f, 1.0f);
+}
 
 void TestApplication::createScene()
 {
@@ -104,9 +115,6 @@ void TestApplication::createScene()
 	createPlane();
 	createSphere();
 }
-
-
-
 
 void TestApplication::createLight()
 {
@@ -117,12 +125,11 @@ void TestApplication::createLight()
 	directionalLight = mSceneMgr->createLight("DirectionalLight");
 	directionalLight->setType(Ogre::Light::LT_DIRECTIONAL);
 
-	directionalLight->setDiffuseColour(Ogre::ColourValue(.3, .3, .3));
-	directionalLight->setSpecularColour(Ogre::ColourValue(.3, .3, .3));
+	directionalLight->setDiffuseColour(Ogre::ColourValue(.3f, .3f, .3f));
+	directionalLight->setSpecularColour(Ogre::ColourValue(.3f, .3f, .3f));
 
 	directionalLight->setDirection(Ogre::Vector3(0, -1, 1));
 }
-
 
 void TestApplication::createPlane()
 {
@@ -141,7 +148,6 @@ void TestApplication::createPlane()
 	groundEntity->setMaterialName("Examples/Rockwall");
 	groundEntity->setCastShadows(false);
 }
-
 
 void TestApplication::createSphere()
 {
@@ -280,14 +286,23 @@ void TestApplication::showScore(double score)
 										  // Now it is possible to use the Ogre::String as parameter too
 }
 
-
-void TestApplication::updateRemainingTime(double elapsedTime)
+void TestApplication::updateRemainingTime()
 {
-	remainingTime = totalGameTime - elapsedTime;
-	stringstream stream;
-	stream << std::fixed << std::setprecision(1) << remainingTime; 	// Set number of digits after the decimal point to 1, for the timer display.
-	std::string timeRepresentation = stream.str();
-	timerText->setText("Time: " + timeRepresentation);
+	if (isGameOver == false)
+	{
+		elapsedTime = timer->getMilliseconds() / 1000.0;
+		remainingTime = totalGameTime - elapsedTime;
+
+		if (remainingTime <= 0)
+		{
+			initGameOver();
+		}
+
+		stringstream stream;
+		stream << std::fixed << std::setprecision(1) << remainingTime; 	// Set number of digits after the decimal point to 1, for the timer display.
+		std::string timeRepresentation = stream.str();
+		timerText->setText("Time: " + timeRepresentation);
+	}
 }
 
 
@@ -346,8 +361,7 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 
 bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	double elapsedSeconds =  timer->getMilliseconds() / 1000.0;
-	updateRemainingTime(elapsedSeconds);
+	updateRemainingTime();
 	showScore(1);
 
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
