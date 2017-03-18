@@ -24,12 +24,18 @@
     <ClInclude Include="OgreText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\RigidBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\TestApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\BaseApplication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RigidBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

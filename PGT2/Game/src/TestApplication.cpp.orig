@@ -1,0 +1,624 @@
+#include "TestApplication.h"
+#include "../OgreText.h"
+#include <sstream>
+#include <iomanip>
+
+const float moveSpeed = 100;
+const int totalGameTime = 60;
+
+#include "Ogre.h"
+OgreText *scoreText;
+OgreText *timerText;
+Ogre::Light* directionalLight;
+
+#include <Terrain/OgreTerrain.h>
+#include <Terrain/OgreTerrainGroup.h>
+
+#include "BaseApplication.h"
+
+TestApplication::TestApplication(void)
+	: mTerrainGroup(0),
+	mTerrainGlobals(0),
+	mInfoLabel(0)
+{
+}
+
+TestApplication::~TestApplication(void)
+{
+}
+
+void TestApplication::createCamera()
+{
+	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));
+	// Create the Camera with name PlayerCam
+	mCamera = mSceneMgr->createCamera("PlayerCam");
+
+<<<<<<< HEAD
+	mCamera->setPosition(Ogre::Vector3(0, 300, 500));
+	mCamera->lookAt(Ogre::Vector3(0, 0, 0));
+	mCamera->setNearClipDistance(5);
+
+	mCameraMan = new OgreBites::SdkCameraMan(mCamera);
+
+	bool infiniteClip =
+		mRoot->getRenderSystem()->getCapabilities()->hasCapability(
+		Ogre::RSC_INFINITE_FAR_PLANE);
+
+	if (infiniteClip)
+		mCamera->setFarClipDistance(0);
+	else
+		//mCamera->setFarClipDistance(932500000);
+		mCamera->setFarClipDistance(1390000);
+
+=======
+	mCamera->setPosition(Ogre::Vector3(0, 500, 500));
+	mCamera->setNearClipDistance(500);
+	camNode = ballNode->createChildSceneNode();
+	camNode->setPosition(0, 0, 0);
+	camPitchNode = camNode->createChildSceneNode();
+	camPitchNode->setPosition(0, 50, 500);
+	/*mCameraMan = new OgreBites::SdkCameraMan(mCamera);*/
+	camPitchNode->attachObject(mCamera);
+	mCamera->setAutoTracking(true, ballNode);
+	/*mCameraMan->setTarget(ballNode);*/
+}
+bool TestApplication::mouseMoved(const OIS::MouseEvent &arg)
+{
+    if (mTrayMgr->injectMouseMove(arg)) return true;
+    camNode->yaw(Ogre::Degree(-arg.state.X.rel * 0.25f));
+    return true;
+>>>>>>> 2nd_try_3rd_person_camera
+}
+
+void TestApplication::createViewports()
+{
+	Ogre::Viewport* vp = mWindow->addViewport(mCamera);
+
+	vp->setBackgroundColour(Ogre::ColourValue(0, 0, 0));
+
+	mCamera->setAspectRatio(
+		Ogre::Real(vp->getActualWidth()) /
+		Ogre::Real(vp->getActualHeight()));
+
+}
+
+void TestApplication::init()
+{
+	remainingTime = totalGameTime;
+	timer = new Ogre::Timer();
+	timer->reset();
+	scoreText = new OgreText();
+	scoreText->setPos(0.1f, 0.1f);        // Text position, using relative co-ordinates
+	scoreText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
+	timerText = new OgreText();
+	timerText->setPos(0.4f, 0.1f);        // Text position, using relative co-ordinates
+	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
+}
+
+
+
+//Classes for Terraingeneration
+void TestApplication::createFrameListener()
+{
+	BaseApplication::createFrameListener();
+	mInfoLabel = mTrayMgr->createLabel(OgreBites::TL_TOP, "TerrainInfo", "", 350);
+}
+
+void TestApplication::destroyScene()
+{
+	OGRE_DELETE mTerrainGroup;
+	OGRE_DELETE mTerrainGlobals;
+}
+
+void getTerrainImage(bool flipX, bool flipY, Ogre::Image& img)
+{
+	img.load("terrain.png", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+	if (flipX)
+		img.flipAroundY();
+	if (flipY)
+		img.flipAroundX();
+}
+
+void TestApplication::defineTerrain(long x, long y)
+{
+	Ogre::String filename = mTerrainGroup->generateFilename(x, y);
+
+	bool exists =
+		Ogre::ResourceGroupManager::getSingleton().resourceExists(
+		mTerrainGroup->getResourceGroup(),
+		filename);
+
+	if (exists)
+		mTerrainGroup->defineTerrain(x, y);
+	else
+	{
+		Ogre::Image img;
+		getTerrainImage(x % 2 != 0, y % 2 != 0, img);
+		mTerrainGroup->defineTerrain(x, y, &img);
+
+		mTerrainsImported = true;
+	}
+
+
+}
+
+void TestApplication::initBlendMaps(Ogre::Terrain* terrain)
+{
+	Ogre::Real minHeight0 = 70;
+	Ogre::Real fadeDist0 = 40;
+	Ogre::Real minHeight1 = 70;
+	Ogre::Real fadeDist1 = 15;
+
+	Ogre::TerrainLayerBlendMap* blendMap0 = terrain->getLayerBlendMap(1);
+	Ogre::TerrainLayerBlendMap* blendMap1 = terrain->getLayerBlendMap(2);
+
+	float* pBlend0 = blendMap0->getBlendPointer();
+	float* pBlend1 = blendMap1->getBlendPointer();
+
+	for (Ogre::uint16 y = 0; y < terrain->getLayerBlendMapSize(); ++y)
+	{
+		for (Ogre::uint16 x = 0; x < terrain->getLayerBlendMapSize(); ++x)
+		{
+			Ogre::Real tx, ty;
+
+			blendMap0->convertImageToTerrainSpace(x, y, &tx, &ty);
+			Ogre::Real height = terrain->getHeightAtTerrainPosition(tx, ty);
+			Ogre::Real val = (height - minHeight0) / fadeDist0;
+			val = Ogre::Math::Clamp(val, (Ogre::Real)0, (Ogre::Real)1);
+			*pBlend0++ = val;
+
+			val = (height - minHeight1) / fadeDist1;
+			val = Ogre::Math::Clamp(val, (Ogre::Real)0, (Ogre::Real)1);
+			*pBlend1++ = val;
+		}
+	}
+
+	blendMap0->dirty();
+	blendMap1->dirty();
+	blendMap0->update();
+	blendMap1->update();
+}
+
+void TestApplication::configureTerrainDefaults(Ogre::Light* light)
+{
+	mTerrainGlobals->setMaxPixelError(8);
+	mTerrainGlobals->setCompositeMapDistance(3000);
+
+	mTerrainGlobals->setLightMapDirection(light->getDerivedDirection());
+	mTerrainGlobals->setCompositeMapAmbient(mSceneMgr->getAmbientLight());
+	mTerrainGlobals->setCompositeMapDiffuse(light->getDiffuseColour());
+
+	Ogre::Terrain::ImportData& importData = mTerrainGroup->getDefaultImportSettings();
+	importData.terrainSize = 5130;
+	//importData.worldSize = 12000.0;
+	importData.worldSize = 12000.0;
+	importData.inputScale = 600;
+	//importData.minBatchSize = 33;
+	//importData.maxBatchSize = 65;
+	importData.minBatchSize = 3;
+	importData.maxBatchSize = 65;
+
+	//How many different texture will it have
+	importData.layerList.resize(3);
+
+	//Adding texture.
+	importData.layerList[0].worldSize = 100;
+	importData.layerList[0].textureNames.push_back(
+		"dirt_grayrocky_diffusespecular.dds");
+	importData.layerList[0].textureNames.push_back(
+		"dirt_grayrocky_normalheight.dds");
+	importData.layerList[1].worldSize = 30;
+	importData.layerList[1].textureNames.push_back(
+		"grass_green-01_diffusespecular.dds");
+	importData.layerList[1].textureNames.push_back(
+		"grass_green-01_normalheight.dds");
+	importData.layerList[2].worldSize = 200;
+	importData.layerList[2].textureNames.push_back(
+		"growth_weirdfungus-03_diffusespecular.dds");
+	importData.layerList[2].textureNames.push_back(
+		"growth_weirdfungus-03_normalheight.dds");
+}
+
+void TestApplication::createScene()
+{
+	init();
+	createLight();
+	createPlane();
+	createSphere();
+}
+
+
+
+
+void TestApplication::createLight()
+{
+	mSceneMgr->setAmbientLight(Ogre::ColourValue::White);
+	mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
+
+	// Directional light
+	directionalLight = mSceneMgr->createLight("DirectionalLight");
+	directionalLight->setType(Ogre::Light::LT_DIRECTIONAL);
+
+	directionalLight->setDiffuseColour(Ogre::ColourValue(.3, .3, .3));
+	directionalLight->setSpecularColour(Ogre::ColourValue(.3, .3, .3));
+
+	directionalLight->setDirection(Ogre::Vector3(0, -1, 1));
+}
+
+
+void TestApplication::createPlane()
+{
+	// Create ground
+	//	Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
+
+	//	Ogre::MeshManager::getSingleton().createPlane(
+	//		"ground",
+	//		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+	//		plane, 1500, 1500, 20, 20, true, 1, 5, 5, Ogre::Vector3::UNIT_Z);
+
+	//	Ogre::Entity* groundEntity = mSceneMgr->createEntity("ground");
+	//	mSceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(groundEntity);
+
+	//	groundEntity->setMaterialName("Examples/Rockwall");
+	//	groundEntity->setCastShadows(false); 
+
+	//Create environment
+	mSceneMgr->setSkyBox(true, "Examples/CloudyNoonSkyBox");
+
+
+	//Foggy distance
+	//Ogre::ColourValue fadeColour(0.9, 0.9, 0.9);
+	//mWindow->getViewport(0)->setBackgroundColour(fadeColour);
+	//mSceneMgr->setFog(Ogre::FOG_LINEAR, fadeColour, 0, 2600, 2900);
+	//mSceneMgr->setFog(Ogre::FOG_EXP, fadeColour, 0.0002);
+
+
+
+	//Create Terrain
+	mTerrainGlobals = OGRE_NEW Ogre::TerrainGlobalOptions();
+
+	//mTerrainGroup = OGRE_NEW Ogre::TerrainGroup(
+	//mSceneMgr,
+	//Ogre::Terrain::ALIGN_X_Z,
+	//513, 12000.0);
+	mTerrainGroup = OGRE_NEW Ogre::TerrainGroup(
+		mSceneMgr,
+		Ogre::Terrain::ALIGN_X_Z,
+		65, 32000.0);
+
+
+	mTerrainGroup->setFilenameConvention(Ogre::String("terrain"), Ogre::String("dat"));
+	mTerrainGroup->setOrigin(Ogre::Vector3::ZERO);
+
+	configureTerrainDefaults(directionalLight);
+
+	for (long x = 0; x <= 0; ++x)
+		for (long y = 0; y <= 0; ++y)
+			defineTerrain(x, y);
+
+	mTerrainGroup->loadAllTerrains(true);
+
+	if (mTerrainsImported)
+	{
+		Ogre::TerrainGroup::TerrainIterator ti = mTerrainGroup->getTerrainIterator();
+
+		while (ti.hasMoreElements())
+		{
+			Ogre::Terrain* t = ti.getNext()->instance;
+			initBlendMaps(t);
+		}
+	}
+
+	mTerrainGroup->freeTemporaryResources();
+}
+
+
+
+
+void TestApplication::createSphere()
+{
+	Ogre::Entity *sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
+
+<<<<<<< HEAD
+	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 400, 0));
+=======
+	/*ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 100, 0));*/
+>>>>>>> 2nd_try_3rd_person_camera
+	ballNode->attachObject(sphereEntity);
+
+	size_t vertex_count, index_count;
+	Ogre::Vector3* vertices;
+	unsigned long* indices;
+
+	GetMeshInformation(sphereEntity->getMesh(), vertex_count, vertices, index_count, indices, ballNode->getPosition(), ballNode->getOrientation(), ballNode->getScale());
+	Ogre::Vector3 kaas = vertices[6];
+
+	delete[] vertices;
+	delete[] indices;
+}
+
+void TestApplication::GetMeshInformation(const Ogre::MeshPtr mesh,
+	size_t &vertex_count,
+	Ogre::Vector3* &vertices,
+	size_t &index_count,
+	unsigned long* &indices,
+	const Ogre::Vector3 &position,
+	const Ogre::Quaternion &orient,
+	const Ogre::Vector3 &scale)
+{
+	bool added_shared = false;
+	size_t current_offset = 0;
+	size_t shared_offset = 0;
+	size_t next_offset = 0;
+	size_t index_offset = 0;
+
+	vertex_count = index_count = 0;
+
+	// Calculate how many vertices and indices we're going to need
+	for (unsigned short i = 0; i < mesh->getNumSubMeshes(); ++i)
+	{
+		Ogre::SubMesh* submesh = mesh->getSubMesh(i);
+
+		// We only need to add the shared vertices once
+		if (submesh->useSharedVertices)
+		{
+			if (!added_shared)
+			{
+				vertex_count += mesh->sharedVertexData->vertexCount;
+				added_shared = true;
+			}
+		}
+		else
+		{
+			vertex_count += submesh->vertexData->vertexCount;
+		}
+
+		// Add the indices
+		index_count += submesh->indexData->indexCount;
+	}
+
+
+	// Allocate space for the vertices and indices
+	vertices = new Ogre::Vector3[vertex_count];
+	indices = new unsigned long[index_count];
+
+	added_shared = false;
+
+	// Run through the submeshes again, adding the data into the arrays
+	for (unsigned short i = 0; i < mesh->getNumSubMeshes(); ++i)
+	{
+		Ogre::SubMesh* submesh = mesh->getSubMesh(i);
+
+		Ogre::VertexData* vertex_data = submesh->useSharedVertices ? mesh->sharedVertexData : submesh->vertexData;
+
+		if ((!submesh->useSharedVertices) || (submesh->useSharedVertices && !added_shared))
+		{
+			if (submesh->useSharedVertices)
+			{
+				added_shared = true;
+				shared_offset = current_offset;
+			}
+
+			const Ogre::VertexElement* posElem =
+				vertex_data->vertexDeclaration->findElementBySemantic(Ogre::VES_POSITION);
+
+			Ogre::HardwareVertexBufferSharedPtr vbuf =
+				vertex_data->vertexBufferBinding->getBuffer(posElem->getSource());
+
+			unsigned char* vertex =
+				static_cast<unsigned char*>(vbuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
+
+			// There is _no_ baseVertexPointerToElement() which takes an Ogre::Real or a double
+			//  as second argument. So make it float, to avoid trouble when Ogre::Real will
+			//  be comiled/typedefed as double:
+			//      Ogre::Real* pReal;
+			float* pReal;
+
+			for (size_t j = 0; j < vertex_data->vertexCount; ++j, vertex += vbuf->getVertexSize())
+			{
+				posElem->baseVertexPointerToElement(vertex, &pReal);
+
+				Ogre::Vector3 pt(pReal[0], pReal[1], pReal[2]);
+
+				vertices[current_offset + j] = (orient * (pt * scale)) + position;
+			}
+
+			vbuf->unlock();
+			next_offset += vertex_data->vertexCount;
+		}
+
+
+		Ogre::IndexData* index_data = submesh->indexData;
+		size_t numTris = index_data->indexCount / 3;
+		Ogre::HardwareIndexBufferSharedPtr ibuf = index_data->indexBuffer;
+		if (ibuf.isNull()) continue; // need to check if index buffer is valid (which will be not if the mesh doesn't have triangles like a pointcloud)
+
+		bool use32bitindexes = (ibuf->getType() == Ogre::HardwareIndexBuffer::IT_32BIT);
+
+		unsigned long*  pLong = static_cast<unsigned long*>(ibuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
+		unsigned short* pShort = reinterpret_cast<unsigned short*>(pLong);
+
+
+		size_t offset = (submesh->useSharedVertices) ? shared_offset : current_offset;
+		size_t index_start = index_data->indexStart;
+		size_t last_index = numTris * 3 + index_start;
+
+		if (use32bitindexes)
+			for (size_t k = index_start; k < last_index; ++k)
+			{
+				indices[index_offset++] = pLong[k] + static_cast<unsigned long>(offset);
+			}
+
+		else
+			for (size_t k = index_start; k < last_index; ++k)
+			{
+				indices[index_offset++] = static_cast<unsigned long>(pShort[k]) +
+					static_cast<unsigned long>(offset);
+			}
+
+		ibuf->unlock();
+		current_offset = next_offset;
+	}
+}
+
+void TestApplication::showScore(double score)
+{
+	scoreText->setText("Score: " + static_cast<std::ostringstream*>(&(std::ostringstream() << score))->str());    // Text to be displayed
+										  // Now it is possible to use the Ogre::String as parameter too
+}
+
+
+void TestApplication::updateRemainingTime(double elapsedTime)
+{
+	remainingTime = totalGameTime - elapsedTime;
+	stringstream stream;
+	stream << std::fixed << std::setprecision(1) << remainingTime; 	// Set number of digits after the decimal point to 1, for the timer display.
+	std::string timeRepresentation = stream.str();
+	timerText->setText("Time: " + timeRepresentation);
+}
+
+
+bool iDown = false;
+bool jDown = false;
+bool kDown = false;
+bool lDown = false;
+
+bool TestApplication::keyPressed(const OIS::KeyEvent& ke)
+{
+	switch (ke.key)
+	{
+		case OIS::KC_I:
+			iDown = true;
+			break;
+		case OIS::KC_J:
+			jDown = true;
+			break;
+		case OIS::KC_K:
+			kDown = true;
+			break;
+		case OIS::KC_L:
+			lDown = true;
+			break;
+		default:
+			break;
+	}
+	return BaseApplication::keyPressed(ke);
+}
+
+bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
+{
+	switch (ke.key)
+	{
+	case OIS::KC_I:
+		iDown = false;
+		break;
+	case OIS::KC_J:
+		jDown = false;
+		break;
+	case OIS::KC_K:
+		kDown = false;
+		break;
+	case OIS::KC_L:
+		lDown = false;
+		break;
+	default:
+		break;
+	}
+	return BaseApplication::keyReleased(ke);
+}
+
+
+	
+
+
+bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
+{
+	double elapsedSeconds =  timer->getMilliseconds() / 1000.0;
+	updateRemainingTime(elapsedSeconds);
+	showScore(1);
+
+	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
+	if (iDown)
+	{
+		movePos.z = -moveSpeed;
+	}
+	if (jDown)
+	{
+		movePos.x = -moveSpeed;
+	}
+	if (kDown)
+	{
+		movePos.z = moveSpeed;
+	}
+	if (lDown)
+	{
+		movePos.x = moveSpeed;
+	}
+
+	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
+
+	//Terrain Generation message
+	if (mTerrainGroup->isDerivedDataUpdateInProgress())
+	{
+		mTrayMgr->moveWidgetToTray(mInfoLabel, OgreBites::TL_TOP, 0);
+		mInfoLabel->show();
+
+		if (mTerrainsImported)
+			mInfoLabel->setCaption("Building terrain...");
+		else
+			mInfoLabel->setCaption("Updating terrain...");
+	}
+	else
+	{
+		mTrayMgr->removeWidgetFromTray(mInfoLabel);
+		mInfoLabel->hide();
+
+		if (mTerrainsImported)
+		{
+			mTerrainGroup->saveAllTerrains(true);
+			mTerrainsImported = false;
+		}
+	}
+
+
+
+	return BaseApplication::frameRenderingQueued(evt);
+}
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+#define WIN32_LEAN_AND_MEAN
+#include "windows.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+	INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
+#else
+	int main(int argc, char *argv[])
+#endif
+	{
+		// Create application object
+		TestApplication app;
+
+		try {
+			app.go();
+		}
+		catch (Ogre::Exception& e) {
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+			MessageBox(NULL, e.getFullDescription().c_str(), "An exception has occured!", MB_OK | MB_ICONERROR | MB_TASKMODAL);
+#else
+			std::cerr << "An exception has occured: " <<
+				e.getFullDescription().c_str() << std::endl;
+#endif
+		}
+
+		return 0;
+	}
+
+#ifdef __cplusplus
+}
+#endif

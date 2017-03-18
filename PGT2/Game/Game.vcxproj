@@ -20,10 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OgreText.h" />
+    <ClInclude Include="src\RigidBody.h" />
     <ClInclude Include="src\BaseApplication.h" />
     <ClInclude Include="src\TestApplication.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\RigidBody.cpp" />
     <ClCompile Include="src\BaseApplication.cpp" />
     <ClCompile Include="src\TestApplication.cpp" />
   </ItemGroup>
