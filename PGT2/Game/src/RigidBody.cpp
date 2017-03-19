@@ -1,4 +1,5 @@
 #include "RigidBody.h"
+#include "Helper.h"
 
 RigidBody::RigidBody(Ogre::SceneNode* node, Ogre::Entity* entity)
 {
@@ -72,7 +73,11 @@ void RigidBody::Integrate(float delta)
 		tempPos += (RigidBody::Velocity * delta);
 		RigidBody::SetPosition(tempPos);
 
+		Helper::log("velocity", Velocity);
+
 		//TODO Calculate total movement and check if under benchmark: IsAwake = false
+
+		RigidBody::ForceAccum = Ogre::Vector3(0, 0, 0);
 	}
 }
 

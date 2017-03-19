@@ -5,6 +5,7 @@
 #include "BaseApplication.h"
 #include <cmath>
 #include "Ogre.h"
+#include "Helper.h"
 
 const float moveSpeed = 100;
 const int BALL_SIZE = 100;
@@ -19,7 +20,7 @@ Ogre::Light* directionalLight;
 
 TestApplication::TestApplication(void)
 {
-
+	
 }
 
 TestApplication::~TestApplication(void)
@@ -164,7 +165,7 @@ void TestApplication::setCameraTarget(Ogre::SceneNode* node)
 	camNode = node->createChildSceneNode();
 	camNode->setPosition(0, 0, 0);
 	camPitchNode = camNode->createChildSceneNode();
-	camPitchNode->setPosition(0, 50, 800);
+	camPitchNode->setPosition(0, 250, 500);
 	/*mCameraMan = new OgreBites::SdkCameraMan(mCamera);*/
 	camPitchNode->attachObject(mCamera);
 	mCamera->setAutoTracking(true, node);
@@ -380,17 +381,19 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	showScore(1);
 
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
-	//Ogre::Vector3 test = mCamera->getDirection();
 	if (iDown)
 	{
-		
-		Ogre::Vector3 cameraWorldPos = camPitchNode->_getDerivedPosition(); //niks werkte dus heb ik maar mijn methode verzonnen
-		Ogre::Vector3 ballWorldPos = ballBody.Node->getPosition();
-		Ogre::Vector3 direction = cameraWorldPos - ballWorldPos;
+		Vector3 direction = camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_Z;
+		//ngle.euler
+		//Ogre::Vector3 cameraWorldPos = mSceneMgr->getRootSceneNode()->convertLocalToWorldPosition(camNode->getPosition()); //niks werkte dus heb ik maar mijn methode verzonnen
+		//Ogre::Vector3 ballWorldPos = ballBody.Node->getPosition();
+		//Ogre::Vector3 direction = cameraWorldPos - ballWorldPos;
+			
 		direction.y = 0;
 		direction.normalise();
 		direction = direction * 5; // * speed
-		ballBody.AddForce(-direction);
+		ballBody.AddForce(direction);
+		
 	}
 	if (jDown)
 	{
@@ -404,7 +407,7 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	}
 
 	//ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
-	ballBody.Integrate(0.00001f);
+	ballBody.Integrate(0.00005f);
 	CheckBallCollision();
 	return BaseApplication::frameRenderingQueued(evt);
 }
