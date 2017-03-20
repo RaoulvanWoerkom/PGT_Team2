@@ -19,12 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Highscore.h" />
     <ClInclude Include="OgreText.h" />
     <ClInclude Include="src\RigidBody.h" />
     <ClInclude Include="src\BaseApplication.h" />
     <ClInclude Include="src\TestApplication.h" />
+    <ClInclude Include="Utils\json.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Highscore.cpp" />
     <ClCompile Include="src\RigidBody.cpp" />
     <ClCompile Include="src\BaseApplication.cpp" />
     <ClCompile Include="src\TestApplication.cpp" />
