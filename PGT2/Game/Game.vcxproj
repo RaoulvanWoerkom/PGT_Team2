@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ForceGenerator.h" />
+    <ClInclude Include="src\Highscore.h" />
     <ClInclude Include="OgreText.h" />
     <ClInclude Include="src\Helper.h" />
     <ClInclude Include="src\RigidBody.h" />
@@ -30,6 +31,7 @@
   <ItemGroup>
     <ClCompile Include="src\\ForceGenerator.cpp" />
     <ClCompile Include="src\Helper.cpp" />
+    <ClCompile Include="src\Highscore.cpp" />
     <ClCompile Include="src\RigidBody.cpp" />
     <ClCompile Include="src\BaseApplication.cpp" />
     <ClCompile Include="src\TestApplication.cpp" />

@@ -33,6 +33,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ForceGenerator.h">
+    </ClInclude>
+    <ClInclude Include="src\Highscore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -52,6 +54,8 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\\ForceGenerator.cpp">
+ </ClCompile>
+    <ClCompile Include="src\Highscore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

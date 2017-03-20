@@ -6,6 +6,7 @@
 #include <cmath>
 #include "Ogre.h"
 #include "Helper.h"
+#include "../Highscore.h"
 
 const float moveSpeed = 100;
 const int BALL_SIZE = 100;
@@ -106,6 +107,9 @@ void TestApplication::initGameOver()
 	loseText->setText("Your wrecking time is up! \n press 'Y' to restart.");
 	loseText->setPos(0.4f, 0.2f);
 	loseText->setCol(1.0f, 1.0f, 1.0f, 1.0f);
+
+	Highscore * highscore = new Highscore();
+	highscore->addToScoreboard("WreckingBall", 100);	
 }
 
 void TestApplication::restartGame()
