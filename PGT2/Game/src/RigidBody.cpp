@@ -86,8 +86,6 @@ void RigidBody::Integrate(float delta)
 		tempPos += (RigidBody::Velocity * delta);
 		RigidBody::SetPosition(tempPos);
 
-		Helper::log("velocity", LastFrameAcceleration);
-		Helper::log("acceleration", Acceleration);
 
 		//Helper::log("acceleration", Acceleration);
 		//Helper::log("forceaccum", ForceAccum);
