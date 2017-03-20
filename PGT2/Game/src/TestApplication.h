@@ -3,6 +3,7 @@
 
 #include "BaseApplication.h"
 #include "RigidBody.h"
+#include "ForceGenerator.h"
 #include <Terrain/OgreTerrain.h>
 #include <Terrain/OgreTerrainGroup.h>
 
@@ -20,8 +21,8 @@ public:
 	double remainingTime;
 	double totalGameTime;
 	bool isGameOver;
-
-
+	ForceRegistry registry;
+	Gravity gravity;
 
 protected:
 	virtual void createScene();

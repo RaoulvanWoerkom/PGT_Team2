@@ -82,6 +82,8 @@ void TestApplication::init()
 	timerText = new OgreText();
 	timerText->setPos(0.4f, 0.1f);        // Text position, using relative co-ordinates
 	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
+
+	registry.add(&ballBody , &gravity);
 }
 
 void getTerrainImage(bool flipX, bool flipY, Ogre::Image& img)
@@ -384,11 +386,6 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	if (iDown)
 	{
 		Vector3 direction = camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_Z;
-		//ngle.euler
-		//Ogre::Vector3 cameraWorldPos = mSceneMgr->getRootSceneNode()->convertLocalToWorldPosition(camNode->getPosition()); //niks werkte dus heb ik maar mijn methode verzonnen
-		//Ogre::Vector3 ballWorldPos = ballBody.Node->getPosition();
-		//Ogre::Vector3 direction = cameraWorldPos - ballWorldPos;
-			
 		direction.y = 0;
 		direction.normalise();
 		direction = direction * 5; // * speed
@@ -397,17 +394,33 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	}
 	if (jDown)
 	{
-		//test.normalise();
+		Vector3 direction = camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_X;
+		direction.y = 0;
+		direction.normalise();
+		direction = direction * 5; // * speed
+		ballBody.AddForce(direction);
 	}
 	if (kDown)
 	{
+		Vector3 direction = camNode->_getDerivedOrientation() * -Vector3::NEGATIVE_UNIT_Z;
+		direction.y = 0;
+		direction.normalise();
+		direction = direction * 5; // * speed
+		ballBody.AddForce(direction);
 	}
 	if (lDown)
 	{
+		Vector3 direction = camNode->_getDerivedOrientation() * -Vector3::NEGATIVE_UNIT_X;
+		direction.y = 0;
+		direction.normalise();
+		direction = direction * 5; // * speed
+		ballBody.AddForce(direction);
 	}
 
-	//ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
-	ballBody.Integrate(0.00005f);
+	float duration = evt.timeSinceLastFrame;
+
+	registry.updateForces(duration);
+	ballBody.Integrate(duration);
 	CheckBallCollision();
 	return BaseApplication::frameRenderingQueued(evt);
 }
@@ -453,6 +466,7 @@ void TestApplication::CheckBallCollision()
 		double diffDist = BALL_SIZE - shortestLength;
 		ballPos += normalVec * diffDist;
 		ballBody.Node->setPosition(ballPos);
+		ballBody.SetVelocity(Ogre::Vector3(ballBody.GetVelocity().x, 0, ballBody.GetVelocity().z));//temporary fix, gotta make contactregistry
 	}
 	delete[] vertices;
 	delete[] indices;
