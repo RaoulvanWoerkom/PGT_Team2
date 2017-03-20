@@ -10,6 +10,7 @@ const int START_GAME_TIME = 10;
 #include "Ogre.h"
 OgreText *scoreText;
 OgreText *timerText;
+OgreText *loseText;
 Ogre::Light* directionalLight;
 
 #include <Terrain/OgreTerrain.h>
@@ -102,10 +103,20 @@ void TestApplication::initGameOver()
 	remainingTime = 0;
 	isGameOver = true;
 
-	OgreText * loseText = new OgreText();
-	loseText->setText("PLAY TIME'S OVER B] \n git gud next time");
+	loseText = new OgreText();
+	loseText->setText("Your wrecking time is up! \n press 'Y' to restart.");
 	loseText->setPos(0.4f, 0.2f);
 	loseText->setCol(1.0f, 1.0f, 1.0f, 1.0f);
+}
+
+void TestApplication::restartGame()
+{
+	isGameOver = false;
+	totalGameTime = START_GAME_TIME;
+	loseText->setText("");
+	elapsedTime = 0.0;
+	timer->reset();
+	ballNode->setPosition(0, 200, 0);
 }
 
 void TestApplication::createScene()
@@ -288,21 +299,18 @@ void TestApplication::showScore(double score)
 
 void TestApplication::updateRemainingTime()
 {
-	if (isGameOver == false)
+	elapsedTime = timer->getMilliseconds() / 1000.0;
+	remainingTime = totalGameTime - elapsedTime;
+
+	if (remainingTime <= 0)
 	{
-		elapsedTime = timer->getMilliseconds() / 1000.0;
-		remainingTime = totalGameTime - elapsedTime;
-
-		if (remainingTime <= 0)
-		{
-			initGameOver();
-		}
-
-		stringstream stream;
-		stream << std::fixed << std::setprecision(1) << remainingTime; 	// Set number of digits after the decimal point to 1, for the timer display.
-		std::string timeRepresentation = stream.str();
-		timerText->setText("Time: " + timeRepresentation);
+		initGameOver();
 	}
+
+	stringstream stream;
+	stream << std::fixed << std::setprecision(1) << remainingTime; 	// Set number of digits after the decimal point to 1, for the timer display.
+	std::string timeRepresentation = stream.str();
+	timerText->setText("Time: " + timeRepresentation);
 }
 
 
@@ -310,6 +318,7 @@ bool iDown = false;
 bool jDown = false;
 bool kDown = false;
 bool lDown = false;
+bool yDown = false;
 
 bool TestApplication::keyPressed(const OIS::KeyEvent& ke)
 {
@@ -326,6 +335,9 @@ bool TestApplication::keyPressed(const OIS::KeyEvent& ke)
 			break;
 		case OIS::KC_L:
 			lDown = true;
+			break;
+		case OIS::KC_Y:
+			yDown = true;
 			break;
 		default:
 			break;
@@ -349,41 +361,49 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 	case OIS::KC_L:
 		lDown = false;
 		break;
+	case OIS::KC_Y:
+		yDown = false;
+		break;
 	default:
 		break;
 	}
 	return BaseApplication::keyReleased(ke);
 }
 
-
-	
-
-
 bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
-	updateRemainingTime();
-	showScore(1);
+	if (!isGameOver)
+	{
+		updateRemainingTime();
+		showScore(1);
 
-	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
-	if (iDown)
-	{
-		movePos.z = -moveSpeed;
-	}
-	if (jDown)
-	{
-		movePos.x = -moveSpeed;
-	}
-	if (kDown)
-	{
-		movePos.z = moveSpeed;
-	}
-	if (lDown)
-	{
-		movePos.x = moveSpeed;
-	}
+		Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
+		if (iDown)
+		{
+			movePos.z = -moveSpeed;
+		}
+		if (jDown)
+		{
+			movePos.x = -moveSpeed;
+		}
+		if (kDown)
+		{
+			movePos.z = moveSpeed;
+		}
+		if (lDown)
+		{
+			movePos.x = moveSpeed;
+		}
 
-	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
-
+		ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
+	}
+	else
+	{
+		if (yDown)
+		{
+			restartGame();
+		}
+	}
 	return BaseApplication::frameRenderingQueued(evt);
 }
 
