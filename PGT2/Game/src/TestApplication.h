@@ -24,6 +24,7 @@ protected:
 	virtual void createScene();
 	virtual void init();
 	virtual void initGameOver();
+	virtual void restartGame();
 	virtual void createCamera();
 	virtual void createPlane();
 	virtual void createLight();
