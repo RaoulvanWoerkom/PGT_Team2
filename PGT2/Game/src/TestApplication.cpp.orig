@@ -3,10 +3,11 @@
 #include <sstream>
 #include <iomanip>
 
+<<<<<<< HEAD
+const float moveSpeed = 100;
 const int totalGameTime = 60;
 
 #include "Ogre.h"
-#include "math.h"
 OgreText *scoreText;
 OgreText *timerText;
 Ogre::Light* directionalLight;
@@ -15,6 +16,10 @@ Ogre::Light* directionalLight;
 #include <Terrain/OgreTerrainGroup.h>
 
 #include "BaseApplication.h"
+=======
+#include "Ogre.h"
+#include "math.h"
+>>>>>>> dae4fa86a8d05c3333fead25e00c748acbb73af0
 
 const float MOVE_SPEED = 100;
 const float BALL_SIZE = 100;
@@ -76,7 +81,8 @@ void TestApplication::init()
 	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
 }
 
-Ogre::Vector3 planeNormal;
+<<<<<<< HEAD
+
 
 //Classes for Terraingeneration
 void TestApplication::createFrameListener()
@@ -100,6 +106,23 @@ void getTerrainImage(bool flipX, bool flipY, Ogre::Image& img)
 	if (flipY)
 		img.flipAroundX();
 }
+=======
+Ogre::Vector3 planeNormal;
+void TestApplication::createPlane()
+{
+	// Create ground
+	Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
+	planeNormal = plane.normal;
+	Ogre::MeshManager::getSingleton().createPlane(
+		"ground",
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+		plane, 1500, 1500, 20, 20, true, 1, 5, 5, Ogre::Vector3::UNIT_Z);
+
+	groundEntity = mSceneMgr->createEntity("ground");
+	//mSceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(groundEntity);
+	groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	groundNode->attachObject(groundEntity);
+>>>>>>> dae4fa86a8d05c3333fead25e00c748acbb73af0
 
 void TestApplication::defineTerrain(long x, long y)
 {
@@ -211,6 +234,7 @@ void TestApplication::createScene()
 
 
 
+
 void TestApplication::createLight()
 {
 	mSceneMgr->setAmbientLight(Ogre::ColourValue::White);
@@ -231,17 +255,11 @@ void TestApplication::createPlane()
 {
 	// Create ground
 	//	Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
-	// planeNormal = plane.normal;
+
 	//	Ogre::MeshManager::getSingleton().createPlane(
 	//		"ground",
 	//		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
 	//		plane, 1500, 1500, 20, 20, true, 1, 5, 5, Ogre::Vector3::UNIT_Z);
-	
-	//Get ground nodes
-	//groundEntity = mSceneMgr->createEntity("ground");
-	//mSceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(groundEntity);
-	//groundNode = mSceneMgr->getRootSceneNode()->createChildScene
-	//groundNode->attachObject(groundEntity);
 
 	//	Ogre::Entity* groundEntity = mSceneMgr->createEntity("ground");
 	//	mSceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(groundEntity);
@@ -262,67 +280,41 @@ void TestApplication::createPlane()
 
 
 	//Create Terrain
-	//mTerrainGlobals = OGRE_NEW Ogre::TerrainGlobalOptions();
+	mTerrainGlobals = OGRE_NEW Ogre::TerrainGlobalOptions();
 
 	//mTerrainGroup = OGRE_NEW Ogre::TerrainGroup(
 	//mSceneMgr,
 	//Ogre::Terrain::ALIGN_X_Z,
 	//513, 12000.0);
-	
-	//mTerrainGroup = OGRE_NEW Ogre::TerrainGroup(
-	//	mSceneMgr,
-	//	Ogre::Terrain::ALIGN_X_Z,
-	//	65, 32000.0);
-
-	//mTerrainGroup->setFilenameConvention(Ogre::String("terrain"), Ogre::String("dat"));
-	//mTerrainGroup->setOrigin(Ogre::Vector3::ZERO);
+	mTerrainGroup = OGRE_NEW Ogre::TerrainGroup(
+		mSceneMgr,
+		Ogre::Terrain::ALIGN_X_Z,
+		65, 32000.0);
 
 
-	//MeshPtr pmo = terrainObject->convertToMesh("terrain");
+	mTerrainGroup->setFilenameConvention(Ogre::String("terrain"), Ogre::String("dat"));
+	mTerrainGroup->setOrigin(Ogre::Vector3::ZERO);
 
-	planeEntity = mSceneMgr->createEntity("Plane", "World.mesh");
+	configureTerrainDefaults(directionalLight);
 
-	MaterialPtr m_pMat = planeEntity->getSubEntity(0)->getMaterial()->clone("carrots");
-	m_pMat->getTechnique(0)->getPass(0)->setAmbient(0, 1, 0);
-//	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(1, 10, 3, 50);
-	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(3, 20, 5, 20);
-	planeEntity->setMaterialName(m_pMat->getName());
+	for (long x = 0; x <= 0; ++x)
+		for (long y = 0; y <= 0; ++y)
+			defineTerrain(x, y);
 
-	planeNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, -210, 0));
-	planeNode->scale(Ogre::Vector3(500, 850, 500));
-	planeNode->attachObject(planeEntity);
+	mTerrainGroup->loadAllTerrains(true);
 
+	if (mTerrainsImported)
+	{
+		Ogre::TerrainGroup::TerrainIterator ti = mTerrainGroup->getTerrainIterator();
 
-//	configureTerrainDefaults(directionalLight);
+		while (ti.hasMoreElements())
+		{
+			Ogre::Terrain* t = ti.getNext()->instance;
+			initBlendMaps(t);
+		}
+	}
 
-//	for (long x = 0; x <= 0; ++x)
-//		for (long y = 0; y <= 0; ++y)
-//			defineTerrain(x, y);
-
-	//mTerrainGroup->loadAllTerrains(true);
-
-	
-
-	//if (mTerrainsImported)
-	//{
-	//	Ogre::TerrainGroup::TerrainIterator ti = mTerrainGroup->getTerrainIterator();
-
-	//	while (ti.hasMoreElements())
-	//	{
-	//		Ogre::Terrain* t = ti.getNext()->instance;
-	//		initBlendMaps(t);
-
-	//	}
-
-	//}
-
-
-//	mTerrainGroup->freeTemporaryResources();
-
-	//groundEntity = mSceneMgr->createEntity("terrain");
-	//mSceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(groundEntity);
-	
-
+	mTerrainGroup->freeTemporaryResources();
 }
 
 
@@ -332,14 +324,10 @@ void TestApplication::createSphere()
 {
 	ballEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 
-	MaterialPtr m_bMat = ballEntity->getSubEntity(0)->getMaterial()->clone("Balls");
-	m_bMat->getTechnique(0)->getPass(0)->setAmbient(0, 0, 1);
-	m_bMat->getTechnique(0)->getPass(0)->setDiffuse(0, 1, 0, 0);
-	ballEntity->setMaterialName(m_bMat->getName());
-
-
 	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, BALL_SIZE, 0));
-	ballNode->attachObject(ballEntity);	
+	ballNode->attachObject(ballEntity);
+
+	
 }
 
 bool iDown = false;
@@ -370,35 +358,7 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
 	
 
-	CheckBallCollision(planeNode, planeEntity);
-
-
-	double elapsedSeconds = timer->getMilliseconds() / 1000.0;
-	updateRemainingTime(elapsedSeconds);
-	
-	//Terrain Generation message
-//	if (mTerrainGroup->isDerivedDataUpdateInProgress())
-//	{
-//		mTrayMgr->moveWidgetToTray(mInfoLabel, OgreBites::TL_TOP, 0);
-//		mInfoLabel->show();
-
-//		if (mTerrainsImported)
-//			mInfoLabel->setCaption("Building terrain...");
-//		else
-//			mInfoLabel->setCaption("Updating terrain...");
-//	}
-//	else
-//	{
-//		mTrayMgr->removeWidgetFromTray(mInfoLabel);
-//		mInfoLabel->hide();
-
-//		if (mTerrainsImported)
-//		{
-//			mTerrainGroup->saveAllTerrains(true);
-//			mTerrainsImported = false;
-//		}
-//	}
-
+	CheckBallCollision(groundNode, groundEntity);
 
 
 	return BaseApplication::frameRenderingQueued(evt);
@@ -411,6 +371,10 @@ void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* e
 	Ogre::Vector3* vertices1;
 	unsigned long* indices1;
 
+<<<<<<< HEAD
+	ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, 400, 0));
+	ballNode->attachObject(sphereEntity);
+=======
 	GetMeshInformation(entity1->getMesh(), vertex_count1, vertices1, index_count1, indices1, node1->getPosition(), node1->getOrientation(), node1->getScale());
 
 	
@@ -552,6 +516,7 @@ Ogre::Vector3 TestApplication::closestPointOnTriangle(Ogre::Vector3 point1, Ogre
 	}
 	Ogre::Vector3 ret = point1 + s * edge0 + t * edge1;
 	return ret;
+>>>>>>> dae4fa86a8d05c3333fead25e00c748acbb73af0
 
 }
 
@@ -774,6 +739,62 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 }
 
 
+<<<<<<< HEAD
+	
+
+
+bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
+{
+	double elapsedSeconds =  timer->getMilliseconds() / 1000.0;
+	updateRemainingTime(elapsedSeconds);
+	showScore(1);
+
+	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
+	if (iDown)
+	{
+		movePos.z = -moveSpeed;
+	}
+	if (jDown)
+	{
+		movePos.x = -moveSpeed;
+	}
+	if (kDown)
+	{
+		movePos.z = moveSpeed;
+	}
+	if (lDown)
+	{
+		movePos.x = moveSpeed;
+	}
+
+	ballNode->translate(movePos * evt.timeSinceLastFrame, Ogre::Node::TS_LOCAL);
+
+	//Terrain Generation message
+	if (mTerrainGroup->isDerivedDataUpdateInProgress())
+	{
+		mTrayMgr->moveWidgetToTray(mInfoLabel, OgreBites::TL_TOP, 0);
+		mInfoLabel->show();
+
+		if (mTerrainsImported)
+			mInfoLabel->setCaption("Building terrain...");
+		else
+			mInfoLabel->setCaption("Updating terrain...");
+	}
+	else
+	{
+		mTrayMgr->removeWidgetFromTray(mInfoLabel);
+		mInfoLabel->hide();
+
+		if (mTerrainsImported)
+		{
+			mTerrainGroup->saveAllTerrains(true);
+			mTerrainsImported = false;
+		}
+	}
+
+
+=======
+>>>>>>> dae4fa86a8d05c3333fead25e00c748acbb73af0
 
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32

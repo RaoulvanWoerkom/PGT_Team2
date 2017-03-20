@@ -12,12 +12,14 @@ public:
 	TestApplication();
 	virtual ~TestApplication();
 	Ogre::SceneNode* ballNode;
-	Ogre::SceneNode* planeNode;
+<<<<<<< HEAD
 	Ogre::Timer* timer;
 	double remainingTime;
-
+=======
+	Ogre::SceneNode* groundNode;
 	Ogre::Entity* ballEntity;
-	Ogre::Entity* planeEntity;
+	Ogre::Entity* groundEntity;
+>>>>>>> dae4fa86a8d05c3333fead25e00c748acbb73af0
 
 protected:
 	virtual void createScene();
@@ -26,6 +28,7 @@ protected:
 	virtual void createPlane();
 	virtual void createLight();
 	virtual void createViewports();
+
 	virtual void createFrameListener();
 	virtual void destroyScene();
 
@@ -41,10 +44,14 @@ private:
 
 	virtual void createSphere();
 	virtual void showScore(double score);
+<<<<<<< HEAD
 	virtual void updateRemainingTime(double elapsedTime);
+
+=======
 	float clamp(float n, float lower, float upper);
 	void CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* entity1);
 	std::vector<Ogre::Vector3>  FindLineSphereIntersections(Ogre::Vector3 linePoint0, Ogre::Vector3 linePoint1, Ogre::Vector3 circleCenter, double circleRadius);
+>>>>>>> dae4fa86a8d05c3333fead25e00c748acbb73af0
 	void GetMeshInformation(const Ogre::MeshPtr mesh,
 		size_t &vertex_count,
 		Ogre::Vector3* &vertices,
