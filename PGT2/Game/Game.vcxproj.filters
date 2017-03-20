@@ -28,14 +28,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ForceGenerator.h">
-    </ClInclude>
-    <ClInclude Include="OgreText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UnitTestSample.h">
+    <ClInclude Include="src\Highscore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Highscore.h">
+    <ClInclude Include="src\OgreText.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UnitTestSample.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,11 +54,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\\ForceGenerator.cpp">
-    </ClCompile>
-    <ClCompile Include="UnitTestSample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Highscore.cpp">
+    <ClCompile Include="src\Highscore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UnitTestSample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
