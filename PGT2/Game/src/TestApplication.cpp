@@ -1,12 +1,12 @@
 #include "TestApplication.h"
-#include "../OgreText.h"
+#include "OgreText.h"
 #include <sstream>
 #include <iomanip>
 #include "BaseApplication.h"
 #include <cmath>
 #include "Ogre.h"
 #include "Helper.h"
-#include "../Highscore.h"
+#include "Highscore.h"
 
 const float moveSpeed = 100;
 const int BALL_SIZE = 100;
