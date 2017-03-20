@@ -144,22 +144,17 @@ void TestApplication::createLight()
 
 void TestApplication::createPlane()
 {
-	// Create ground
-	Ogre::Plane plane(Ogre::Vector3::UNIT_Y, 0);
-	Ogre::MeshManager::getSingleton().createPlane(
-		"ground",
-		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-		plane, 1500, 1500, 20, 20, true, 1, 5, 5, Ogre::Vector3::UNIT_Z);
+	groundEntity = mSceneMgr->createEntity("Plane", "World.mesh");
 
-	groundEntity = mSceneMgr->createEntity("ground");
-	//mSceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(groundEntity);
-	groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	MaterialPtr m_pMat = groundEntity->getSubEntity(0)->getMaterial()->clone("carrots");
+	m_pMat->getTechnique(0)->getPass(0)->setAmbient(0, 1, 0);
+	//	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(1, 10, 3, 50);
+	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(3, 20, 5, 20);
+	groundEntity->setMaterialName(m_pMat->getName());
+
+	groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, -210, 0));
+	groundNode->scale(Ogre::Vector3(500, 850, 500));
 	groundNode->attachObject(groundEntity);
-
-	groundEntity->setMaterialName("Examples/Rockwall");
-	groundEntity->setCastShadows(false);
-
-
 }
 
 void TestApplication::createSphere()

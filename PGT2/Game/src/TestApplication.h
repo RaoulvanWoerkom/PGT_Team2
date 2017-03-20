@@ -24,6 +24,7 @@ public:
 	ForceRegistry registry;
 	Gravity gravity;
 
+
 protected:
 	virtual void createScene();
 	virtual void init();
