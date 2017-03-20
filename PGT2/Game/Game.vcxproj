@@ -19,12 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ForceGenerator.h" />
     <ClInclude Include="OgreText.h" />
+    <ClInclude Include="src\Helper.h" />
+    <ClInclude Include="src\RigidBody.h" />
     <ClInclude Include="src\BaseApplication.h" />
     <ClInclude Include="src\TestApplication.h" />
     <ClInclude Include="UnitTestSample.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\\ForceGenerator.cpp" />
+    <ClCompile Include="src\Helper.cpp" />
+    <ClCompile Include="src\RigidBody.cpp" />
     <ClCompile Include="src\BaseApplication.cpp" />
     <ClCompile Include="src\TestApplication.cpp" />
     <ClCompile Include="UnitTestSample.cpp" />
@@ -58,7 +64,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v100</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -106,7 +112,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(OGRE_HOME)\lib\$(Configuration);$(OGRE_HOME)\boost\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OgreMain_d.lib;OIS_d.lib;OgreOverlay_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OgreMain_d.lib;OIS_d.lib;OgreOverlay_d.lib;OgreTerrain_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(OutDir)\$(TargetFileName)" "$(OGRE_HOME)\Bin\$(Configuration)"</Command>

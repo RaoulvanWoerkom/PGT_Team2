@@ -21,10 +21,18 @@
     <ClInclude Include="src\BaseApplication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="OgreText.h">
+    <ClInclude Include="src\OgreText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UnitTestSample.h">
+    <ClInclude Include="src\UnitTestSample.h">
+    </ClInclude>
+    <ClInclude Include="src\RigidBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ForceGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,7 +43,15 @@
     <ClCompile Include="src\BaseApplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UnitTestSample.cpp">
+    <ClCompile Include="src\UnitTestSample.cpp">
+    </ClCompile>
+    <ClCompile Include="src\RigidBody.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Helper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\\ForceGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

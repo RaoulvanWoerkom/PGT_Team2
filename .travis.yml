@@ -1,19 +1,14 @@
-dist: trusty
 language: cpp
-
-cache:
-  directories:
-    - '$HOME/.sonar/cache'
-
-notifications:
-  email: false
 
 addons:
   sonarqube:
+    token:
+      secure: "SONAR_TOKEN" # encrypted value of your token
   branches:
+    - citest
+    - CiTest
     - master
     - CITest
-    - shadow
 
 before_install:
   - chmod +x tools/ci/before-install.sh
@@ -25,18 +20,9 @@ install:
 
 script:
   - chmod +x tools/ci/build.sh
-
-  - build-wrapper-linux-x86-64 --out-dir bw-output tools/ci/build.sh
-
-  #- make clean
-
-  # Execute some tests
-  #- make test
-  
-after_success:
-# Run SonarQube analysis
+  - tools/ci/build.sh
   - sonar-scanner
-  
+
 sudo: required
 
 matrix:
