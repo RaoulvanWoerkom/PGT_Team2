@@ -2,16 +2,18 @@
 #define __TestApplication_h_
 
 #include "BaseApplication.h"
-
+#include "RigidBody.h"
+#include "ForceGenerator.h"
 #include <Terrain/OgreTerrain.h>
 #include <Terrain/OgreTerrainGroup.h>
+
 
 class TestApplication : public BaseApplication
 {
 public:
 	TestApplication();
 	virtual ~TestApplication();
-	Ogre::SceneNode* ballNode;
+	RigidBody ballBody;
 	Ogre::SceneNode* camNode;
 	Ogre::SceneNode* camPitchNode;
 	Ogre::Timer* timer;
@@ -19,6 +21,8 @@ public:
 	double remainingTime;
 	double totalGameTime;
 	bool isGameOver;
+	ForceRegistry registry;
+	Gravity gravity;
 
 protected:
 	virtual void createScene();
@@ -35,12 +39,12 @@ private:
 
 	Ogre::SceneNode* groundNode;
 	Ogre::Entity* groundEntity;
-
+	void setCameraTarget(Ogre::SceneNode* node);
 	virtual void createSphere();
 	virtual void showScore(double score);
 	virtual void updateRemainingTime();
 
-	void TestApplication::CheckBallCollision(Ogre::SceneNode* node1, Ogre::Entity* entity1);
+	void TestApplication::CheckBallCollision();
 	Ogre::Vector3 TestApplication::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
 	float TestApplication::clamp(float n, float lower, float upper);
 	Ogre::Vector3 TestApplication::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);

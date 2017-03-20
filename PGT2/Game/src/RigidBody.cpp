@@ -1,11 +1,12 @@
 #include "RigidBody.h"
-
+#include "Helper.h"
+#include <cmath>
 RigidBody::RigidBody(Ogre::SceneNode* node, Ogre::Entity* entity)
 {
 	RigidBody::Node = node;
 	RigidBody::Entity = entity;
 	RigidBody::InverseMass = 1;
-	RigidBody::Dampening = 0.9;
+	RigidBody::Dampening = 0.995;
 	RigidBody::IsAwake = true;
 	RigidBody::CanSleep = false;
 	RigidBody::Velocity = Ogre::Vector3().ZERO;
@@ -20,6 +21,16 @@ RigidBody::RigidBody(void)
 void RigidBody::SetPosition(Ogre::Vector3& position)
 {
 	RigidBody::Node->setPosition(position);
+}
+
+void RigidBody::SetVelocity(Ogre::Vector3 & velocity)
+{
+	RigidBody::Velocity = velocity;
+}
+
+Ogre::Vector3 RigidBody::GetVelocity()
+{
+	return RigidBody::Velocity;
 }
 
 Ogre::Vector3 RigidBody::GetPosition()
@@ -59,28 +70,45 @@ void RigidBody::Integrate(float delta)
 	{
 		//calculate acceleration with mass and force
 		//TODO calculate angular acceleration with Tensor and Torque
-		RigidBody::Acceleration += (RigidBody::ForceAccum * RigidBody::InverseMass);
+		Ogre::Vector3 LastFrameAcceleration = RigidBody::Acceleration;
+		LastFrameAcceleration += (RigidBody::ForceAccum * RigidBody::InverseMass);
 
 		//Update velocity with time and acceleration
-		RigidBody::Velocity += (RigidBody::Acceleration * delta);
+		RigidBody::Velocity += (LastFrameAcceleration);
 
-		//dampen the movement so it stops eventually
-		RigidBody::Velocity *= Ogre::Math().Pow(RigidBody::Dampening, delta);
+		//dampen the movement so it stops eventually !Temporary fix pls watch me
+		RigidBody::Velocity *= RigidBody::Dampening;
+
+		//RigidBody::Velocity *= RigidBody::Dampening;
 
 		//Move Rigidbody with velocity and time
 		Ogre::Vector3 tempPos = RigidBody::GetPosition();
 		tempPos += (RigidBody::Velocity * delta);
 		RigidBody::SetPosition(tempPos);
 
+		Helper::log("velocity", LastFrameAcceleration);
+		Helper::log("acceleration", Acceleration);
+
+		//Helper::log("acceleration", Acceleration);
+		//Helper::log("forceaccum", ForceAccum);
+
+		RigidBody::ForceAccum = Ogre::Vector3().ZERO;
 		//TODO Calculate total movement and check if under benchmark: IsAwake = false
 	}
 }
 
-void RigidBody::calculateDerivedData()
+bool RigidBody::HasFiniteMass()
 {
-	//RigidBody::TransformMatrix.makeTransform(RigidBody::GetPosition(), RigidBody::Node->getScale(), RigidBody::GetOrientation().normalise);
+	if (RigidBody::InverseMass == 0)
+	{
+		return false;
+	}
+	return true;
+}
 
-	
+float RigidBody::GetMass()
+{
+	return 1 / RigidBody::InverseMass;
 }
 
 void RigidBody::SetInertiaTensor(const Ogre::Matrix3& inertiaTensor)
