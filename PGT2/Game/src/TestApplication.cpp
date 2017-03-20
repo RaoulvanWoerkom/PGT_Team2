@@ -5,6 +5,7 @@
 #include "BaseApplication.h"
 #include <cmath>
 #include "Ogre.h"
+#include "../Highscore.h"
 
 const float moveSpeed = 100;
 const int BALL_SIZE = 100;
@@ -97,6 +98,9 @@ void TestApplication::initGameOver()
 {
 	remainingTime = 0;
 	isGameOver = true;
+
+	Highscore * highscore = new Highscore();
+	highscore->addToScoreboard("WreckingBall", 100);
 
 	OgreText * loseText = new OgreText();
 	loseText->setText("PLAY TIME'S OVER B] \n git gud next time");

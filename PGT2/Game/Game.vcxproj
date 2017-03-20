@@ -24,7 +24,6 @@
     <ClInclude Include="src\RigidBody.h" />
     <ClInclude Include="src\BaseApplication.h" />
     <ClInclude Include="src\TestApplication.h" />
-    <ClInclude Include="Utils\json.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Highscore.cpp" />
