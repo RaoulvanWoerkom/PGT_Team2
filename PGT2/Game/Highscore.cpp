@@ -47,13 +47,8 @@ void Highscore::addToScoreboard(std::string name, double score)
 	highscore.score = score;
 	highscore.timestamp = currentDateTime();
 
-	myfile << printf_s("Name: %s \nPoints: %d\n\n\n", highscore.name, highscore.score);
+	myfile << printf("Name: %s \nPoints: %d\n\n\n", highscore.name, highscore.score);
 	
-	myfile << flush;
+	//myfile << flush;
 	myfile.close();
-
-	ofstream myfile2;
-	myfile2.open("example.txt");
-	myfile2 << "Writing this to a file.\n";
-	myfile2.close();
 };
