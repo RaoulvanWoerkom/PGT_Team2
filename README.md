@@ -1,33 +1,5 @@
-# clean-project
-[![Travis build status](https://travis-ci.org/ogre3d/clean-project.svg?branch=master)](https://travis-ci.org/ogre3d/clean-project) [![build status](https://gitlab.com/ci/projects/17554/status.png?ref=master)](https://gitlab.com/ci/projects/17554?ref=master)
+# WreckCity
+[![Build Status](https://travis-ci.com/RaoulvanWoerkom/PGT_Team2.svg?token=9ngTZhyE6LTMPuN1UZHX&branch=master)](https://travis-ci.com/RaoulvanWoerkom/PGT_Team2)
 
-A clean ogre project with cmake. It aims to be a start for Ogre based projects and to compile on as much different environment as possible.
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/3a4e09148e73499a80d5071ce60f9d42)](https://www.codacy.com/app/raoulwoerkom/PGT_Team2?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RaoulvanWoerkom/PGT_Team2&amp;utm_campaign=Badge_Grade)
 
-### Features
-
-         | Travis Ubuntu 12.04 | Travis Ubuntu 14.04 | Gitlab CI Debian Jessie
----------|---------------------|---------------------|------------------------
-Ogre 1.9 | :heavy_check_mark:  | :heavy_check_mark:  | :heavy_check_mark:
-Ogre 1.8 | :heavy_check_mark:  | :heavy_check_mark:  | :heavy_check_mark:
-Ogre 1.7 | :heavy_check_mark:  | :x:                 | :x:
-
-### Roadmap
-- Ogre 2.0 and 2.1 support.
-- Travis Mac support.
-- Appveyor support.
-- Android build.
-- Mingw cross-compilation support (build 32bits from 64bits and vice versa).
-- Mingw Windows build.
-- Maybe some unit tests?
-
-### Build
-```bash
-mkdir build
-cd build
-cmake ..
-make
-make install
-```
-
-### Contributions
-... are highly welcomed!
