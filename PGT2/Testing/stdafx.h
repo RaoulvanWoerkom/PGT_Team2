@@ -8,10 +8,10 @@
 #include "targetver.h"
 
 // Headers for CppUnitTest
-//#include "CppUnitTest.h"
+#include "CppUnitTest.h"
 
-#include <cppunit/CompilerOutputter.h>
-#include <cppunit/extensions/TestFactoryRegistry.h>
-#include <cppunit/ui/text/TestRunner.h>
+//#include <cppunit/CompilerOutputter.h>
+//#include <cppunit/extensions/TestFactoryRegistry.h>
+//#include <cppunit/ui/text/TestRunner.h>
 
 // TODO: reference additional headers your program requires here
