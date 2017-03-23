@@ -20,17 +20,12 @@ set(APP "OgreApp")
  
 set(HDRS
 	./PGT2/Game/src/BaseApplication.h
-	./PGT2/Game/src/Highscore.h
-	./PGT2/Game/src/OgreText.h
-	./PGT2/Game/src/RigidBody.h
 	./PGT2/Game/src/TestApplication.h	
 	./PGT2/Game/src/UnitTestSample.h
 )
  
 set(SRCS
 	./PGT2/Game/src/BaseApplication.cpp
-	./PGT2/Game/src/Highscore.cpp
-	./PGT2/Game/src/RigidBody.cpp
 	./PGT2/Game/src/TestApplication.cpp
 	./PGT2/Game/src/UnitTestSample.cpp
 )
