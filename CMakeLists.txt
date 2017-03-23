@@ -37,6 +37,7 @@ set(SRCS
 	./PGT2/Game/src/RigidBody.cpp
 	./PGT2/Game/src/TestApplication.cpp
 	./PGT2/Game/src/UnitTestSample.cpp
+	./PGT2/Testing/unittest1.cpp
 )
  
 include("tools/cmake/common.cmake") 
