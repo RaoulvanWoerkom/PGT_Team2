@@ -18,12 +18,12 @@ RigidBody::RigidBody(void)
 {
 }
 
-void RigidBody::SetPosition(Ogre::Vector3& position)
+void RigidBody::SetPosition(Ogre::Vector3 position)
 {
 	RigidBody::Node->setPosition(position);
 }
 
-void RigidBody::SetVelocity(Ogre::Vector3 & velocity)
+void RigidBody::SetVelocity(Ogre::Vector3 velocity)
 {
 	RigidBody::Velocity = velocity;
 }
