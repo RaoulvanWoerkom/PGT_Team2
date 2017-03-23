@@ -31,8 +31,8 @@ public:
 
 	RigidBody(Ogre::SceneNode *node, Ogre::Entity *entity);
 	RigidBody(void);
-	void SetPosition(Ogre::Vector3 &position);
-	void SetVelocity(Ogre::Vector3 &velocity);
+	void SetPosition(Ogre::Vector3 position);
+	void SetVelocity(Ogre::Vector3 velocity);
 	Ogre::Vector3 GetVelocity();
 	Ogre::Vector3 GetPosition();
 	void SetOrientation(Ogre::Quaternion &orientation);
