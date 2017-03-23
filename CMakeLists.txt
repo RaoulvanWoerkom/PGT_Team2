@@ -19,15 +19,9 @@ cmake_minimum_required(VERSION 2.6)
 set(APP "OgreApp")
  
 set(HDRS
-	./PGT2/Game/src/BaseApplication.h
-	./PGT2/Game/src/TestApplication.h	
-	./PGT2/Game/src/UnitTestSample.h
 )
  
 set(SRCS
-	./PGT2/Game/src/BaseApplication.cpp
-	./PGT2/Game/src/TestApplication.cpp
-	./PGT2/Game/src/UnitTestSample.cpp
 )
  
 include("tools/cmake/common.cmake") 
