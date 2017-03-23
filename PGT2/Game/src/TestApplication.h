@@ -45,10 +45,10 @@ private:
 	virtual void showScore(double score);
 	virtual void updateRemainingTime();
 
-	void TestApplication::CheckBallCollision();
-	Ogre::Vector3 TestApplication::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
-	float TestApplication::clamp(float n, float lower, float upper);
-	Ogre::Vector3 TestApplication::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);
+	void CheckBallCollision();
+	Ogre::Vector3 normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
+	float clamp(float n, float lower, float upper);
+	Ogre::Vector3 closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);
 
 	void GetMeshInformation(const Ogre::MeshPtr mesh,
 		size_t &vertex_count,
