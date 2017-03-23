@@ -48,12 +48,12 @@ Ogre::Quaternion RigidBody::GetOrientation()
 	return RigidBody::Node->getOrientation();
 }
 
-void RigidBody::AddForce(Ogre::Vector3& force)
+void RigidBody::AddForce(Ogre::Vector3 force)
 {
 	RigidBody::ForceAccum += force;
 }
 
-void RigidBody::AddTorque(Ogre::Vector3& torque)
+void RigidBody::AddTorque(Ogre::Vector3 torque)
 {
 	RigidBody::TorqueAccum = torque;
 }

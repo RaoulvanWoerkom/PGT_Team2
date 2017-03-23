@@ -1,5 +1,5 @@
 #include "Helper.h"
-#include <windows.h>
+//#include <windows.h>
 #include <stdio.h>
 
 

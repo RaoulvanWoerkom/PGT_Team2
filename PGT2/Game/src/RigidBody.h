@@ -38,8 +38,8 @@ public:
 	void SetOrientation(Ogre::Quaternion &orientation);
 	void SetInertiaTensor(const Ogre::Matrix3 &inertiaTensor);
 	Ogre::Quaternion GetOrientation();
-	void AddForce(Ogre::Vector3 &force);
-	void AddTorque(Ogre::Vector3 &torque);
+	void AddForce(Ogre::Vector3 force);
+	void AddTorque(Ogre::Vector3 torque);
 	void SetIsAwake(const bool awake);
 	void Integrate(float delta);
 	bool HasFiniteMass();
