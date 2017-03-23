@@ -400,7 +400,7 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			Vector3 direction = camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_Z;
 			direction.y = 0;
 			direction.normalise();
-			direction = direction * 5; // * speed
+			direction = direction * 10; // * speed
 			ballBody.AddForce(direction);
 
 		}
@@ -409,7 +409,7 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			Vector3 direction = camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_X;
 			direction.y = 0;
 			direction.normalise();
-			direction = direction * 5; // * speed
+			direction = direction * 10; // * speed
 			ballBody.AddForce(direction);
 		}
 		if (kDown)
@@ -417,7 +417,7 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			Vector3 direction = camNode->_getDerivedOrientation() * -Vector3::NEGATIVE_UNIT_Z;
 			direction.y = 0;
 			direction.normalise();
-			direction = direction * 5; // * speed
+			direction = direction * 10; // * speed
 			ballBody.AddForce(direction);
 		}
 		if (lDown)
@@ -425,15 +425,19 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			Vector3 direction = camNode->_getDerivedOrientation() * -Vector3::NEGATIVE_UNIT_X;
 			direction.y = 0;
 			direction.normalise();
-			direction = direction * 5; // * speed
+			direction = direction * 10; // * speed
 			ballBody.AddForce(direction);
+		}
+		if (yDown)
+		{
+			restartGame();//temporary for testing purposes
 		}
 	}
 	else
 	{
 		if (yDown)
 		{
-			restartGame();
+			restartGame();//temporary for testing purposes
 		}
 	}
 		
@@ -470,7 +474,7 @@ void TestApplication::CheckBallCollision()
 		Ogre::Vector3 point1 = vertices[index1];
 		Ogre::Vector3 point2 = vertices[index2];
 		Ogre::Vector3 point3 = vertices[index3];
-		normalVec = normalVector(point1, point2, point3);
+		
 		Ogre::Vector3 collPoint = closestPointOnTriangle(point1, point2, point3, ballPos);
 		double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
 		if (dist < BALL_SIZE)
@@ -479,6 +483,7 @@ void TestApplication::CheckBallCollision()
 			{
 				shortestLength = dist;
 				chosenIndex = i;
+				normalVec = normalVector(point1, point2, point3);
 				closestHitCoordinates = collPoint;
 			}
 		}
@@ -487,6 +492,7 @@ void TestApplication::CheckBallCollision()
 	{
 		double diffDist = BALL_SIZE - shortestLength;
 		ballPos += normalVec * diffDist;
+		Helper::log("normal", normalVec);
 		ballBody.Node->setPosition(ballPos);
 		ballBody.SetVelocity(Ogre::Vector3(ballBody.GetVelocity().x, 0, ballBody.GetVelocity().z));//temporary fix, gotta make contactregistry
 	}
