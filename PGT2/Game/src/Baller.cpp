@@ -76,16 +76,6 @@ void Baller::init()
 	registry.add(&ballBody , &gravity);
 }
 
-void getTerrainImage(bool flipX, bool flipY, Ogre::Image& img)
-{
-	img.load("terrain.png", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-	if (flipX)
-		img.flipAroundY();
-	if (flipY)
-		img.flipAroundX();
-}
-
 void Baller::initGameOver()
 {
 	remainingTime = 0;
@@ -108,7 +98,7 @@ void Baller::restartGame()
 	loseText->setText("");
 	elapsedTime = 0.0;
 	timer->reset();
-	ballBody.SetPosition(Ogre::Vector3(0, 200, 0));
+	ballBody.setPosition(Ogre::Vector3(0, 200, 0));
 }
 
 void Baller::createScene()
@@ -117,7 +107,7 @@ void Baller::createScene()
 	createLight();
 	createPlane();
 	createSphere();
-	camera.setCameraTarget(ballBody.Node);
+	camera.setCameraTarget(ballBody.node);
 }
 
 void Baller::createLight()
@@ -159,6 +149,7 @@ void Baller::createSphere()
 	ballNode->attachObject(sphereEntity);
 
 	ballBody = RigidBody(ballNode, sphereEntity);
+
 }
 
 void Baller::GetMeshInformation(const Ogre::MeshPtr mesh,
@@ -378,7 +369,7 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			direction.y = 0;
 			direction.normalise();
 			direction = direction * MOVE_SPEED; // * speed
-			ballBody.AddForce(direction);
+			ballBody.addForce(direction);
 
 		}
 		if (jDown)
@@ -387,7 +378,7 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			direction.y = 0;
 			direction.normalise();
 			direction = direction * MOVE_SPEED; // * speed
-			ballBody.AddForce(direction);
+			ballBody.addForce(direction);
 		}
 		if (kDown)
 		{
@@ -395,7 +386,7 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			direction.y = 0;
 			direction.normalise();
 			direction = direction * MOVE_SPEED; // * speed
-			ballBody.AddForce(direction);
+			ballBody.addForce(direction);
 		}
 		if (lDown)
 		{
@@ -403,7 +394,7 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			direction.y = 0;
 			direction.normalise();
 			direction = direction * MOVE_SPEED; // * speed
-			ballBody.AddForce(direction);
+			ballBody.addForce(direction);
 		}
 		if (yDown)
 		{
@@ -422,7 +413,7 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	float duration = evt.timeSinceLastFrame;
 
 	registry.updateForces(duration);
-	ballBody.Integrate(duration);
+	ballBody.integrate(duration);
 	CheckBallCollision();
 
 	return BaseApplication::frameRenderingQueued(evt);
@@ -440,7 +431,7 @@ void Baller::CheckBallCollision()
 	int chosenIndex = -1;
 	Ogre::Vector3 closestHitCoordinates;
 	Ogre::Vector3 normalVec = Ogre::Vector3(-1, -1, -1);
-	Ogre::Vector3 ballPos = ballBody.Node->getPosition();
+	Ogre::Vector3 ballPos = ballBody.node->getPosition();
 
 	int max = index_count - 3;
 	for (size_t i = 0; i < max; i += 3)
@@ -470,8 +461,8 @@ void Baller::CheckBallCollision()
 		double diffDist = BALL_SIZE - shortestLength;
 		ballPos += normalVec * diffDist;
 		Helper::log("normal", normalVec);
-		ballBody.Node->setPosition(ballPos);
-		ballBody.SetVelocity(Ogre::Vector3(ballBody.GetVelocity().x, 0, ballBody.GetVelocity().z));//temporary fix, gotta make contactregistry
+		ballBody.node->setPosition(ballPos);
+		ballBody.setVelocity(Ogre::Vector3(ballBody.getVelocity().x, 0, ballBody.getVelocity().z));//temporary fix, gotta make contactregistry
 	}
 	delete[] vertices;
 	delete[] indices;

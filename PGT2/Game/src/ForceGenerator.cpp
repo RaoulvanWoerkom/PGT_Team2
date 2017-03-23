@@ -33,8 +33,8 @@ Gravity::Gravity()
 
 void Gravity::updateForce(RigidBody * body, float duration)
 {
-	if (!body->HasFiniteMass()) return;
+	if (!body->hasFiniteMass()) return;
 
 	// Apply the mass-scaled force to the body
-	body->AddForce(gravity * body->GetMass());
+	body->addForce(gravity * body->getMass());
 }
