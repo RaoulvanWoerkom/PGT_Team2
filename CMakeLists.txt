@@ -19,9 +19,12 @@ cmake_minimum_required(VERSION 2.6)
 set(APP "OgreApp")
  
 set(HDRS
+./PGT2/Game/src/Highscore.h
+
 )
  
 set(SRCS
+./PGT2/Game/src/Highscore.cpp
 )
  
 include("tools/cmake/common.cmake") 

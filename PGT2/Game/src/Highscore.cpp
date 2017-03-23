@@ -47,7 +47,7 @@ void Highscore::addToScoreboard(std::string name, double score)
 	highscore.score = score;
 	highscore.timestamp = currentDateTime();
 
-	myfile << printf("Name: %s \nPoints: %d\n\n\n", highscore.name, highscore.score);
+	myfile << printf("Name: %s \nPoints: %d\n\n\n", highscore.name.c_str(), int(highscore.score));
 	
 	//myfile << flush;
 	myfile.close();
