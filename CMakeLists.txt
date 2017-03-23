@@ -27,6 +27,8 @@ set(HDRS
 	./PGT2/Game/src/RigidBody.h
 	./PGT2/Game/src/TestApplication.h	
 	./PGT2/Game/src/UnitTestSample.h
+	./PGT2/Testing/stdafx.h
+	./PGT2/Testing/targetver.h
 )
  
 set(SRCS
@@ -38,6 +40,7 @@ set(SRCS
 	./PGT2/Game/src/TestApplication.cpp
 	./PGT2/Game/src/UnitTestSample.cpp
 	./PGT2/Testing/unittest1.cpp
+	./PGT2/Testing/stdafx.cpp
 )
  
 include("tools/cmake/common.cmake") 
