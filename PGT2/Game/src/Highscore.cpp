@@ -2,7 +2,9 @@
 #include <time.h>
 #include <iostream>
 #include <fstream>
+
 using namespace std;
+
 
 namespace highscores {
 	struct highscore {
@@ -29,14 +31,16 @@ const std::string currentDateTime() {
 
 Highscore::Highscore()
 {
+	
 }
 
 Highscore::~Highscore()
 {
+	
 }
 
 // https://cboard.cprogramming.com/c-programming/135750-scoreboard-saved-txt-file.html
-void Highscore::addToScoreboard(std::string name, double score)
+bool Highscore::addToScoreboard(std::string name, double score)
 {	
 	std::ofstream myfile;
 	myfile.open("scoreboard.txt", ios::out);
@@ -51,4 +55,6 @@ void Highscore::addToScoreboard(std::string name, double score)
 	
 	//myfile << flush;
 	myfile.close();
+
+	return true;
 };

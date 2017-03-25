@@ -17,6 +17,11 @@ http://www.ogre3d.org/wiki/
 
 #include "BaseApplication.h"
 
+// Unit Testing
+#include <cppunit/CompilerOutputter.h>
+#include <cppunit/extensions/TestFactoryRegistry.h>
+#include <cppunit/ui/text/TestRunner.h>
+
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <macUtils.h>
 #endif
@@ -243,6 +248,21 @@ void BaseApplication::go(void)
     destroyScene();
 }
 //---------------------------------------------------------------------------
+bool setupTesting()
+{
+	// get the top-level suite of tests (registry is not the Win32 registry)
+	CppUnit::Test * suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
+	// add the test to the list of tests to run
+	CppUnit::TextUi::TestRunner runner;
+	runner.addTest(suite);
+	// change the default outputter to a compiler error format outputter
+	runner.setOutputter(new CppUnit::CompilerOutputter(&runner.result(), std::cerr));
+	// run the tests
+	bool wasSuccessful = runner.run();
+	// return error code 1 if one or more tests failed
+	return wasSuccessful ? 0 : 1;
+};
+//---------------------------------------------------------------------------
 bool BaseApplication::setup(void)
 {
     mRoot = new Ogre::Root(mPluginsCfg);
@@ -251,6 +271,9 @@ bool BaseApplication::setup(void)
 
     bool carryOn = configure();
     if (!carryOn) return false;
+
+	// Setup Testing
+	setupTesting();
 
     chooseSceneManager();
     createCamera();
@@ -271,6 +294,7 @@ bool BaseApplication::setup(void)
 
     return true;
 };
+
 //---------------------------------------------------------------------------
 bool BaseApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {

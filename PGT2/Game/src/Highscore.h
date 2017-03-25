@@ -1,11 +1,13 @@
 #pragma once
 #include <string>
 
+#include "BaseApplication.h"
+
 class Highscore
 {
 public:
 	Highscore();
 	~Highscore();
-	void addToScoreboard(std::string name, double score);
+	bool addToScoreboard(std::string name, double score);
 };
 
