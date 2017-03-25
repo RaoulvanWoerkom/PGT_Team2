@@ -10,16 +10,13 @@ namespace Testing
 		
 		TEST_METHOD(SumFALSE)
 		{
-
 			UnitTestSample test = UnitTestSample();
-
 			Microsoft::VisualStudio::CppUnitTestFramework::Assert::AreEqual(test.sum, test.testsum, 0.0, L"Incorrect sum!", LINE_INFO());
 		}
 
 		TEST_METHOD(DivideTRUE)
 		{
 			UnitTestSample test = UnitTestSample();
-
 			Microsoft::VisualStudio::CppUnitTestFramework::Assert::AreEqual(test.sum, test.testsum/test.sum, 0.0, L"Incorrect sum!", LINE_INFO());
 		}
 	};

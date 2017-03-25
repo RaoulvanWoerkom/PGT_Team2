@@ -19,22 +19,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CustomCamera.h" />
     <ClInclude Include="src\ForceGenerator.h" />
     <ClInclude Include="src\Highscore.h" />
     <ClInclude Include="src\OgreText.h" />
     <ClInclude Include="src\Helper.h" />
     <ClInclude Include="src\RigidBody.h" />
     <ClInclude Include="src\BaseApplication.h" />
-    <ClInclude Include="src\TestApplication.h" />
+    <ClInclude Include="src\Baller.h" />
     <ClInclude Include="src\UnitTestSample.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CustomCamera.cpp" />
     <ClCompile Include="src\\ForceGenerator.cpp" />
     <ClCompile Include="src\Helper.cpp" />
     <ClCompile Include="src\Highscore.cpp" />
     <ClCompile Include="src\RigidBody.cpp" />
     <ClCompile Include="src\BaseApplication.cpp" />
-    <ClCompile Include="src\TestApplication.cpp" />
+    <ClCompile Include="src\Baller.cpp" />
     <ClCompile Include="src\UnitTestSample.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

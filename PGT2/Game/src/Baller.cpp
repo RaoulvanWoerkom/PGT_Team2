@@ -1,4 +1,4 @@
-#include "TestApplication.h"
+#include "Baller.h"
 #include "OgreText.h"
 #include <sstream>
 #include <iomanip>
@@ -8,7 +8,7 @@
 #include "Helper.h"
 #include "Highscore.h"
 
-const float moveSpeed = 100;
+const float MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
 const int START_GAME_TIME = 60;
 
@@ -20,31 +20,20 @@ Ogre::Light* directionalLight;
 
 
 
-TestApplication::TestApplication(void)
+Baller::Baller(void)
 {
 	
 }
 
-TestApplication::~TestApplication(void)
+Baller::~Baller(void)
 {
 }
 
-void TestApplication::createCamera()
-{
-	
-	mCamera = mSceneMgr->createCamera("PlayerCam");
-	//mCamera->setNearClipDistance(500);
-	
-	
-	
-	/*mCameraMan->setTarget(ballNode);*/
-}
 
-
-bool TestApplication::mouseMoved(const OIS::MouseEvent &arg)
+bool Baller::mouseMoved(const OIS::MouseEvent &arg)
 {
     if (mTrayMgr->injectMouseMove(arg)) return true;
-    camNode->yaw(Ogre::Degree(-arg.state.X.rel * 0.25f));
+    camera.camNode->yaw(Ogre::Degree(-arg.state.X.rel * 0.25f));
     return true;
 
 	bool infiniteClip =
@@ -54,24 +43,23 @@ bool TestApplication::mouseMoved(const OIS::MouseEvent &arg)
 	if (infiniteClip)
 		mCamera->setFarClipDistance(0);
 	else
-		//mCamera->setFarClipDistance(932500000);
 		mCamera->setFarClipDistance(1390000);
 
 }
 
-void TestApplication::createViewports()
+
+void Baller::createCamera()
 {
-	Ogre::Viewport* vp = mWindow->addViewport(mCamera);
-
-	vp->setBackgroundColour(Ogre::ColourValue(0, 0, 0));
-
-	mCamera->setAspectRatio(
-		Ogre::Real(vp->getActualWidth()) /
-		Ogre::Real(vp->getActualHeight()));
-
+	mCamera = mSceneMgr->createCamera("PlayerCam");
+	camera = CustomCamera(mCamera, mSceneMgr, mWindow);
 }
 
-void TestApplication::init()
+void Baller::createViewports()
+{
+	camera.createViewports();
+}
+
+void Baller::init()
 {
 	isGameOver = false;
 	totalGameTime = START_GAME_TIME;
@@ -88,17 +76,7 @@ void TestApplication::init()
 	registry.add(&ballBody , &gravity);
 }
 
-void getTerrainImage(bool flipX, bool flipY, Ogre::Image& img)
-{
-	img.load("terrain.png", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-	if (flipX)
-		img.flipAroundY();
-	if (flipY)
-		img.flipAroundX();
-}
-
-void TestApplication::initGameOver()
+void Baller::initGameOver()
 {
 	remainingTime = 0;
 	isGameOver = true;
@@ -112,26 +90,27 @@ void TestApplication::initGameOver()
 	highscore->addToScoreboard("WreckingBall", 100);	
 }
 
-void TestApplication::restartGame()
+
+void Baller::restartGame()
 {
 	isGameOver = false;
 	totalGameTime = START_GAME_TIME;
 	loseText->setText("");
 	elapsedTime = 0.0;
 	timer->reset();
-	ballBody.SetPosition(Ogre::Vector3(0, 200, 0));
+	ballBody.setPosition(Ogre::Vector3(0, 200, 0));
 }
 
-void TestApplication::createScene()
+void Baller::createScene()
 {
 	init();
 	createLight();
 	createPlane();
 	createSphere();
-	setCameraTarget(ballBody.Node);
+	camera.setCameraTarget(ballBody.node);
 }
 
-void TestApplication::createLight()
+void Baller::createLight()
 {
 	mSceneMgr->setAmbientLight(Ogre::ColourValue::White);
 	mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
@@ -146,7 +125,7 @@ void TestApplication::createLight()
 	directionalLight->setDirection(Ogre::Vector3(0, -1, 1));
 }
 
-void TestApplication::createPlane()
+void Baller::createPlane()
 {
 	groundEntity = mSceneMgr->createEntity("Plane", "World.mesh");
 
@@ -161,7 +140,7 @@ void TestApplication::createPlane()
 	groundNode->attachObject(groundEntity);
 }
 
-void TestApplication::createSphere()
+void Baller::createSphere()
 {
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	ballNode->setPosition(0, 300, 0);
@@ -170,21 +149,10 @@ void TestApplication::createSphere()
 	ballNode->attachObject(sphereEntity);
 
 	ballBody = RigidBody(ballNode, sphereEntity);
+
 }
 
-void TestApplication::setCameraTarget(Ogre::SceneNode* node)
-{
-	camNode = node->createChildSceneNode();
-	camNode->setPosition(0, 0, 0);
-	camPitchNode = camNode->createChildSceneNode();
-	camPitchNode->setPosition(0, 250, 500);
-	/*mCameraMan = new OgreBites::SdkCameraMan(mCamera);*/
-	camPitchNode->attachObject(mCamera);
-	mCamera->setAutoTracking(true, node);
-}
-
-
-void TestApplication::GetMeshInformation(const Ogre::MeshPtr mesh,
+void Baller::GetMeshInformation(const Ogre::MeshPtr mesh,
 	size_t &vertex_count,
 	Ogre::Vector3* &vertices,
 	size_t &index_count,
@@ -308,13 +276,13 @@ void TestApplication::GetMeshInformation(const Ogre::MeshPtr mesh,
 	}
 }
 
-void TestApplication::showScore(double score)
+void Baller::showScore(double score)
 {
 	scoreText->setText("Score: " + static_cast<std::ostringstream*>(&(std::ostringstream() << score))->str());    // Text to be displayed
 										  // Now it is possible to use the Ogre::String as parameter too
 }
 
-void TestApplication::updateRemainingTime()
+void Baller::updateRemainingTime()
 {
 	elapsedTime = timer->getMilliseconds() / 1000.0;
 	remainingTime = totalGameTime - elapsedTime;
@@ -337,7 +305,7 @@ bool kDown = false;
 bool lDown = false;
 bool yDown = false;
 
-bool TestApplication::keyPressed(const OIS::KeyEvent& ke)
+bool Baller::keyPressed(const OIS::KeyEvent& ke)
 {
 	switch (ke.key)
 	{
@@ -362,7 +330,7 @@ bool TestApplication::keyPressed(const OIS::KeyEvent& ke)
 	return BaseApplication::keyPressed(ke);
 }
 
-bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
+bool Baller::keyReleased(const OIS::KeyEvent& ke)
 {
 	switch (ke.key)
 	{
@@ -387,7 +355,7 @@ bool TestApplication::keyReleased(const OIS::KeyEvent& ke)
 	return BaseApplication::keyReleased(ke);
 }
 
-bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
+bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 {
 	if (!isGameOver)
 	{
@@ -397,36 +365,36 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 		Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
 		if (iDown)
 		{
-			Vector3 direction = camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_Z;
+			Vector3 direction = camera.camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_Z;
 			direction.y = 0;
 			direction.normalise();
-			direction = direction * 10; // * speed
-			ballBody.AddForce(direction);
+			direction = direction * MOVE_SPEED; // * speed
+			ballBody.addForce(direction);
 
 		}
 		if (jDown)
 		{
-			Vector3 direction = camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_X;
+			Vector3 direction = camera.camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_X;
 			direction.y = 0;
 			direction.normalise();
-			direction = direction * 10; // * speed
-			ballBody.AddForce(direction);
+			direction = direction * MOVE_SPEED; // * speed
+			ballBody.addForce(direction);
 		}
 		if (kDown)
 		{
-			Vector3 direction = camNode->_getDerivedOrientation() * -Vector3::NEGATIVE_UNIT_Z;
+			Vector3 direction = camera.camNode->_getDerivedOrientation() * -Vector3::NEGATIVE_UNIT_Z;
 			direction.y = 0;
 			direction.normalise();
-			direction = direction * 10; // * speed
-			ballBody.AddForce(direction);
+			direction = direction * MOVE_SPEED; // * speed
+			ballBody.addForce(direction);
 		}
 		if (lDown)
 		{
-			Vector3 direction = camNode->_getDerivedOrientation() * -Vector3::NEGATIVE_UNIT_X;
+			Vector3 direction = camera.camNode->_getDerivedOrientation() * -Vector3::NEGATIVE_UNIT_X;
 			direction.y = 0;
 			direction.normalise();
-			direction = direction * 10; // * speed
-			ballBody.AddForce(direction);
+			direction = direction * MOVE_SPEED; // * speed
+			ballBody.addForce(direction);
 		}
 		if (yDown)
 		{
@@ -445,13 +413,13 @@ bool TestApplication::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	float duration = evt.timeSinceLastFrame;
 
 	registry.updateForces(duration);
-	ballBody.Integrate(duration);
+	ballBody.integrate(duration);
 	CheckBallCollision();
 
 	return BaseApplication::frameRenderingQueued(evt);
 }
 
-void TestApplication::CheckBallCollision()
+void Baller::CheckBallCollision()
 {
 
 	size_t vertex_count, index_count;
@@ -463,7 +431,7 @@ void TestApplication::CheckBallCollision()
 	int chosenIndex = -1;
 	Ogre::Vector3 closestHitCoordinates;
 	Ogre::Vector3 normalVec = Ogre::Vector3(-1, -1, -1);
-	Ogre::Vector3 ballPos = ballBody.Node->getPosition();
+	Ogre::Vector3 ballPos = ballBody.node->getPosition();
 
 	int max = index_count - 3;
 	for (size_t i = 0; i < max; i += 3)
@@ -493,14 +461,14 @@ void TestApplication::CheckBallCollision()
 		double diffDist = BALL_SIZE - shortestLength;
 		ballPos += normalVec * diffDist;
 		Helper::log("normal", normalVec);
-		ballBody.Node->setPosition(ballPos);
-		ballBody.SetVelocity(Ogre::Vector3(ballBody.GetVelocity().x, 0, ballBody.GetVelocity().z));//temporary fix, gotta make contactregistry
+		ballBody.node->setPosition(ballPos);
+		ballBody.setVelocity(Ogre::Vector3(ballBody.getVelocity().x, 0, ballBody.getVelocity().z));//temporary fix, gotta make contactregistry
 	}
 	delete[] vertices;
 	delete[] indices;
 }
 
-Ogre::Vector3 TestApplication::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition)
+Ogre::Vector3 Baller::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition)
 {
 	Ogre::Vector3 edge0 = point2 - point1;
 	Ogre::Vector3 edge1 = point3 - point1;
@@ -597,11 +565,11 @@ Ogre::Vector3 TestApplication::closestPointOnTriangle(Ogre::Vector3 point1, Ogre
 	return ret;
 }
 
-float TestApplication::clamp(float n, float lower, float upper) {
+float Baller::clamp(float n, float lower, float upper) {
 	return std::max(lower, std::min(n, upper));
 }
 
-Ogre::Vector3 TestApplication::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3)
+Ogre::Vector3 Baller::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3)
 {
 	long e1x = point2.x - point1.x;
 	long e1y = point2.y - point1.y;
@@ -638,7 +606,7 @@ extern "C" {
 #endif
 	{
 		// Create application object
-		TestApplication app;
+		Baller app;
 
 		try {
 			app.go();
