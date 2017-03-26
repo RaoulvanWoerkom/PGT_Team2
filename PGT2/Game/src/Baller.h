@@ -43,7 +43,7 @@ private:
 	virtual void showScore(double score);
 	virtual void updateRemainingTime();
 
-	void Baller::CheckBallCollision();
+	void CheckBallCollision(Ogre::Entity* otherEntity, Ogre::SceneNode* otherSceneNode);
 	Ogre::Vector3 Baller::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
 	float Baller::clamp(float n, float lower, float upper);
 	Ogre::Vector3 Baller::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);

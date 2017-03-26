@@ -414,18 +414,18 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
 	registry.updateForces(duration);
 	ballBody.integrate(duration);
-	CheckBallCollision();
+	CheckBallCollision(groundEntity, groundNode);
 
 	return BaseApplication::frameRenderingQueued(evt);
 }
 
-void Baller::CheckBallCollision()
+void Baller::CheckBallCollision(Ogre::Entity* otherEntity, Ogre::SceneNode* otherSceneNode)
 {
 
 	size_t vertex_count, index_count;
 	Ogre::Vector3* vertices;
 	unsigned long* indices;
-	GetMeshInformation(groundEntity->getMesh(), vertex_count, vertices, index_count, indices, groundNode->getPosition(), groundNode->getOrientation(), groundNode->getScale());
+	GetMeshInformation(otherEntity->getMesh(), vertex_count, vertices, index_count, indices, otherSceneNode->getPosition(), otherSceneNode->getOrientation(), otherSceneNode->getScale());
 
 	double shortestLength = 100000000000;
 	int chosenIndex = -1;
