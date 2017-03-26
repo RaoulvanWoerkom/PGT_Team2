@@ -36,3 +36,17 @@ void Helper::log(std::string name, Ogre::Vector3 vec)
 	sprintf(buffer, " %s:  x: %f  y: %f  z: %f\n", charAr, x, y, z);
 	OutputDebugString(buffer);
 }
+
+void Helper::log(std::string name, Ogre::Quaternion qaut)
+{
+	char charAr[1024];
+	strncpy(charAr, name.c_str(), sizeof(charAr));
+	charAr[sizeof(charAr) - 1] = 0;
+	char  buffer[sizeof(charAr) + 200];
+	float x = qaut.x;
+	float y = qaut.y;
+	float z = qaut.z;
+	float w = qaut.w;
+	sprintf(buffer, " %s:  x: %f  y: %f  z: %f, w: %f\n", charAr, x, y, z, w);
+	OutputDebugString(buffer);
+}

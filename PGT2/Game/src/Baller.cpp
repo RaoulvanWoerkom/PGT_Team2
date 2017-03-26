@@ -145,7 +145,11 @@ void Baller::createSphere()
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	ballNode->setPosition(0, 300, 0);
 	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
-	
+	MaterialPtr m_pMat = sphereEntity->getSubEntity(0)->getMaterial()->clone("carrots");
+	m_pMat->getTechnique(0)->getPass(0)->setAmbient(0, 1, 0);
+	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(3, 20, 5, 20);
+	sphereEntity->setMaterialName(m_pMat->getName());
+
 	ballNode->attachObject(sphereEntity);
 
 	ballBody = RigidBody(ballNode, sphereEntity);
@@ -368,8 +372,8 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			Vector3 direction = camera.camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_Z;
 			direction.y = 0;
 			direction.normalise();
-			direction = direction * MOVE_SPEED; // * speed
-			ballBody.addForce(direction);
+			direction = direction; // * speed
+			ballBody.addTorque(direction);
 
 		}
 		if (jDown)
@@ -460,7 +464,6 @@ void Baller::CheckBallCollision()
 	{
 		double diffDist = BALL_SIZE - shortestLength;
 		ballPos += normalVec * diffDist;
-		Helper::log("normal", normalVec);
 		ballBody.node->setPosition(ballPos);
 		ballBody.setVelocity(Ogre::Vector3(ballBody.getVelocity().x, 0, ballBody.getVelocity().z));//temporary fix, gotta make contactregistry
 	}

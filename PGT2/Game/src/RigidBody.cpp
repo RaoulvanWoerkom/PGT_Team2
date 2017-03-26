@@ -12,6 +12,12 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::velocity = Ogre::Vector3().ZERO;
 	RigidBody::acceleration = Ogre::Vector3().ZERO;
 	RigidBody::forceAccum = Ogre::Vector3().ZERO;
+	RigidBody::torqueAccum = Ogre::Vector3().ZERO;
+	RigidBody::rotation = Ogre::Vector3().ZERO;
+	RigidBody::inertiaTensor = Ogre::Matrix3(0.4f, 0, 0,
+											 0, 0.4f, 0,
+											 0 , 0, 0.4f );
+	RigidBody::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
 }
 
 RigidBody::RigidBody(void)
@@ -40,6 +46,7 @@ Ogre::Vector3 RigidBody::getPosition()
 
 void RigidBody::setOrientation(Ogre::Quaternion& orientation)
 {
+	orientation.normalise();
 	RigidBody::node->setOrientation(orientation);
 }
 
@@ -58,6 +65,25 @@ void RigidBody::addTorque(Ogre::Vector3& torque)
 	RigidBody::torqueAccum = torque;
 }
 
+void RigidBody::addForceAtBodyPoint(Ogre::Vector3 force, Ogre::Vector3 point)
+{
+	// Convert to coordinates relative to center of mass.
+	Ogre::Vector3 pt = RigidBody::node->convertLocalToWorldPosition(point);
+	RigidBody::addForceAtPoint(force, pt);
+}
+
+void RigidBody::addForceAtPoint(Ogre::Vector3 force, Ogre::Vector3 point)
+{
+	// Convert to coordinates relative to center of mass.
+	Ogre::Vector3 pt = point;
+	Ogre::Vector3 pos = RigidBody::getPosition();
+	pt -= pos;
+
+	RigidBody::forceAccum += force;
+	RigidBody::torqueAccum += Ogre::Vector3(pt.y*force.z - pt.z*force.y,
+											pt.z*force.x - pt.x*force.z,
+											pt.x*force.y - pt.y*force.x);  ;
+}
 
 void RigidBody::setIsAwake(const bool awake)
 {
@@ -73,24 +99,36 @@ void RigidBody::integrate(float delta)
 		Ogre::Vector3 LastFrameAcceleration = RigidBody::acceleration;
 		LastFrameAcceleration += (RigidBody::forceAccum * RigidBody::inverseMass);
 
+		Ogre::Vector3 AngularAcceleration = (RigidBody::inverseInertiaTensorWorld * RigidBody::torqueAccum);
+
 		//Update velocity with time and acceleration
 		RigidBody::velocity += (LastFrameAcceleration);
+		RigidBody::rotation += (AngularAcceleration);
 
 		//dampen the movement so it stops eventually !Temporary fix pls watch me
 		RigidBody::velocity *= RigidBody::dampening;
-
-		//RigidBody::Velocity *= RigidBody::Dampening;
+		//RigidBody::rotation *= RigidBody::dampening;
 
 		//Move Rigidbody with velocity and time
 		Ogre::Vector3 tempPos = RigidBody::getPosition();
 		tempPos += (RigidBody::velocity * delta);
 		RigidBody::setPosition(tempPos);
 
+		Ogre::Quaternion tempOrien = RigidBody::getOrientation();
+		tempOrien = tempOrien + Ogre::Quaternion(0,
+					RigidBody::rotation.x * delta,
+					RigidBody::rotation.y * delta,
+					RigidBody::rotation.z * delta);
 
-		//Helper::log("acceleration", Acceleration);
-		//Helper::log("forceaccum", ForceAccum);
+		RigidBody::setOrientation(tempOrien);
+
+		calculateDerivedData();
+
+
 
 		RigidBody::forceAccum = Ogre::Vector3().ZERO;
+		RigidBody::torqueAccum = Ogre::Vector3().ZERO;
+
 		//TODO Calculate total movement and check if under benchmark: IsAwake = false
 	}
 }
