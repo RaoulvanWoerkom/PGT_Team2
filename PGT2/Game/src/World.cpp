@@ -2,7 +2,7 @@
 const float MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
 
-
+const int SECTION_AMOUNT = 10;
 World::World()
 {
 	
@@ -25,9 +25,9 @@ void World::createLight(Ogre::SceneManager* mSceneMgr)
 	directionalLight->setDirection(Ogre::Vector3(0, -1, 1));
 }
 
-void World::createPlane(Ogre::SceneManager* mSceneMgr)
+void World::createTerrain(Ogre::SceneManager* mSceneMgr)
 {
-	groundEntity = mSceneMgr->createEntity("Plane", "World.mesh");
+	Ogre::Entity* groundEntity = mSceneMgr->createEntity("Plane", "World.mesh");
 
 	Ogre::MaterialPtr m_pMat = groundEntity->getSubEntity(0)->getMaterial()->clone("carrots");
 	m_pMat->getTechnique(0)->getPass(0)->setAmbient(0, 1, 0);
@@ -35,12 +35,14 @@ void World::createPlane(Ogre::SceneManager* mSceneMgr)
 	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(3, 20, 5, 20);
 	groundEntity->setMaterialName(m_pMat->getName());
 
-	groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, -210, 0));
+	Ogre::SceneNode* groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, -210, 0));
 	groundNode->scale(Ogre::Vector3(500, 850, 500));
 	groundNode->attachObject(groundEntity);
-	RigidBody* groundBody = new RigidBody(groundNode, groundEntity);
+	groundBody = new RigidBody(groundNode, groundEntity);
 	groundBody->setIsAwake(false);
 	addRigidBody(groundBody);
+
+	splitTerrainVertices();
 }
 
 
@@ -66,17 +68,102 @@ void World::addRigidBody(RigidBody* body)
 }
 
 
-void World::splitVertices()
+void World::splitTerrainVertices()
 {
-	for (unsigned short i = 0; i < bodyCount; ++i)
+	getMeshInformation(groundBody->entity->getMesh(), terrainVertexCount, terrainVertices, terrainIndexCount, terrainIndices, groundBody->getPosition(), groundBody->getOrientation(), groundBody->node->getScale());
+
+	int max = terrainIndexCount - 3;
+	float lowestX = 1000000;
+	float heightestX = -1000000;
+	float lowestZ = 1000000;
+	float heightestZ = -1000000;
+
+	for (size_t i = 0; i < max; i += 3)
 	{
-		size_t vertex_count, index_count;
-		Ogre::Vector3* vertices;
-		unsigned long* indices;
-		RigidBody* body = worldObjects.at(i);
-		getMeshInformation(body->entity->getMesh(), vertex_count, vertices, index_count, indices, body->getPosition(), body->getOrientation(), body->node->getScale());
+		long index1 = terrainIndices[i];
+		long index2 = terrainIndices[i + 1];
+		long index3 = terrainIndices[i + 2];
+		Ogre::Vector3 point1 = terrainVertices[index1];
+		Ogre::Vector3 point2 = terrainVertices[index2];
+		Ogre::Vector3 point3 = terrainVertices[index3];
+		Ogre::Vector3 middlePoint = (point1 + point2 + point3) / 3;
+		if (middlePoint.x < lowestX)
+		{
+			lowestX = middlePoint.x;
+		}
+		if (middlePoint.x > heightestX)
+		{
+			heightestX = middlePoint.x;
+		}
+		if (middlePoint.z < lowestZ)
+		{
+			lowestZ = middlePoint.z;
+		}
+		if (middlePoint.z > heightestZ)
+		{
+			heightestZ = middlePoint.z;
+		}
 
 	}
+	lowestMapPos = Ogre::Vector2(lowestX, lowestZ);
+
+	Ogre::Vector2 mapSize = Ogre::Vector2(abs(heightestX - lowestX), abs(heightestZ - lowestZ));
+	sectionSize = Ogre::Vector2(mapSize.x / SECTION_AMOUNT, mapSize.y / SECTION_AMOUNT);
+	for (int y = 0; y < SECTION_AMOUNT; y++)
+	{
+		for (int x = 0; x < SECTION_AMOUNT; x++)
+		{
+			VerticeSection newSection = VerticeSection();
+			newSection.minPoint = Ogre::Vector2(lowestX + sectionSize.x * x, lowestZ + sectionSize.y * y);
+			newSection.maxPoint = Ogre::Vector2(lowestX + sectionSize.x * (x + 1), lowestZ + sectionSize.y * (y + 1));
+			newSection.vertices = std::vector<Vertex>();
+			vertexSections[x][y] = newSection;
+			
+			Helper::log("min ", newSection.minPoint);
+			Helper::log("max ", newSection.maxPoint);
+			//vertexSections[x][y] 
+
+		}
+	}
+
+	
+
+	
+	for (int i = 0; i < max; i += 3)
+	{
+		long index1 = terrainIndices[i];
+		long index2 = terrainIndices[i + 1];
+		long index3 = terrainIndices[i + 2];
+		Ogre::Vector3 point1 = terrainVertices[index1];
+		Ogre::Vector3 point2 = terrainVertices[index2];
+		Ogre::Vector3 point3 = terrainVertices[index3];
+		Ogre::Vector3 middlePoint = (point1 + point2 + point3) / 3;
+
+		Vertex vertex = Vertex();
+		vertex.point1 = point1;
+		vertex.point2 = point2;
+		vertex.point3 = point3;
+		vertex.point3 = point3;
+		vertex.normal = normalVector(point1, point2, point3);
+		int xPos;
+		int yPos;
+		getSectionLocation(middlePoint, xPos, yPos);
+
+		vertexSections[xPos][yPos].vertices.push_back(vertex);
+
+	}
+	
+	
+
+}
+
+void World::getSectionLocation(Ogre::Vector3 pos, int& xPos, int& yPos)
+{
+	Ogre::Vector2 adjustedPoint = Ogre::Vector2(pos.x + abs(lowestMapPos.x), pos.z + abs(lowestMapPos.y));
+	xPos = floor(adjustedPoint.x / sectionSize.x);
+	yPos = floor(adjustedPoint.y / sectionSize.y);
+	if (xPos == SECTION_AMOUNT) xPos--;
+	if (yPos == SECTION_AMOUNT) yPos--;
 }
 
 void World::getMeshInformation(const Ogre::MeshPtr mesh,
@@ -205,20 +292,8 @@ void World::getMeshInformation(const Ogre::MeshPtr mesh,
 
 bool World::mouseMoved(const OIS::MouseEvent &arg)
 {
-    
     camera.camNode->yaw(Ogre::Degree(-arg.state.X.rel * 0.25f));
     return true;
-	/*
-	bool infiniteClip =
-		mRoot->getRenderSystem()->getCapabilities()->hasCapability(
-		Ogre::RSC_INFINITE_FAR_PLANE);
-
-	if (infiniteClip)
-		mCamera->setFarClipDistance(0);
-	else
-		mCamera->setFarClipDistance(1390000);
-		*/
-
 }
 
 
@@ -287,17 +362,18 @@ void World::update(const Ogre::FrameEvent& evt)
 	float duration = evt.timeSinceLastFrame;
 	registry.updateForces(duration);
 	ballBody.integrate(duration);
-	checkBallCollision(groundEntity, groundNode);
+
+
+	checkBallCollision();
 }
 
 
-void World::checkBallCollision(Ogre::Entity* otherEntity, Ogre::SceneNode* otherSceneNode)
+void World::checkBallCollision()
 {
-
-	size_t vertex_count, index_count;
-	Ogre::Vector3* vertices;
-	unsigned long* indices;
-	getMeshInformation(otherEntity->getMesh(), vertex_count, vertices, index_count, indices, otherSceneNode->getPosition(), otherSceneNode->getOrientation(), otherSceneNode->getScale());
+	int xPos;
+	int yPos;
+	getSectionLocation(ballBody.node->getPosition(), xPos, yPos);
+	std::vector<Vertex> vertexList = vertexSections[xPos][yPos].vertices;
 
 	double shortestLength = 100000000000;
 	int chosenIndex = -1;
@@ -305,17 +381,12 @@ void World::checkBallCollision(Ogre::Entity* otherEntity, Ogre::SceneNode* other
 	Ogre::Vector3 normalVec = Ogre::Vector3(-1, -1, -1);
 	Ogre::Vector3 ballPos = ballBody.node->getPosition();
 
-	int max = index_count - 3;
-	for (size_t i = 0; i < max; i += 3)
+	//int max = index_count - 3;
+	for (size_t i = 0; i < vertexList.size(); i++)
 	{
-		long index1 = indices[i];
-		long index2 = indices[i + 1];
-		long index3 = indices[i + 2];
-		Ogre::Vector3 point1 = vertices[index1];
-		Ogre::Vector3 point2 = vertices[index2];
-		Ogre::Vector3 point3 = vertices[index3];
+		Vertex currVertex = vertexList.at(i);
 		
-		Ogre::Vector3 collPoint = closestPointOnTriangle(point1, point2, point3, ballPos);
+		Ogre::Vector3 collPoint = closestPointOnTriangle(currVertex.point1, currVertex.point2, currVertex.point3, ballPos);
 		double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
 		if (dist < BALL_SIZE)
 		{
@@ -323,7 +394,7 @@ void World::checkBallCollision(Ogre::Entity* otherEntity, Ogre::SceneNode* other
 			{
 				shortestLength = dist;
 				chosenIndex = i;
-				normalVec = normalVector(point1, point2, point3);
+				normalVec = currVertex.normal;
 				closestHitCoordinates = collPoint;
 			}
 		}
@@ -332,12 +403,9 @@ void World::checkBallCollision(Ogre::Entity* otherEntity, Ogre::SceneNode* other
 	{
 		double diffDist = BALL_SIZE - shortestLength;
 		ballPos += normalVec * diffDist;
-		//Helper::log("normal", normalVec);
 		ballBody.node->setPosition(ballPos);
 		ballBody.setVelocity(Ogre::Vector3(ballBody.getVelocity().x, 0, ballBody.getVelocity().z));//temporary fix, gotta make contactregistry
 	}
-	delete[] vertices;
-	delete[] indices;
 }
 
 Ogre::Vector3 World::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition)

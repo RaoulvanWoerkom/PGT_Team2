@@ -99,11 +99,11 @@ void Baller::createScene()
 {
 	init();
 	world.createLight(mSceneMgr);
-	world.createPlane(mSceneMgr);
+	world.createTerrain(mSceneMgr);
 	world.createSphere(mSceneMgr);
 	world.setCameraFollow();
 
-	world.splitVertices();
+	//world.splitVertices();
 }
 
 

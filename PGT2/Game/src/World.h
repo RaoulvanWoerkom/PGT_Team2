@@ -6,6 +6,26 @@
 #include "ForceGenerator.h"
 #include "CustomCamera.h"
 #include "InputManager.h"
+#include "Helper.h"
+
+typedef struct
+{
+	Ogre::Vector3 point1;
+	Ogre::Vector3 point2;
+	Ogre::Vector3 point3;
+
+	Ogre::Vector3 normal;
+
+} Vertex;
+
+typedef struct
+{
+	Ogre::Vector2 minPoint;
+	Ogre::Vector2 maxPoint;
+	std::vector<Vertex> vertices;
+} VerticeSection;
+
+
 
 class World
 {
@@ -13,27 +33,30 @@ class World
 
 public:
 
-
+	
 	World();
+	
 	Ogre::Light* directionalLight;
 	CustomCamera camera;
 	RigidBody ballBody;
-	Ogre::SceneNode* groundNode;
-	Ogre::Entity* groundEntity;
+	RigidBody* groundBody;
+
 	ForceRegistry registry;
 	Gravity gravity;
+	
 
-	
-	
 
 	std::vector<RigidBody*> worldObjects;
+	Ogre::Vector2 lowestMapPos;
+	Ogre::Vector2 sectionSize;
+	VerticeSection vertexSections[10][10];
 	size_t bodyCount;
 
-	size_t vertex_count, index_count;
-	Ogre::Vector3* vertices;
-	unsigned long* indices;
+	size_t terrainVertexCount, terrainIndexCount;
+	Ogre::Vector3* terrainVertices;
+	unsigned long* terrainIndices;
 
-	void splitVertices();
+	void splitTerrainVertices();
 	void addRigidBody(RigidBody* body);
 	void getMeshInformation(const Ogre::MeshPtr mesh,
 		size_t &vertex_count,
@@ -43,7 +66,7 @@ public:
 		const Ogre::Vector3 &position,
 		const Ogre::Quaternion &orient,
 		const Ogre::Vector3 &scale);
-	virtual void createPlane(Ogre::SceneManager* mSceneMgr);
+	virtual void createTerrain(Ogre::SceneManager* mSceneMgr);
 	virtual void createSphere(Ogre::SceneManager* mSceneMgr);
 	virtual void createLight(Ogre::SceneManager* mSceneMgr);
 	bool mouseMoved(const OIS::MouseEvent &arg);
@@ -53,13 +76,17 @@ public:
 	void update(const Ogre::FrameEvent& evt);
 	void setCameraFollow();
 
+	
+
 private:
 	
-	void checkBallCollision(Ogre::Entity* otherEntity, Ogre::SceneNode* otherSceneNode);
+	void checkBallCollision();
+	void getSectionLocation(Ogre::Vector3 pos, int& xPos, int& yPos);
 	Ogre::Vector3 closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);
 	float clamp(float n, float lower, float upper);
 	Ogre::Vector3 normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
 };
+
 
 
 #endif // #ifndef __World_h_
