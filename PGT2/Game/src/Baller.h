@@ -5,6 +5,7 @@
 #include "RigidBody.h"
 #include "ForceGenerator.h"
 #include "CustomCamera.h"
+#include "Ball.h"
 
 
 class Baller : public BaseApplication 
@@ -12,7 +13,7 @@ class Baller : public BaseApplication
 public:
 	Baller();
 	virtual ~Baller();
-	RigidBody ballBody;
+	Ball ballBody;
 	
 	Ogre::Timer* timer;
 	double elapsedTime;
@@ -22,7 +23,6 @@ public:
 	ForceRegistry registry;
 	Gravity gravity;
 	CustomCamera camera;
-
 
 protected:
 	virtual void createScene();

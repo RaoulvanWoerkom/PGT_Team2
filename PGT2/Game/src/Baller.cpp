@@ -7,6 +7,7 @@
 #include "Ogre.h"
 #include "Helper.h"
 #include "Highscore.h"
+#include "Ball.h"
 
 const float MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
@@ -107,7 +108,7 @@ void Baller::createScene()
 	createLight();
 	createPlane();
 	createSphere();
-	camera.setCameraTarget(ballBody.node);
+	camera.setCameraTarget(ballBody.cameraNode);
 }
 
 void Baller::createLight()
@@ -143,6 +144,7 @@ void Baller::createPlane()
 void Baller::createSphere()
 {
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	Ogre::SceneNode* ballCamNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	ballNode->setPosition(0, 300, 0);
 	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 	MaterialPtr m_pMat = sphereEntity->getSubEntity(0)->getMaterial()->clone("carrots");
@@ -151,9 +153,9 @@ void Baller::createSphere()
 	sphereEntity->setMaterialName(m_pMat->getName());
 
 	ballNode->attachObject(sphereEntity);
+	
 
-	ballBody = RigidBody(ballNode, sphereEntity);
-
+	ballBody = Ball(ballNode, ballCamNode, sphereEntity);
 }
 
 void Baller::GetMeshInformation(const Ogre::MeshPtr mesh,
@@ -372,7 +374,6 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			Vector3 direction = camera.camNode->_getDerivedOrientation() * Vector3::NEGATIVE_UNIT_Z;
 			direction.y = 0;
 			direction.normalise();
-			direction = direction; // * speed
 			ballBody.addTorque(direction);
 
 		}

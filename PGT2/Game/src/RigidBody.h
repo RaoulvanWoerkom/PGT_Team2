@@ -42,8 +42,9 @@ public:
 	void addForceAtBodyPoint(Ogre::Vector3 force, Ogre::Vector3 point);
 	void addForceAtPoint(Ogre::Vector3 force, Ogre::Vector3 point);
 	void setIsAwake(const bool awake);
+	void _transformInertiaTensor(Ogre::Matrix3 & iitWorld, Ogre::Quaternion & q, Ogre::Matrix3 & iitBody, Ogre::Matrix4 & rotmat);
 	void calculateDerivedData();
-	void integrate(float delta);
+	virtual void integrate(float delta);
 	bool hasFiniteMass();
 	float getMass();
 

@@ -90,6 +90,83 @@ void RigidBody::setIsAwake(const bool awake)
 	RigidBody::isAwake = awake;
 }
 
+void RigidBody::_transformInertiaTensor(Ogre::Matrix3 &iitWorld,
+	 Ogre::Quaternion &q,
+	 Ogre::Matrix3 &iitBody,
+	 Ogre::Matrix4 &rotmat)
+{
+	Ogre::Real t4 = rotmat[0][0] * iitBody[0][0] +
+		rotmat[0][1] * iitBody[1][0] +
+		rotmat[0][2] * iitBody[2][0];
+	Ogre::Real t9 = rotmat[0][0] * iitBody[0][1] +
+		rotmat[0][1] * iitBody[1][1] +
+		rotmat[0][2] * iitBody[2][1];
+	Ogre::Real t14 = rotmat[0][0] * iitBody[0][2] +
+		rotmat[0][1] * iitBody[1][2] +
+		rotmat[0][2] * iitBody[2][2];
+	Ogre::Real t28 = rotmat[1][0] * iitBody[0][0] +
+		rotmat[1][1] * iitBody[1][0] +
+		rotmat[1][2] * iitBody[2][0];
+	Ogre::Real t33 = rotmat[1][0] * iitBody[0][1] +
+		rotmat[1][1] * iitBody[1][1] +
+		rotmat[1][2] * iitBody[2][1];
+	Ogre::Real t38 = rotmat[1][0] * iitBody[0][2] +
+		rotmat[1][1] * iitBody[1][2] +
+		rotmat[1][2] * iitBody[2][2];
+	Ogre::Real t52 = rotmat[2][0] * iitBody[0][0] +
+		rotmat[2][1] * iitBody[1][0] +
+		rotmat[2][2] * iitBody[2][0];
+	Ogre::Real t57 = rotmat[2][0] * iitBody[0][1] +
+		rotmat[2][1] * iitBody[1][1] +
+		rotmat[2][2] * iitBody[2][1];
+	Ogre::Real t62 = rotmat[2][0] * iitBody[0][2] +
+		rotmat[2][1] * iitBody[1][2] +
+		rotmat[2][2] * iitBody[2][2];
+
+	iitWorld[0][0] = t4*rotmat[0][0] +
+		t9*rotmat[0][1] +
+		t14*rotmat[0][2];
+	iitWorld[0][1] = t4*rotmat[1][0] +
+		t9*rotmat[1][1] +
+		t14*rotmat[1][2];
+	iitWorld[0][2] = t4*rotmat[2][0] +
+		t9*rotmat[2][1] +
+		t14*rotmat[2][2];
+	iitWorld[1][0] = t28*rotmat[0][0] +
+		t33*rotmat[0][1] +
+		t38*rotmat[0][2];
+	iitWorld[1][1] = t28*rotmat[1][0] +
+		t33*rotmat[1][1] +
+		t38*rotmat[1][2];
+	iitWorld[1][2] = t28*rotmat[2][0] +
+		t33*rotmat[2][1] +
+		t38*rotmat[2][2];
+	iitWorld[2][0] = t52*rotmat[0][0] +
+		t57*rotmat[0][1] +
+		t62*rotmat[0][2];
+	iitWorld[2][1] = t52*rotmat[1][0] +
+		t57*rotmat[1][1] +
+		t62*rotmat[1][2];
+	iitWorld[2][2] = t52*rotmat[2][0] +
+		t57*rotmat[2][1] +
+		t62*rotmat[2][2];
+}
+
+
+void RigidBody::calculateDerivedData()
+{
+	// Calculate the transform matrix for the body.
+	RigidBody::transformMatrix = RigidBody::node->_getFullTransform();
+
+	// Calculate the inertiaTensor in world space.
+	_transformInertiaTensor(RigidBody::inverseInertiaTensorWorld,
+		RigidBody::getOrientation(),
+		RigidBody::inverseInertiaTensor,
+		RigidBody::transformMatrix);
+
+}
+
+
 void RigidBody::integrate(float delta)
 {
 	if (RigidBody::isAwake)
@@ -107,24 +184,27 @@ void RigidBody::integrate(float delta)
 
 		//dampen the movement so it stops eventually !Temporary fix pls watch me
 		RigidBody::velocity *= RigidBody::dampening;
-		//RigidBody::rotation *= RigidBody::dampening;
+		RigidBody::rotation *= RigidBody::dampening;
 
 		//Move Rigidbody with velocity and time
 		Ogre::Vector3 tempPos = RigidBody::getPosition();
 		tempPos += (RigidBody::velocity * delta);
 		RigidBody::setPosition(tempPos);
 
+		Ogre::Quaternion q(0,
+			RigidBody::rotation.x * delta,
+			RigidBody::rotation.y * delta,
+			RigidBody::rotation.z * delta);
 		Ogre::Quaternion tempOrien = RigidBody::getOrientation();
-		tempOrien = tempOrien + Ogre::Quaternion(0,
-					RigidBody::rotation.x * delta,
-					RigidBody::rotation.y * delta,
-					RigidBody::rotation.z * delta);
+		q = q * tempOrien;
+		tempOrien.w += q.w * ((Ogre::Real)0.5);
+		tempOrien.x += q.x * ((Ogre::Real)0.5);
+		tempOrien.y += q.y * ((Ogre::Real)0.5);
+		tempOrien.z += q.z * ((Ogre::Real)0.5);
 
 		RigidBody::setOrientation(tempOrien);
 
 		calculateDerivedData();
-
-
 
 		RigidBody::forceAccum = Ogre::Vector3().ZERO;
 		RigidBody::torqueAccum = Ogre::Vector3().ZERO;
