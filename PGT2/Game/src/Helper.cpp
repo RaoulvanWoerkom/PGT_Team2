@@ -77,3 +77,19 @@ void Helper::log(std::string name, Ogre::Vector3 vec)
 }
 
 
+bool Helper::vectorListContainsVector2(std::vector<Ogre::Vector2> &list, Ogre::Vector2 vec)
+{
+	for (size_t i = 0; i < list.size(); i++)
+	{
+		Ogre::Vector2 currVec = list.at(i);
+		Helper::log("11 " , currVec);
+
+		if (currVec.x == vec.x, currVec.y == vec.y)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+

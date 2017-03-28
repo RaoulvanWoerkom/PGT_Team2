@@ -108,7 +108,7 @@ void World::splitTerrainVertices()
 	lowestMapPos = Ogre::Vector2(lowestX, lowestZ);
 
 	Ogre::Vector2 mapSize = Ogre::Vector2(abs(heightestX - lowestX), abs(heightestZ - lowestZ));
-	sectionSize = Ogre::Vector2(mapSize.x / SECTION_AMOUNT, mapSize.y / SECTION_AMOUNT);
+	sectionSize = Ogre::Vector2(mapSize.x / SECTION_AMOUNT+1, mapSize.y / SECTION_AMOUNT+1);
 	for (int y = 0; y < SECTION_AMOUNT; y++)
 	{
 		for (int x = 0; x < SECTION_AMOUNT; x++)
@@ -138,18 +138,14 @@ void World::splitTerrainVertices()
 		Ogre::Vector3 point2 = terrainVertices[index2];
 		Ogre::Vector3 point3 = terrainVertices[index3];
 		Ogre::Vector3 middlePoint = (point1 + point2 + point3) / 3;
-
 		Vertex vertex = Vertex();
 		vertex.point1 = point1;
 		vertex.point2 = point2;
 		vertex.point3 = point3;
 		vertex.point3 = point3;
 		vertex.normal = normalVector(point1, point2, point3);
-		int xPos;
-		int yPos;
-		getSectionLocation(middlePoint, xPos, yPos);
-
-		vertexSections[xPos][yPos].vertices.push_back(vertex);
+		Ogre::Vector2 gridPos = getSections(middlePoint, Ogre::Vector2(0,0)).at(0);
+		vertexSections[(int)gridPos.x][(int)gridPos.y].vertices.push_back(vertex);
 
 	}
 	
@@ -157,13 +153,36 @@ void World::splitTerrainVertices()
 
 }
 
-void World::getSectionLocation(Ogre::Vector3 pos, int& xPos, int& yPos)
+std::vector<Ogre::Vector2> World::getSections(Ogre::Vector3 pos, Ogre::Vector2 size)
 {
-	Ogre::Vector2 adjustedPoint = Ogre::Vector2(pos.x + abs(lowestMapPos.x), pos.z + abs(lowestMapPos.y));
-	xPos = floor(adjustedPoint.x / sectionSize.x);
-	yPos = floor(adjustedPoint.y / sectionSize.y);
-	if (xPos == SECTION_AMOUNT) xPos--;
-	if (yPos == SECTION_AMOUNT) yPos--;
+	std::vector<Ogre::Vector2> ret = std::vector<Ogre::Vector2>();
+	Ogre::Vector2 point1 = Ogre::Vector2(pos.x - size.x / 2, pos.z - size.y / 2);
+	Ogre::Vector2 point2 = Ogre::Vector2(pos.x - size.x / 2, pos.z + size.y / 2);
+	Ogre::Vector2 point3 = Ogre::Vector2(pos.x + size.x / 2, pos.z - size.y / 2);
+	Ogre::Vector2 point4 = Ogre::Vector2(pos.x + size.x / 2, pos.z + size.y / 2);
+	Ogre::Vector2 adjustedPoint1 = Ogre::Vector2(point1.x + abs(lowestMapPos.x), point1.y + abs(lowestMapPos.y));
+	Ogre::Vector2 adjustedPoint2 = Ogre::Vector2(point2.x + abs(lowestMapPos.x), point2.y + abs(lowestMapPos.y));
+	Ogre::Vector2 adjustedPoint3 = Ogre::Vector2(point3.x + abs(lowestMapPos.x), point3.y + abs(lowestMapPos.y));
+	Ogre::Vector2 adjustedPoint4 = Ogre::Vector2(point4.x + abs(lowestMapPos.x), point4.y + abs(lowestMapPos.y));
+	Ogre::Vector2 section1 = Ogre::Vector2(floor(adjustedPoint1.x / sectionSize.x), floor(adjustedPoint1.y / sectionSize.y));
+	Ogre::Vector2 section2 = Ogre::Vector2(floor(adjustedPoint2.x / sectionSize.x), floor(adjustedPoint2.y / sectionSize.y));
+	Ogre::Vector2 section3 = Ogre::Vector2(floor(adjustedPoint3.x / sectionSize.x), floor(adjustedPoint3.y / sectionSize.y));
+	Ogre::Vector2 section4 = Ogre::Vector2(floor(adjustedPoint4.x / sectionSize.x), floor(adjustedPoint4.y / sectionSize.y));
+
+
+
+
+
+	if (!Helper::vectorListContainsVector2(ret, section1))
+		ret.push_back(section1);
+	if (!Helper::vectorListContainsVector2(ret, section2))
+		ret.push_back(section2);
+	if (!Helper::vectorListContainsVector2(ret, section3))
+		ret.push_back(section3);
+	if (!Helper::vectorListContainsVector2(ret, section4))
+		ret.push_back(section4);
+
+	return ret;
 }
 
 void World::getMeshInformation(const Ogre::MeshPtr mesh,
@@ -370,35 +389,38 @@ void World::update(const Ogre::FrameEvent& evt)
 
 void World::checkBallCollision()
 {
-	int xPos;
-	int yPos;
-	getSectionLocation(ballBody.node->getPosition(), xPos, yPos);
-	std::vector<Vertex> vertexList = vertexSections[xPos][yPos].vertices;
+	std::vector<Ogre::Vector2> sectionList = getSections(ballBody.node->getPosition(), Ogre::Vector2(BALL_SIZE, BALL_SIZE));
+	
 
 	double shortestLength = 100000000000;
 	int chosenIndex = -1;
 	Ogre::Vector3 closestHitCoordinates;
 	Ogre::Vector3 normalVec = Ogre::Vector3(-1, -1, -1);
 	Ogre::Vector3 ballPos = ballBody.node->getPosition();
-
-	//int max = index_count - 3;
-	for (size_t i = 0; i < vertexList.size(); i++)
+	for (size_t i = 0; i < sectionList.size(); i++)
 	{
-		Vertex currVertex = vertexList.at(i);
-		
-		Ogre::Vector3 collPoint = closestPointOnTriangle(currVertex.point1, currVertex.point2, currVertex.point3, ballPos);
-		double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
-		if (dist < BALL_SIZE)
+		Ogre::Vector2 currSection = sectionList.at(i);
+		std::vector<Vertex> vertexList = vertexSections[(int)currSection.x][(int)currSection.y].vertices;
+		for (size_t j = 0; j < vertexList.size(); j++)
 		{
-			if (dist < shortestLength)
+			Vertex currVertex = vertexList.at(j);
+
+			Ogre::Vector3 collPoint = closestPointOnTriangle(currVertex.point1, currVertex.point2, currVertex.point3, ballPos);
+			double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
+			if (dist < BALL_SIZE)
 			{
-				shortestLength = dist;
-				chosenIndex = i;
-				normalVec = currVertex.normal;
-				closestHitCoordinates = collPoint;
+				if (dist < shortestLength)
+				{
+					shortestLength = dist;
+					chosenIndex = j;
+					normalVec = currVertex.normal;
+					closestHitCoordinates = collPoint;
+				}
 			}
 		}
 	}
+
+	
 	if (chosenIndex >= 0)
 	{
 		double diffDist = BALL_SIZE - shortestLength;

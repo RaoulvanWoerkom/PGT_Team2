@@ -81,7 +81,7 @@ public:
 private:
 	
 	void checkBallCollision();
-	void getSectionLocation(Ogre::Vector3 pos, int& xPos, int& yPos);
+	std::vector<Ogre::Vector2> getSections(Ogre::Vector3 pos, Ogre::Vector2 size);
 	Ogre::Vector3 closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);
 	float clamp(float n, float lower, float upper);
 	Ogre::Vector3 normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
