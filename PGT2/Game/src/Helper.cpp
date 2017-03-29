@@ -82,9 +82,7 @@ bool Helper::vectorListContainsVector2(std::vector<Ogre::Vector2> &list, Ogre::V
 	for (size_t i = 0; i < list.size(); i++)
 	{
 		Ogre::Vector2 currVec = list.at(i);
-		Helper::log("11 " , currVec);
-
-		if (currVec.x == vec.x, currVec.y == vec.y)
+		if (currVec.x == vec.x && currVec.y == vec.y)
 		{
 			return true;
 		}

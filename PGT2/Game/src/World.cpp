@@ -170,9 +170,6 @@ std::vector<Ogre::Vector2> World::getSections(Ogre::Vector3 pos, Ogre::Vector2 s
 	Ogre::Vector2 section4 = Ogre::Vector2(floor(adjustedPoint4.x / sectionSize.x), floor(adjustedPoint4.y / sectionSize.y));
 
 
-
-
-
 	if (!Helper::vectorListContainsVector2(ret, section1))
 		ret.push_back(section1);
 	if (!Helper::vectorListContainsVector2(ret, section2))
@@ -389,6 +386,7 @@ void World::update(const Ogre::FrameEvent& evt)
 
 void World::checkBallCollision()
 {
+	
 	std::vector<Ogre::Vector2> sectionList = getSections(ballBody.node->getPosition(), Ogre::Vector2(BALL_SIZE, BALL_SIZE));
 	
 
