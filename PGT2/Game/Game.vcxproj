@@ -36,7 +36,7 @@
   <ItemGroup>
     <ClCompile Include="src\Ball.cpp" />
     <ClCompile Include="src\CustomCamera.cpp" />
-    <ClCompile Include="src\CustomTimercpp.cpp" />
+    <ClCompile Include="src\CustomTimer.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\World.cpp" />
     <ClCompile Include="src\\ForceGenerator.cpp" />
