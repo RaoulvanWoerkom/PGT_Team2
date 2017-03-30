@@ -104,7 +104,7 @@
     <ClCompile Include="src\Ball.cpp">
       <Filter>Source Files\PhysicsEngine</Filter>
     </ClCompile>
-    <ClCompile Include="src\CustomTimercpp.cpp">
+    <ClCompile Include="src\CustomTimer.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
