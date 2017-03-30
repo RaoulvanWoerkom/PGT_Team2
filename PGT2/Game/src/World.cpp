@@ -49,12 +49,13 @@ void World::createTerrain(Ogre::SceneManager* mSceneMgr)
 void World::createSphere(Ogre::SceneManager* mSceneMgr)
 {
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	ballNode->setPosition(0, 300, 0);
 	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 
 	ballNode->attachObject(sphereEntity);
 
-	ballBody = RigidBody(ballNode, sphereEntity);
+	ballBody = Ball(ballNode, ballCameraNode, sphereEntity );
 
 
 
@@ -360,7 +361,7 @@ void World::createCamera(Ogre::Camera* mCamera, Ogre::SceneManager* mSceneMgr, O
 
 void World::setCameraFollow()
 {
-	camera.setCameraTarget(ballBody.node);
+	camera.setCameraTarget(ballBody.cameraNode);
 }
 
 

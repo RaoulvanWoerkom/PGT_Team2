@@ -15,5 +15,6 @@ public:
 	static void log(std::string name, Ogre::Vector2 vec);
 	static void log(std::string name, Ogre::Vector3 vec);
 	static bool vectorListContainsVector2(std::vector<Ogre::Vector2> &list, Ogre::Vector2 vec);
+	static void log(std::string name, Ogre::Quaternion qaut);
 };
 #endif

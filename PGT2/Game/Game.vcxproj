@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Ball.h" />
     <ClInclude Include="src\CustomCamera.h" />
     <ClInclude Include="src\ForceGenerator.h" />
     <ClInclude Include="src\Highscore.h" />
@@ -32,6 +33,7 @@
     <ClInclude Include="src\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Ball.cpp" />
     <ClCompile Include="src\CustomCamera.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\World.cpp" />

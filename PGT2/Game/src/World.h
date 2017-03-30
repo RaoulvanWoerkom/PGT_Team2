@@ -7,6 +7,7 @@
 #include "CustomCamera.h"
 #include "InputManager.h"
 #include "Helper.h"
+#include "Ball.h"
 
 typedef struct
 {
@@ -38,7 +39,7 @@ public:
 	
 	Ogre::Light* directionalLight;
 	CustomCamera camera;
-	RigidBody ballBody;
+	Ball ballBody;
 	RigidBody* groundBody;
 
 	ForceRegistry registry;
