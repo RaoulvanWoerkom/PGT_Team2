@@ -66,6 +66,9 @@
     <ClInclude Include="src\Ball.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\CustomTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BaseApplication.cpp">
@@ -100,6 +103,9 @@
     </ClCompile>
     <ClCompile Include="src\Ball.cpp">
       <Filter>Source Files\PhysicsEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CustomTimercpp.cpp">
+      <Filter>Source Files\UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

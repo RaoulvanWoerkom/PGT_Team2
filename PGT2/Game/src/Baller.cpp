@@ -1,21 +1,9 @@
 #include "Baller.h"
-#include "OgreText.h"
-#include <sstream>
-#include <iomanip>
-#include "BaseApplication.h"
-#include <cmath>
-#include "Ogre.h"
-#include "Helper.h"
-#include "Highscore.h"
-
-
-
 
 OgreText *scoreText;
 OgreText *timerText;
 OgreText *loseText;
 const int START_GAME_TIME = 60;
-
 
 Baller::Baller(void)
 {
@@ -24,8 +12,8 @@ Baller::Baller(void)
 
 Baller::~Baller(void)
 {
-}
 
+}
 
 bool Baller::mouseMoved(const OIS::MouseEvent &arg)
 {
@@ -33,7 +21,6 @@ bool Baller::mouseMoved(const OIS::MouseEvent &arg)
 	world.mouseMoved(arg);
 	return true;
 }
-
 
 void Baller::createCamera()
 {
@@ -51,26 +38,19 @@ void Baller::init()
 {
 	inputManager = InputManager();
 	isGameOver = false;
-	totalGameTime = START_GAME_TIME;
-	elapsedTime = 0.0;
-	timer = new Ogre::Timer();
-	timer->reset();
+	timer = CustomTimer();
+	timer.init();
 	scoreText = new OgreText();
 	scoreText->setPos(0.1f, 0.1f);        // Text position, using relative co-ordinates
 	scoreText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
 	timerText = new OgreText();
 	timerText->setPos(0.4f, 0.1f);        // Text position, using relative co-ordinates
 	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
-	
-	
-
-
-	
 }
 
 void Baller::initGameOver()
 {
-	remainingTime = 0;
+	timer.stopAtZero();
 	isGameOver = true;
 
 	loseText = new OgreText();
@@ -80,19 +60,14 @@ void Baller::initGameOver()
 
 	Highscore * highscore = new Highscore();
 	highscore->addToScoreboard("WreckingBall", 100);	
-	
 }
-
 
 void Baller::restartGame()
 {
 	isGameOver = false;
-	totalGameTime = START_GAME_TIME;
+	timer.reset();
 	loseText->setText("");
-	elapsedTime = 0.0;
-	timer->reset();
 	world.restartWorld();
-	
 }
 
 void Baller::createScene()
@@ -106,10 +81,6 @@ void Baller::createScene()
 	//world.splitVertices();
 }
 
-
-
-
-
 void Baller::showScore(double score)
 {
 	scoreText->setText("Score: " + static_cast<std::ostringstream*>(&(std::ostringstream() << score))->str());    // Text to be displayed
@@ -118,21 +89,18 @@ void Baller::showScore(double score)
 
 void Baller::updateRemainingTime()
 {
-	elapsedTime = timer->getMilliseconds() / 1000.0;
-	remainingTime = totalGameTime - elapsedTime;
+	timer.update();
 
-	if (remainingTime <= 0)
+	if (timer.isTimeUp())
 	{
 		initGameOver();
 	}
 
 	stringstream stream;
-	stream << std::fixed << std::setprecision(1) << remainingTime; 	// Set number of digits after the decimal point to 1, for the timer display.
+	stream << std::fixed << std::setprecision(1) << timer.getRemainingTime(); 	// Set number of digits after the decimal point to 1, for the timer display.
 	std::string timeRepresentation = stream.str();
 	timerText->setText("Time: " + timeRepresentation);
 }
-
-
 
 bool Baller::keyPressed(const OIS::KeyEvent& ke)
 {
@@ -168,9 +136,6 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	}
 	return BaseApplication::frameRenderingQueued(evt);
 }
-
-
-
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN
