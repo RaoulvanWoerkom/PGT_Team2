@@ -14,6 +14,7 @@ protected:
 	Ogre::Vector3 velocity;
 	Ogre::Vector3 rotation;
 	Ogre::Vector3 acceleration;
+	Ogre::Vector3 lastFrameAcceleration;
 
 	Ogre::Matrix4 transformMatrix;
 	Ogre::Matrix3 inverseInertiaTensorWorld;
@@ -33,7 +34,12 @@ public:
 	void setPosition(Ogre::Vector3 _position);
 	void setVelocity(Ogre::Vector3 _velocity);
 	Ogre::Vector3 getVelocity();
+	Ogre::Vector3 getRotation();
 	Ogre::Vector3 getPosition();
+	Ogre::Vector3 getLastFrameAcceleration();
+	Ogre::Matrix3 getInverseInertiaTensorWorld();
+	void addVelocity(Ogre::Vector3 vel);
+	void addRotation(Ogre::Vector3 vel);
 	void setOrientation(Ogre::Quaternion& _orientation);
 	void setInertiaTensor(const Ogre::Matrix3& _inertiaTensor);
 	Ogre::Quaternion getOrientation();
@@ -43,10 +49,12 @@ public:
 	void addForceAtPoint(Ogre::Vector3 force, Ogre::Vector3 point);
 	void setIsAwake(const bool awake);
 	void _transformInertiaTensor(Ogre::Matrix3 & iitWorld, Ogre::Quaternion & q, Ogre::Matrix3 & iitBody, Ogre::Matrix4 & rotmat);
+	void clearAccumulators();
 	void calculateDerivedData();
 	virtual void integrate(float delta);
 	bool hasFiniteMass();
 	float getMass();
+	float getInverseMass();
 
 };
 

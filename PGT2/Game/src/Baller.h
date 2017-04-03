@@ -1,4 +1,4 @@
-#ifndef __Baller_h_
+	#ifndef __Baller_h_
 #define __Baller_h_
 
 #include "BaseApplication.h"
@@ -15,6 +15,7 @@
 #include "Ogre.h"
 #include "Helper.h"
 #include "Highscore.h"
+#include "Contact.h"
 
 class Baller : public BaseApplication 
 {
@@ -26,7 +27,7 @@ public:
 	World world;
 	CustomTimer timer;
 	bool isGameOver;
-	
+
 protected:
 	virtual void createScene();
 	virtual void init();

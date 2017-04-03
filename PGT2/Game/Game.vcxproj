@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Ball.h" />
+    <ClInclude Include="src\Contact.h" />
     <ClInclude Include="src\CustomCamera.h" />
     <ClInclude Include="src\CustomTimer.h" />
     <ClInclude Include="src\ForceGenerator.h" />
@@ -35,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ball.cpp" />
+    <ClCompile Include="src\Contact.cpp" />
     <ClCompile Include="src\CustomCamera.cpp" />
     <ClCompile Include="src\CustomTimer.cpp" />
     <ClCompile Include="src\InputManager.cpp" />

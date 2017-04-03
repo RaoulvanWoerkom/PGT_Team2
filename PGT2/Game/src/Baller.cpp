@@ -5,9 +5,8 @@ OgreText *timerText;
 OgreText *loseText;
 const int START_GAME_TIME = 60;
 
-Baller::Baller(void)
+Baller::Baller() 
 {
-	
 }
 
 Baller::~Baller(void)

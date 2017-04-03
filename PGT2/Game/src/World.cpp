@@ -1,14 +1,24 @@
 #include "World.h"
 const float MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
-
 const int SECTION_AMOUNT = 20;
-World::World()
-{
 
+World::World() : 
+firstBody(NULL),
+firstContactGen(NULL),
+resolver(0)
+{
+	calculateIterations = false;
 	worldObjects = std::vector<RigidBody*>();
 	bodyCount = 0;
+	cData.contactArray = contacts;
 }
+
+World::~World()
+{
+}
+
+
 
 void World::createLight(Ogre::SceneManager* mSceneMgr)
 {
@@ -60,6 +70,20 @@ void World::createSphere(Ogre::SceneManager* mSceneMgr)
 
 
 	registry.add(&ballBody, &gravity);
+}
+
+void World::startFrame()
+{
+	BodyRegistration *reg = firstBody;
+	while (reg)
+	{
+		// Remove all forces from the accumulator
+		reg->body->clearAccumulators();
+		reg->body->calculateDerivedData();
+
+		// Get the next registration
+		reg = reg->next;
+	}
 }
 
 void World::addRigidBody(RigidBody* body)
@@ -375,6 +399,52 @@ void World::restartWorld()
 	ballBody.setPosition(Ogre::Vector3(0, 200, 0));
 }
 
+unsigned World::generateContacts()
+{
+	unsigned limit = maxContacts;
+	Contact *nextContact = contacts;
+
+	ContactGenRegistration * reg = firstContactGen;
+	while (reg)
+	{
+		unsigned used = reg->gen->addContact(nextContact, limit);
+		limit -= used;
+		nextContact += used;
+
+		// We've run out of contacts to fill. This means we're missing
+		// contacts.
+		if (limit <= 0) break;
+
+		reg = reg->next;
+	}
+
+	// Return the number of contacts used.
+	return maxContacts - limit;
+}
+
+void World::runPhysics(Ogre::Real duration)
+{
+	// First apply the force generators
+	//registry.updateForces(duration);
+
+	// Then integrate the objects
+	BodyRegistration *reg = firstBody;
+	while (reg)
+	{
+		// Remove all forces from the accumulator
+		reg->body->integrate(duration);
+
+		// Get the next registration
+		reg = reg->next;
+	}
+
+	// Generate contacts
+	unsigned usedContacts = generateContacts();
+
+	// And process them
+	if (calculateIterations) resolver.setIterations(usedContacts * 4);
+	resolver.resolveContacts(contacts, usedContacts, duration);
+}
 
 
 void World::update(const Ogre::FrameEvent& evt)
@@ -419,6 +489,19 @@ void World::update(const Ogre::FrameEvent& evt)
 
 
 	checkBallCollision();
+
+	// Update the objects
+	runPhysics(duration);
+
+	// Perform the contact generation
+	generateContacts();
+
+	// Resolve detected contacts
+	resolver.resolveContacts(
+		cData.contactArray,
+		cData.contactCount,
+		duration
+	);
 }
 
 
