@@ -10,14 +10,14 @@ namespace UnitTest2
 	{
 	public:
 		
-		TEST_METHOD(TestSum)
+		TEST_METHOD(TestSumFail)
 		{
 			auto test = UnitTestSample();			
 
 			Assert::AreEqual(test.sum, test.testsum, 0.0, L"Incorrect sum!", LINE_INFO());
 		}
 
-		TEST_METHOD(TestMath)
+		TEST_METHOD(TestMathPass)
 		{
 			auto test = UnitTestSample();
 
@@ -26,4 +26,4 @@ namespace UnitTest2
 	};
 
 
-}
+}	
