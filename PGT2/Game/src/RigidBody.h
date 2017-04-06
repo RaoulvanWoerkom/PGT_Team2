@@ -43,12 +43,12 @@ public:
 	void setOrientation(Ogre::Quaternion& _orientation);
 	void setInertiaTensor(const Ogre::Matrix3& _inertiaTensor);
 	Ogre::Quaternion getOrientation();
-	void addForce(Ogre::Vector3& _force);
-	void addTorque(Ogre::Vector3& _torque);
+	void addForce(Ogre::Vector3 _force);
+	void addTorque(Ogre::Vector3 _torque);
 	void addForceAtBodyPoint(Ogre::Vector3 force, Ogre::Vector3 point);
 	void addForceAtPoint(Ogre::Vector3 force, Ogre::Vector3 point);
 	void setIsAwake(const bool awake);
-	void _transformInertiaTensor(Ogre::Matrix3 & iitWorld, Ogre::Quaternion & q, Ogre::Matrix3 & iitBody, Ogre::Matrix4 & rotmat);
+	void _transformInertiaTensor(Ogre::Matrix3 & iitWorld, Ogre::Quaternion q, Ogre::Matrix3 & iitBody, Ogre::Matrix4 & rotmat);
 	void clearAccumulators();
 	void calculateDerivedData();
 	virtual void integrate(float delta);

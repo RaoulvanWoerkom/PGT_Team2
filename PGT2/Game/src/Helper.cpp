@@ -1,7 +1,6 @@
 
 
 #include "Helper.h"
-#include <windows.h>
 #include <stdio.h>
 
 void Helper::log(std::string name, int number)
@@ -12,7 +11,6 @@ void Helper::log(std::string name, int number)
 	char  buffer[sizeof(charAr) + 200];
 
 	sprintf(buffer, "%s: %d\n", charAr, number);
-	OutputDebugString(buffer);
 }
 
 void Helper::log(std::string name, float fl)
@@ -23,7 +21,6 @@ void Helper::log(std::string name, float fl)
 	char  buffer[sizeof(charAr) + 200];
 
 	sprintf(buffer, " %s: %f\n", charAr, fl);
-	OutputDebugString(buffer);
 }
 
 //werkt neit
@@ -36,7 +33,6 @@ void Helper::log(std::string name, size_t size)
 	char  buffer[sizeof(charAr) + 200];
 
 	sprintf(buffer, " %s: %f\n", charAr, number);
-	OutputDebugString(buffer);
 }
 
 //werkt niet meer???
@@ -48,7 +44,6 @@ void Helper::log(std::string name, long l)
 	char  buffer[sizeof(charAr) + 200];
 
 	sprintf(buffer, " %s: %f\n", charAr, l);
-	OutputDebugString(buffer);
 }
 
 void Helper::log(std::string name, Ogre::Vector2 vec)
@@ -60,7 +55,6 @@ void Helper::log(std::string name, Ogre::Vector2 vec)
 	float x = vec.x;
 	float y = vec.y;
 	sprintf(buffer, " %s:  x: %f  y: %f\n", charAr, x, y);
-	OutputDebugString(buffer);
 }
 
 void Helper::log(std::string name, Ogre::Vector3 vec)
@@ -73,7 +67,6 @@ void Helper::log(std::string name, Ogre::Vector3 vec)
 	float y = vec.y;
 	float z = vec.z;
 	sprintf(buffer, " %s:  x: %f  y: %f  z: %f\n", charAr, x, y, z);
-	OutputDebugString(buffer);
 }
 
 void Helper::log(std::string name, Ogre::Quaternion qaut)
@@ -87,7 +80,6 @@ void Helper::log(std::string name, Ogre::Quaternion qaut)
 	float z = qaut.z;
 	float w = qaut.w;
 	sprintf(buffer, " %s:  x: %f  y: %f  z: %f, w: %f\n", charAr, x, y, z, w);
-	OutputDebugString(buffer);
 }
 
 bool Helper::vectorListContainsVector2(std::vector<Ogre::Vector2> &list, Ogre::Vector2 vec)

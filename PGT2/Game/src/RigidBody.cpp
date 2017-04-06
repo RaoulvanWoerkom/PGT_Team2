@@ -81,12 +81,12 @@ Ogre::Quaternion RigidBody::getOrientation()
 	return RigidBody::node->getOrientation();
 }
 
-void RigidBody::addForce(Ogre::Vector3& force)
+void RigidBody::addForce(Ogre::Vector3 force)
 {
 	RigidBody::forceAccum += force;
 }
 
-void RigidBody::addTorque(Ogre::Vector3& torque)
+void RigidBody::addTorque(Ogre::Vector3 torque)
 {
 	RigidBody::torqueAccum = torque;
 }
@@ -118,7 +118,7 @@ void RigidBody::setIsAwake(const bool awake)
 
 
 void RigidBody::_transformInertiaTensor(Ogre::Matrix3 &iitWorld,
-	 Ogre::Quaternion &q,
+	 Ogre::Quaternion q,
 	 Ogre::Matrix3 &iitBody,
 	 Ogre::Matrix4 &rotmat)
 {
