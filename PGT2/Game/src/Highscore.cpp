@@ -10,7 +10,7 @@ namespace highscores {
 		std::string timestamp;
 		double score;		
 	};
-}
+}	
 
 // Copyright http://stackoverflow.com/questions/997946/how-to-get-current-time-and-date-in-c
 
@@ -19,10 +19,10 @@ const std::string currentDateTime() {
 	time_t     now = time(0);
 	struct tm  tstruct;
 	char       buf[80];
-	tstruct = *localtime(&now);
+	//tstruct = *localtime(&now);
 	// Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
 	// for more information about date/time format
-	strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+	//strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
 
 	return buf;
 }
