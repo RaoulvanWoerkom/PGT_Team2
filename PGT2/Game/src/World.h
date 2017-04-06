@@ -95,7 +95,7 @@ public:
 	std::vector<RigidBody*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
-	VerticeSection vertexSections[20][20];
+	VerticeSection vertexSections[50][50];
 	size_t bodyCount;
 
 	size_t terrainVertexCount, terrainIndexCount;
@@ -138,7 +138,7 @@ public:
 private:
 	
 	void checkBallCollision();
-	std::vector<Ogre::Vector2> getSections(Ogre::Vector3 pos, Ogre::Vector2 size);
+	std::vector<Ogre::Vector2> getSections(Ogre::Vector3 pos, bool surround = false);
 	std::vector<Ogre::Vector2> getSections(std::vector<Ogre::Vector3> positions);
 	Ogre::Vector3 closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);
 	float clamp(float n, float lower, float upper);
