@@ -1,91 +1,235 @@
 #include "RigidBody.h"
-
-RigidBody::RigidBody(Ogre::SceneNode* node, Ogre::Entity* entity)
+#include "Helper.h"
+#include <cmath>
+RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 {
-	RigidBody::Node = node;
-	RigidBody::Entity = entity;
-	RigidBody::InverseMass = 1;
-	RigidBody::Dampening = 0.9;
-	RigidBody::IsAwake = true;
-	RigidBody::CanSleep = false;
-	RigidBody::Velocity = Ogre::Vector3().ZERO;
-	RigidBody::Acceleration = Ogre::Vector3().ZERO;
-	RigidBody::ForceAccum = Ogre::Vector3().ZERO;
+	RigidBody::node = _node;
+	RigidBody::entity = _entity;
+	RigidBody::inverseMass = 1;
+	RigidBody::dampening = 0.995;
+	RigidBody::isAwake = true;
+	RigidBody::canSleep = false;
+	RigidBody::velocity = Ogre::Vector3().ZERO;
+	RigidBody::acceleration = Ogre::Vector3().ZERO;
+	RigidBody::forceAccum = Ogre::Vector3().ZERO;
+	RigidBody::torqueAccum = Ogre::Vector3().ZERO;
+	RigidBody::rotation = Ogre::Vector3().ZERO;
+	RigidBody::inertiaTensor = Ogre::Matrix3(0.4f, 0, 0,
+											 0, 0.4f, 0,
+											 0 , 0, 0.4f );
+	RigidBody::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
 }
 
 RigidBody::RigidBody(void)
 {
 }
 
-void RigidBody::SetPosition(Ogre::Vector3& position)
+void RigidBody::setPosition(Ogre::Vector3 position)
 {
-	RigidBody::Node->setPosition(position);
+	RigidBody::node->setPosition(position);
 }
 
-Ogre::Vector3 RigidBody::GetPosition()
+void RigidBody::setVelocity(Ogre::Vector3 velocity)
 {
-	return RigidBody::Node->getPosition();
+	RigidBody::velocity = velocity;
 }
 
-void RigidBody::SetOrientation(Ogre::Quaternion& orientation)
+Ogre::Vector3 RigidBody::getVelocity()
 {
-	RigidBody::Node->setOrientation(orientation);
+	return RigidBody::velocity;
 }
 
-Ogre::Quaternion RigidBody::GetOrientation()
+Ogre::Vector3 RigidBody::getPosition()
 {
-	return RigidBody::Node->getOrientation();
+	return RigidBody::node->getPosition();
 }
 
-void RigidBody::AddForce(Ogre::Vector3& force)
+void RigidBody::setOrientation(Ogre::Quaternion& orientation)
 {
-	RigidBody::ForceAccum += force;
+	orientation.normalise();
+	RigidBody::node->setOrientation(orientation);
 }
 
-void RigidBody::AddTorque(Ogre::Vector3& torque)
+Ogre::Quaternion RigidBody::getOrientation()
 {
-	RigidBody::TorqueAccum = torque;
+	return RigidBody::node->getOrientation();
+}
+
+void RigidBody::addForce(Ogre::Vector3 force)
+{
+	RigidBody::forceAccum += force;
+}
+
+void RigidBody::addTorque(Ogre::Vector3 torque)
+{
+	RigidBody::torqueAccum = torque;
+}
+
+void RigidBody::addForceAtBodyPoint(Ogre::Vector3 force, Ogre::Vector3 point)
+{
+	// Convert to coordinates relative to center of mass.
+	Ogre::Vector3 pt = RigidBody::node->convertLocalToWorldPosition(point);
+	RigidBody::addForceAtPoint(force, pt);
+}
+
+void RigidBody::addForceAtPoint(Ogre::Vector3 force, Ogre::Vector3 point)
+{
+	// Convert to coordinates relative to center of mass.
+	Ogre::Vector3 pt = point;
+	Ogre::Vector3 pos = RigidBody::getPosition();
+	pt -= pos;
+
+	RigidBody::forceAccum += force;
+	RigidBody::torqueAccum += Ogre::Vector3(pt.y*force.z - pt.z*force.y,
+											pt.z*force.x - pt.x*force.z,
+											pt.x*force.y - pt.y*force.x);  ;
+}
+
+void RigidBody::setIsAwake(const bool awake)
+{
+	RigidBody::isAwake = awake;
+}
+
+void RigidBody::_transformInertiaTensor(Ogre::Matrix3 &iitWorld,
+	 Ogre::Quaternion q,
+	 Ogre::Matrix3 &iitBody,
+	 Ogre::Matrix4 &rotmat)
+{
+	Ogre::Real t4 = rotmat[0][0] * iitBody[0][0] +
+		rotmat[0][1] * iitBody[1][0] +
+		rotmat[0][2] * iitBody[2][0];
+	Ogre::Real t9 = rotmat[0][0] * iitBody[0][1] +
+		rotmat[0][1] * iitBody[1][1] +
+		rotmat[0][2] * iitBody[2][1];
+	Ogre::Real t14 = rotmat[0][0] * iitBody[0][2] +
+		rotmat[0][1] * iitBody[1][2] +
+		rotmat[0][2] * iitBody[2][2];
+	Ogre::Real t28 = rotmat[1][0] * iitBody[0][0] +
+		rotmat[1][1] * iitBody[1][0] +
+		rotmat[1][2] * iitBody[2][0];
+	Ogre::Real t33 = rotmat[1][0] * iitBody[0][1] +
+		rotmat[1][1] * iitBody[1][1] +
+		rotmat[1][2] * iitBody[2][1];
+	Ogre::Real t38 = rotmat[1][0] * iitBody[0][2] +
+		rotmat[1][1] * iitBody[1][2] +
+		rotmat[1][2] * iitBody[2][2];
+	Ogre::Real t52 = rotmat[2][0] * iitBody[0][0] +
+		rotmat[2][1] * iitBody[1][0] +
+		rotmat[2][2] * iitBody[2][0];
+	Ogre::Real t57 = rotmat[2][0] * iitBody[0][1] +
+		rotmat[2][1] * iitBody[1][1] +
+		rotmat[2][2] * iitBody[2][1];
+	Ogre::Real t62 = rotmat[2][0] * iitBody[0][2] +
+		rotmat[2][1] * iitBody[1][2] +
+		rotmat[2][2] * iitBody[2][2];
+
+	iitWorld[0][0] = t4*rotmat[0][0] +
+		t9*rotmat[0][1] +
+		t14*rotmat[0][2];
+	iitWorld[0][1] = t4*rotmat[1][0] +
+		t9*rotmat[1][1] +
+		t14*rotmat[1][2];
+	iitWorld[0][2] = t4*rotmat[2][0] +
+		t9*rotmat[2][1] +
+		t14*rotmat[2][2];
+	iitWorld[1][0] = t28*rotmat[0][0] +
+		t33*rotmat[0][1] +
+		t38*rotmat[0][2];
+	iitWorld[1][1] = t28*rotmat[1][0] +
+		t33*rotmat[1][1] +
+		t38*rotmat[1][2];
+	iitWorld[1][2] = t28*rotmat[2][0] +
+		t33*rotmat[2][1] +
+		t38*rotmat[2][2];
+	iitWorld[2][0] = t52*rotmat[0][0] +
+		t57*rotmat[0][1] +
+		t62*rotmat[0][2];
+	iitWorld[2][1] = t52*rotmat[1][0] +
+		t57*rotmat[1][1] +
+		t62*rotmat[1][2];
+	iitWorld[2][2] = t52*rotmat[2][0] +
+		t57*rotmat[2][1] +
+		t62*rotmat[2][2];
 }
 
 
-void RigidBody::SetIsAwake(const bool awake)
+void RigidBody::calculateDerivedData()
 {
-	RigidBody::IsAwake = awake;
+	// Calculate the transform matrix for the body.
+	RigidBody::transformMatrix = RigidBody::node->_getFullTransform();
+
+	// Calculate the inertiaTensor in world space.
+	_transformInertiaTensor(RigidBody::inverseInertiaTensorWorld,
+		RigidBody::getOrientation(),
+		RigidBody::inverseInertiaTensor,
+		RigidBody::transformMatrix);
+
 }
 
-void RigidBody::Integrate(float delta)
+
+void RigidBody::integrate(float delta)
 {
-	if (RigidBody::IsAwake)
+	if (RigidBody::isAwake)
 	{
 		//calculate acceleration with mass and force
 		//TODO calculate angular acceleration with Tensor and Torque
-		RigidBody::Acceleration += (RigidBody::ForceAccum * RigidBody::InverseMass);
+		Ogre::Vector3 LastFrameAcceleration = RigidBody::acceleration;
+		LastFrameAcceleration += (RigidBody::forceAccum * RigidBody::inverseMass);
+
+		Ogre::Vector3 AngularAcceleration = (RigidBody::inverseInertiaTensorWorld * RigidBody::torqueAccum);
 
 		//Update velocity with time and acceleration
-		RigidBody::Velocity += (RigidBody::Acceleration * delta);
+		RigidBody::velocity += (LastFrameAcceleration);
+		RigidBody::rotation += (AngularAcceleration);
 
-		//dampen the movement so it stops eventually
-		RigidBody::Velocity *= Ogre::Math().Pow(RigidBody::Dampening, delta);
+		//dampen the movement so it stops eventually !Temporary fix pls watch me
+		RigidBody::velocity *= RigidBody::dampening;
+		RigidBody::rotation *= RigidBody::dampening;
 
 		//Move Rigidbody with velocity and time
-		Ogre::Vector3 tempPos = RigidBody::GetPosition();
-		tempPos += (RigidBody::Velocity * delta);
-		RigidBody::SetPosition(tempPos);
+		Ogre::Vector3 tempPos = RigidBody::getPosition();
+		tempPos += (RigidBody::velocity * delta);
+		RigidBody::setPosition(tempPos);
+
+		Ogre::Quaternion q(0,
+			RigidBody::rotation.x * delta,
+			RigidBody::rotation.y * delta,
+			RigidBody::rotation.z * delta);
+		Ogre::Quaternion tempOrien = RigidBody::getOrientation();
+		q = q * tempOrien;
+		tempOrien.w += q.w * ((Ogre::Real)0.5);
+		tempOrien.x += q.x * ((Ogre::Real)0.5);
+		tempOrien.y += q.y * ((Ogre::Real)0.5);
+		tempOrien.z += q.z * ((Ogre::Real)0.5);
+
+		RigidBody::setOrientation(tempOrien);
+
+		calculateDerivedData();
+
+		RigidBody::forceAccum = Ogre::Vector3().ZERO;
+		RigidBody::torqueAccum = Ogre::Vector3().ZERO;
 
 		//TODO Calculate total movement and check if under benchmark: IsAwake = false
 	}
 }
 
-void RigidBody::calculateDerivedData()
+bool RigidBody::hasFiniteMass()
 {
-	//RigidBody::TransformMatrix.makeTransform(RigidBody::GetPosition(), RigidBody::Node->getScale(), RigidBody::GetOrientation().normalise);
-
-	
+	if (RigidBody::inverseMass == 0)
+	{
+		return false;
+	}
+	return true;
 }
 
-void RigidBody::SetInertiaTensor(const Ogre::Matrix3& inertiaTensor)
+float RigidBody::getMass()
 {
-	RigidBody::InverseInertiaTensor = inertiaTensor.Inverse();
+	return 1 / RigidBody::inverseMass;
+}
+
+void RigidBody::setInertiaTensor(const Ogre::Matrix3& inertiaTensor)
+{
+	RigidBody::inverseInertiaTensor = inertiaTensor.Inverse();
 
 }
 

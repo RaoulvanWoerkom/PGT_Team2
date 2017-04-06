@@ -7,38 +7,46 @@
 class RigidBody 
 {
 protected:
-	Ogre::SceneNode* Node; //contains Position & Orientation
-	Ogre::Entity* Entity;
+	Ogre::Real inverseMass;
+	float dampening;
+	Ogre::Vector3 forceAccum;
+	Ogre::Vector3 torqueAccum;
+	Ogre::Vector3 velocity;
+	Ogre::Vector3 rotation;
+	Ogre::Vector3 acceleration;
 
-	Ogre::Real InverseMass;
-	float Dampening;
-	Ogre::Vector3 ForceAccum;
-	Ogre::Vector3 TorqueAccum;
-	Ogre::Vector3 Velocity;
-	Ogre::Vector3 Rotation;
-	Ogre::Vector3 Acceleration;
-
-	Ogre::Matrix4 TransformMatrix;
-	Ogre::Matrix3 InverseInertiaTensor;
-	Ogre::Matrix3 InertiaTensor;
+	Ogre::Matrix4 transformMatrix;
+	Ogre::Matrix3 inverseInertiaTensorWorld;
+	Ogre::Matrix3 inverseInertiaTensor;
+	Ogre::Matrix3 inertiaTensor;
 
 
-	bool IsAwake;
-	bool CanSleep;
+	bool isAwake;
+	bool canSleep;
 
 public:
-	RigidBody(Ogre::SceneNode *node, Ogre::Entity *entity);
+	Ogre::SceneNode* node; //contains Position & Orientation
+	Ogre::Entity* entity;
+
+	RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity);
 	RigidBody(void);
-	void SetPosition(Ogre::Vector3 &position);
-	Ogre::Vector3 GetPosition();
-	void SetOrientation(Ogre::Quaternion &orientation);
-	void SetInertiaTensor(const Ogre::Matrix3 &inertiaTensor);
-	Ogre::Quaternion GetOrientation();
-	void AddForce(Ogre::Vector3 &force);
-	void AddTorque(Ogre::Vector3 &torque);
-	void SetIsAwake(const bool awake);
-	void Integrate(float delta);
+	void setPosition(Ogre::Vector3 _position);
+	void setVelocity(Ogre::Vector3 _velocity);
+	Ogre::Vector3 getVelocity();
+	Ogre::Vector3 getPosition();
+	void setOrientation(Ogre::Quaternion& _orientation);
+	void setInertiaTensor(const Ogre::Matrix3& _inertiaTensor);
+	Ogre::Quaternion getOrientation();
+	void addForce(Ogre::Vector3 _force);
+	void addTorque(Ogre::Vector3 _torque);
+	void addForceAtBodyPoint(Ogre::Vector3 force, Ogre::Vector3 point);
+	void addForceAtPoint(Ogre::Vector3 force, Ogre::Vector3 point);
+	void setIsAwake(const bool awake);
+	void _transformInertiaTensor(Ogre::Matrix3 & iitWorld, Ogre::Quaternion q, Ogre::Matrix3 & iitBody, Ogre::Matrix4 & rotmat);
 	void calculateDerivedData();
+	virtual void integrate(float delta);
+	bool hasFiniteMass();
+	float getMass();
 
 };
 
