@@ -245,7 +245,7 @@ void BaseApplication::go(void)
 //---------------------------------------------------------------------------
 bool BaseApplication::setup(void)
 {
-    mRoot = new Ogre::Root(mPluginsCfg);
+		    mRoot = new Ogre::Root(mPluginsCfg);
 
     setupResources();
 
