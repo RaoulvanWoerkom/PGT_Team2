@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../Game/src/UnitTestSample.h"
+#include "../Game/src/World.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -22,6 +23,11 @@ namespace UnitTest2
 			auto test = UnitTestSample();
 
 			Assert::AreEqual(test.testsum/test.sum, test.sum, 0.0, L"Incorrect sum!", LINE_INFO());
+		}
+
+		TEST_METHOD(Ogre)
+		{
+			auto test = World();
 		}
 	};
 
