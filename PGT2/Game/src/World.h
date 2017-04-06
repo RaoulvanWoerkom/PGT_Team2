@@ -119,7 +119,7 @@ public:
 	void createCamera(Ogre::Camera* mCamera, Ogre::SceneManager* mSceneMgr, Ogre::RenderWindow* mWindow);
 	void createViewports();
 	void restartWorld();
-	void update(const Ogre::FrameEvent& evt);
+	void update(const Ogre::FrameEvent evt);
 	void setCameraFollow();
 
 	ContactGenRegistration *firstContactGen;

@@ -466,7 +466,7 @@ void World::runPhysics(Ogre::Real duration)
 }
 
 
-void World::update(const Ogre::FrameEvent& evt)
+void World::update(const Ogre::FrameEvent evt)
 {
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
 	if (InputManager::iDown)
