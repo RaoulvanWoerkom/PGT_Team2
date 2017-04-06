@@ -14,6 +14,7 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::forceAccum = Ogre::Vector3().ZERO;
 	RigidBody::torqueAccum = Ogre::Vector3().ZERO;
 	RigidBody::rotation = Ogre::Vector3().ZERO;
+	RigidBody::lastFrameAcceleration = Ogre::Vector3().ZERO;
 	RigidBody::inertiaTensor = Ogre::Matrix3(0.4f, 0, 0,
 											 0, 0.4f, 0,
 											 0 , 0, 0.4f );
@@ -39,9 +40,34 @@ Ogre::Vector3 RigidBody::getVelocity()
 	return RigidBody::velocity;
 }
 
+Ogre::Vector3 RigidBody::getRotation()
+{
+	return RigidBody::rotation;
+}
+
 Ogre::Vector3 RigidBody::getPosition()
 {
 	return RigidBody::node->getPosition();
+}
+
+Ogre::Vector3 RigidBody::getLastFrameAcceleration()
+{
+	return RigidBody::lastFrameAcceleration;
+}
+
+Ogre::Matrix3 RigidBody::getInverseInertiaTensorWorld()
+{
+	return RigidBody::inverseInertiaTensorWorld;
+}
+
+void RigidBody::addVelocity(Ogre::Vector3 vel)
+{
+	RigidBody::velocity += vel;
+}
+
+void RigidBody::addRotation(Ogre::Vector3 rot)
+{
+	RigidBody::rotation += rot;
 }
 
 void RigidBody::setOrientation(Ogre::Quaternion& orientation)
@@ -89,6 +115,7 @@ void RigidBody::setIsAwake(const bool awake)
 {
 	RigidBody::isAwake = awake;
 }
+
 
 void RigidBody::_transformInertiaTensor(Ogre::Matrix3 &iitWorld,
 	 Ogre::Quaternion &q,
@@ -152,6 +179,11 @@ void RigidBody::_transformInertiaTensor(Ogre::Matrix3 &iitWorld,
 		t62*rotmat[2][2];
 }
 
+void RigidBody::clearAccumulators()
+{
+	RigidBody::forceAccum = Ogre::Vector3::ZERO;
+	RigidBody::torqueAccum = Ogre::Vector3::ZERO;
+}
 
 void RigidBody::calculateDerivedData()
 {
@@ -173,13 +205,13 @@ void RigidBody::integrate(float delta)
 	{
 		//calculate acceleration with mass and force
 		//TODO calculate angular acceleration with Tensor and Torque
-		Ogre::Vector3 LastFrameAcceleration = RigidBody::acceleration;
-		LastFrameAcceleration += (RigidBody::forceAccum * RigidBody::inverseMass);
+		RigidBody::lastFrameAcceleration = RigidBody::acceleration;
+		RigidBody::lastFrameAcceleration += (RigidBody::forceAccum * RigidBody::inverseMass);
 
 		Ogre::Vector3 AngularAcceleration = (RigidBody::inverseInertiaTensorWorld * RigidBody::torqueAccum);
 
 		//Update velocity with time and acceleration
-		RigidBody::velocity += (LastFrameAcceleration);
+		RigidBody::velocity += (RigidBody::lastFrameAcceleration);
 		RigidBody::rotation += (AngularAcceleration);
 
 		//dampen the movement so it stops eventually !Temporary fix pls watch me
@@ -206,8 +238,7 @@ void RigidBody::integrate(float delta)
 
 		calculateDerivedData();
 
-		RigidBody::forceAccum = Ogre::Vector3().ZERO;
-		RigidBody::torqueAccum = Ogre::Vector3().ZERO;
+		clearAccumulators();
 
 		//TODO Calculate total movement and check if under benchmark: IsAwake = false
 	}
@@ -225,6 +256,11 @@ bool RigidBody::hasFiniteMass()
 float RigidBody::getMass()
 {
 	return 1 / RigidBody::inverseMass;
+}
+
+float RigidBody::getInverseMass()
+{
+	return RigidBody::inverseMass;
 }
 
 void RigidBody::setInertiaTensor(const Ogre::Matrix3& inertiaTensor)

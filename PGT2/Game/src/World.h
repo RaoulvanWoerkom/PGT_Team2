@@ -8,6 +8,7 @@
 #include "InputManager.h"
 #include "Helper.h"
 #include "Ball.h"
+#include "Contact.h"
 
 typedef struct
 {
@@ -26,7 +27,48 @@ typedef struct
 	std::vector<Vertex> vertices;
 } VerticeSection;
 
+struct BodyRegistration
+{
+	RigidBody* body;
+	BodyRegistration* next;
+};
 
+struct ContactGenRegistration
+{
+	ContactGenerator* gen;
+	ContactGenRegistration* next;
+};
+
+struct CollisionData
+{
+	Contact *contactArray;
+	Contact *contacts;
+	int contactsLeft;
+	unsigned contactCount;
+	Ogre::Real friction;
+	Ogre::Real restitution;
+	Ogre::Real tolerance;
+
+	bool hasMoreContacts()
+	{
+		return contactsLeft > 0;
+	}
+
+	void reset(unsigned maxContacts)
+	{
+		contactsLeft = maxContacts;
+		contactCount = 0;
+		contacts = contactArray;
+	}
+
+	void addContacts(unsigned count)
+	{
+		contactsLeft -= count;
+		contactCount += count;
+
+		contacts += count;
+	}
+};
 
 class World
 {
@@ -35,7 +77,9 @@ class World
 public:
 
 	
-	World();
+	World(unsigned maxContacts, unsigned iterations = 0);
+	World(void);
+	~World();
 	
 	Ogre::Light* directionalLight;
 	CustomCamera camera;
@@ -44,6 +88,7 @@ public:
 
 	ForceRegistry registry;
 	Gravity gravity;
+	
 	
 
 
@@ -77,7 +122,18 @@ public:
 	void update(const Ogre::FrameEvent& evt);
 	void setCameraFollow();
 
-	
+	ContactGenRegistration *firstContactGen;
+	BodyRegistration *firstBody;
+	ContactResolver resolver;
+	bool calculateIterations;
+	const static unsigned maxContacts = 256;
+	Contact contacts[maxContacts];
+	CollisionData cData;
+	unsigned generateContacts();
+	void startFrame();
+	void runPhysics(Ogre::Real duration);
+
+
 
 private:
 	
