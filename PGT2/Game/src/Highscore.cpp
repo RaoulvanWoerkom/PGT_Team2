@@ -36,10 +36,10 @@ Highscore::~Highscore()
 }
 
 // https://cboard.cprogramming.com/c-programming/135750-scoreboard-saved-txt-file.html
+// https://stackoverflow.com/questions/15388041/how-to-write-stdstring-to-file
 void Highscore::addToScoreboard(std::string name, double score)
 {	
-	std::ofstream myfile;
-	myfile.open("scoreboard.txt", ios::out);
+	std::ofstream file("scoreboard.txt");
 
 	highscores::highscore highscore;
 
@@ -47,8 +47,7 @@ void Highscore::addToScoreboard(std::string name, double score)
 	highscore.score = score;
 	highscore.timestamp = currentDateTime();
 
-	myfile << printf("Name: %s \nPoints: %d\n\n\n", highscore.name, highscore.score);
-	
-	//myfile << flush;
-	myfile.close();
+	file << ("Name: %s \nPoints: %d\n\n\n", highscore.name, highscore.score);
+
+	file.close();
 };
