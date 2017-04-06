@@ -1,6 +1,4 @@
-#include "UnitTestSample.h"
-
-
+#include "../src/UnitTestSample.h"
 
 UnitTestSample::UnitTestSample()
 {
