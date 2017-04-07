@@ -126,8 +126,8 @@ public:
 	BodyRegistration *firstBody;
 	ContactResolver resolver;
 	bool calculateIterations;
-	const static unsigned maxContacts = 256;
-	Contact contacts[maxContacts];
+	unsigned maxContacts;
+	Contact* contacts;
 	CollisionData cData;
 	unsigned generateContacts();
 	void startFrame();

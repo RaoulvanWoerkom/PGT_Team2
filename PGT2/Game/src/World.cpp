@@ -2,15 +2,18 @@
 const float MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
 const int SECTION_AMOUNT = 50;
+const int MAX_CONTACTS = 256;
 
 World::World() : 
 firstBody(NULL),
 firstContactGen(NULL),
 resolver(0)
 {
-	calculateIterations = false;
+	calculateIterations = true;
 	worldObjects = std::vector<RigidBody*>();
 	bodyCount = 0;
+	maxContacts = MAX_CONTACTS;
+	contacts = new Contact[maxContacts];
 	cData.contactArray = contacts;
 }
 
