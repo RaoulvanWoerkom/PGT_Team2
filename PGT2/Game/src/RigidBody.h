@@ -8,7 +8,7 @@ class RigidBody
 {
 protected:
 	Ogre::Real inverseMass;
-	float dampening;
+	Ogre::Real dampening;
 	Ogre::Vector3 forceAccum;
 	Ogre::Vector3 torqueAccum;
 	Ogre::Vector3 velocity;
@@ -51,10 +51,10 @@ public:
 	void _transformInertiaTensor(Ogre::Matrix3 & iitWorld, Ogre::Quaternion q, Ogre::Matrix3 & iitBody, Ogre::Matrix4 & rotmat);
 	void clearAccumulators();
 	void calculateDerivedData();
-	virtual void integrate(float delta);
+	virtual void integrate(Ogre::Real delta);
 	bool hasFiniteMass();
-	float getMass();
-	float getInverseMass();
+	Ogre::Real getMass();
+	Ogre::Real getInverseMass();
 
 };
 

@@ -1,5 +1,5 @@
 #include "World.h"
-const float MOVE_SPEED = 10;
+const Ogre::Real MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
 const int SECTION_AMOUNT = 50;
 const int MAX_CONTACTS = 256;
@@ -101,10 +101,10 @@ void World::splitTerrainVertices()
 	getMeshInformation(groundBody->entity->getMesh(), terrainVertexCount, terrainVertices, terrainIndexCount, terrainIndices, groundBody->getPosition(), groundBody->getOrientation(), groundBody->node->getScale());
 
 	int max = terrainIndexCount - 3;
-	float lowestX = 1000000;
-	float heightestX = -1000000;
-	float lowestZ = 1000000;
-	float heightestZ = -1000000;
+	Ogre::Real lowestX = 1000000;
+	Ogre::Real heightestX = -1000000;
+	Ogre::Real lowestZ = 1000000;
+	Ogre::Real heightestZ = -1000000;
 
 	for (size_t i = 0; i < max; i += 3)
 	{
@@ -337,10 +337,10 @@ void World::getMeshInformation(const Ogre::MeshPtr mesh,
 				static_cast<unsigned char*>(vbuf->lock(Ogre::HardwareBuffer::HBL_READ_ONLY));
 
 			// There is _no_ baseVertexPointerToElement() which takes an Ogre::Real or a double
-			//  as second argument. So make it float, to avoid trouble when Ogre::Real will
+			//  as second argument. So make it Ogre::Real, to avoid trouble when Ogre::Real will
 			//  be comiled/typedefed as double:
 			//      Ogre::Real* pReal;
-			float* pReal;
+			Ogre::Real* pReal;
 
 			for (size_t j = 0; j < vertex_data->vertexCount; ++j, vertex += vbuf->getVertexSize())
 			{
@@ -447,7 +447,7 @@ unsigned World::generateContacts()
 void World::runPhysics(Ogre::Real duration)
 {
 	// First apply the force generators
-	//registry.updateForces(duration);
+	registry.updateForces(duration);
 
 	// Then integrate the objects
 	BodyRegistration *reg = firstBody;
@@ -505,7 +505,8 @@ void World::update(const Ogre::FrameEvent evt)
 		direction = direction * MOVE_SPEED; // * speed
 		ballBody.addForce(direction);
 	}
-	float duration = evt.timeSinceLastFrame;
+
+	Ogre::Real duration = evt.timeSinceLastFrame;
 	registry.updateForces(duration);
 	ballBody.integrate(duration);
 
@@ -575,15 +576,15 @@ Ogre::Vector3 World::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 
 	Ogre::Vector3 edge1 = point3 - point1;
 	Ogre::Vector3 v0 = point1 - sourcePosition;
 
-	float a = edge0.dotProduct(edge0);
-	float b = edge0.dotProduct(edge1);
-	float c = edge1.dotProduct(edge1);
-	float d = edge0.dotProduct(v0);
-	float e = edge1.dotProduct(v0);
+	Ogre::Real a = edge0.dotProduct(edge0);
+	Ogre::Real b = edge0.dotProduct(edge1);
+	Ogre::Real c = edge1.dotProduct(edge1);
+	Ogre::Real d = edge0.dotProduct(v0);
+	Ogre::Real e = edge1.dotProduct(v0);
 
-	float det = a*c - b*b;
-	float s = b*e - c*d;
-	float t = b*d - a*e;
+	Ogre::Real det = a*c - b*b;
+	Ogre::Real s = b*e - c*d;
+	Ogre::Real t = b*d - a*e;
 
 	if (s + t < det)
 	{
@@ -615,7 +616,7 @@ Ogre::Vector3 World::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 
 		}
 		else
 		{
-			float invDet = 1.f / det;
+			Ogre::Real invDet = 1.f / det;
 			s *= invDet;
 			t *= invDet;
 		}
@@ -624,12 +625,12 @@ Ogre::Vector3 World::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 
 	{
 		if (s < 0.f)
 		{
-			float tmp0 = b + d;
-			float tmp1 = c + e;
+			Ogre::Real tmp0 = b + d;
+			Ogre::Real tmp1 = c + e;
 			if (tmp1 > tmp0)
 			{
-				float numer = tmp1 - tmp0;
-				float denom = a - 2 * b + c;
+				Ogre::Real numer = tmp1 - tmp0;
+				Ogre::Real denom = a - 2 * b + c;
 				s = clamp(numer / denom, 0.f, 1.f);
 				t = 1 - s;
 			}
@@ -643,8 +644,8 @@ Ogre::Vector3 World::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 
 		{
 			if (a + d > b + e)
 			{
-				float numer = c + e - b - d;
-				float denom = a - 2 * b + c;
+				Ogre::Real numer = c + e - b - d;
+				Ogre::Real denom = a - 2 * b + c;
 				s = clamp(numer / denom, 0.f, 1.f);
 				t = 1 - s;
 			}
@@ -656,8 +657,8 @@ Ogre::Vector3 World::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 
 		}
 		else
 		{
-			float numer = c + e - b - d;
-			float denom = a - 2 * b + c;
+			Ogre::Real numer = c + e - b - d;
+			Ogre::Real denom = a - 2 * b + c;
 			s = clamp(numer / denom, 0.f, 1.f);
 			t = 1.f - s;
 		}
@@ -666,7 +667,7 @@ Ogre::Vector3 World::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 
 	return ret;
 }
 
-float World::clamp(float n, float lower, float upper) {
+Ogre::Real World::clamp(Ogre::Real n, Ogre::Real lower, Ogre::Real upper) {
 	return std::max(lower, std::min(n, upper));
 }
 

@@ -13,7 +13,7 @@ public:
 	Ball(Ogre::SceneNode* _node, Ogre::SceneNode* _camNode, Ogre::Entity* _entity);
 	Ball(void);
 
-	void integrate(float delta);
+	void integrate(Ogre::Real delta);
 
 
 	

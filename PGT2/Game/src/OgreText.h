@@ -63,11 +63,11 @@ public:
 		textArea->setFontName("SdkTrays/Value");
 		textArea->setCharHeight(0.03f);
 	}
-	void setPos(float x, float y)
+	void setPos(Ogre::Real x, Ogre::Real y)
 	{
 		textArea->setPosition(x, y);
 	}
-	void setCol(float R, float G, float B, float I)
+	void setCol(Ogre::Real R, Ogre::Real G, Ogre::Real B, Ogre::Real I)
 	{
 		textArea->setColour(Ogre::ColourValue(R, G, B, I));
 	}

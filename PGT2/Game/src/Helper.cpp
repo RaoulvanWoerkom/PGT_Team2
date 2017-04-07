@@ -13,7 +13,7 @@ void Helper::log(std::string name, int number)
 	sprintf(buffer, "%s: %d\n", charAr, number);
 }
 
-void Helper::log(std::string name, float fl)
+void Helper::log(std::string name, Ogre::Real fl)
 {
 	char charAr[1024];
 	strncpy(charAr, name.c_str(), sizeof(charAr));
@@ -52,8 +52,8 @@ void Helper::log(std::string name, Ogre::Vector2 vec)
 	strncpy(charAr, name.c_str(), sizeof(charAr));
 	charAr[sizeof(charAr) - 1] = 0;
 	char  buffer[sizeof(charAr) + 200];
-	float x = vec.x;
-	float y = vec.y;
+	Ogre::Real x = vec.x;
+	Ogre::Real y = vec.y;
 	sprintf(buffer, " %s:  x: %f  y: %f\n", charAr, x, y);
 }
 
@@ -63,9 +63,9 @@ void Helper::log(std::string name, Ogre::Vector3 vec)
 	strncpy(charAr, name.c_str(), sizeof(charAr));
 	charAr[sizeof(charAr) - 1] = 0;
 	char  buffer[sizeof(charAr) + 200];
-	float x = vec.x;
-	float y = vec.y;
-	float z = vec.z;
+	Ogre::Real x = vec.x;
+	Ogre::Real y = vec.y;
+	Ogre::Real z = vec.z;
 	sprintf(buffer, " %s:  x: %f  y: %f  z: %f\n", charAr, x, y, z);
 }
 
@@ -75,10 +75,10 @@ void Helper::log(std::string name, Ogre::Quaternion qaut)
 	strncpy(charAr, name.c_str(), sizeof(charAr));
 	charAr[sizeof(charAr) - 1] = 0;
 	char  buffer[sizeof(charAr) + 200];
-	float x = qaut.x;
-	float y = qaut.y;
-	float z = qaut.z;
-	float w = qaut.w;
+	Ogre::Real x = qaut.x;
+	Ogre::Real y = qaut.y;
+	Ogre::Real z = qaut.z;
+	Ogre::Real w = qaut.w;
 	sprintf(buffer, " %s:  x: %f  y: %f  z: %f, w: %f\n", charAr, x, y, z, w);
 }
 

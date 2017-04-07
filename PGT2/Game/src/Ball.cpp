@@ -30,7 +30,7 @@ Ball::Ball(void)
 {
 }
 
-void Ball::integrate(float delta)
+void Ball::integrate(Ogre::Real delta)
 {
 	RigidBody::integrate(delta);
 

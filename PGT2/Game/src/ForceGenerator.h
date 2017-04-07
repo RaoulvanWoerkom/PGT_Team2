@@ -11,7 +11,7 @@ public:
 	* Overload this in implementations of the interface to calculate
 	* and update the force applied to the given rigid body.
 	*/
-	virtual void updateForce(RigidBody *body, float duration) = 0;
+	virtual void updateForce(RigidBody *body, Ogre::Real duration) = 0;
 };
 
 /**
@@ -29,7 +29,7 @@ public:
 	Gravity();
 
 	/** Applies the gravitational force to the given rigid body. */
-	virtual void updateForce(RigidBody *body, float duration);
+	virtual void updateForce(RigidBody *body, Ogre::Real duration);
 };
 
 
@@ -52,6 +52,6 @@ public:
 	void add(RigidBody* body, ForceGenerator *fg);
 	void remove(RigidBody* body, ForceGenerator *fg);
 	void clear();
-	void updateForces(float duration);
+	void updateForces(Ogre::Real duration);
 };
 #endif // #ifndef __ForceGenerator_h_

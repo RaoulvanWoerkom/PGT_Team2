@@ -199,7 +199,7 @@ void RigidBody::calculateDerivedData()
 }
 
 
-void RigidBody::integrate(float delta)
+void RigidBody::integrate(Ogre::Real delta)
 {
 	if (RigidBody::isAwake)
 	{
@@ -253,12 +253,12 @@ bool RigidBody::hasFiniteMass()
 	return true;
 }
 
-float RigidBody::getMass()
+Ogre::Real RigidBody::getMass()
 {
 	return 1 / RigidBody::inverseMass;
 }
 
-float RigidBody::getInverseMass()
+Ogre::Real RigidBody::getInverseMass()
 {
 	return RigidBody::inverseMass;
 }

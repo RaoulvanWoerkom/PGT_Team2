@@ -76,8 +76,6 @@ class World
 
 public:
 
-	
-	World(unsigned maxContacts, unsigned iterations = 0);
 	World(void);
 	~World();
 	
@@ -141,7 +139,7 @@ private:
 	std::vector<Ogre::Vector2> getSections(Ogre::Vector3 pos, bool surround = false);
 	std::vector<Ogre::Vector2> getSections(std::vector<Ogre::Vector3> positions);
 	Ogre::Vector3 closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);
-	float clamp(float n, float lower, float upper);
+	Ogre::Real clamp(Ogre::Real n, Ogre::Real lower, Ogre::Real upper);
 	int clamp(int n, int lower, int upper);
 	Ogre::Vector3 normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
 };

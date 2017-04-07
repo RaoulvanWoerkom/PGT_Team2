@@ -16,7 +16,7 @@ void ForceRegistry::clear()
 {
 }
 
-void ForceRegistry::updateForces(float duration)
+void ForceRegistry::updateForces(Ogre::Real duration)
 {
 	Registry::iterator i = registrations.begin();
 	for (; i != registrations.end(); i++)
@@ -31,7 +31,7 @@ Gravity::Gravity()
 	Gravity::gravity = Ogre::Vector3(0, -9.81, 0);
 }
 
-void Gravity::updateForce(RigidBody * body, float duration)
+void Gravity::updateForce(RigidBody * body, Ogre::Real duration)
 {
 	if (!body->hasFiniteMass()) return;
 
