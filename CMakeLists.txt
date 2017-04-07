@@ -31,6 +31,7 @@ set(HDRS
 	./PGT2/Game/src/OgreText.h
 	./PGT2/Game/src/RigidBody.h
 	./PGT2/Game/src/UnitTestSample.h
+	./PGT2/Game/src/Contact.h
 	./PGT2/Game/src/World.h
 )
  
@@ -46,6 +47,7 @@ set(SRCS
 	./PGT2/Game/src/InputManager.cpp
 	./PGT2/Game/src/RigidBody.cpp
 	./PGT2/Game/src/UnitTestSample.cpp
+	./PGT2/Game/src/Contact.cpp
 	./PGT2/Game/src/World.cpp
 )
  
