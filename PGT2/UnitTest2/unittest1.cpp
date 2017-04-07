@@ -27,7 +27,7 @@ namespace UnitTest2
 
 		TEST_METHOD(Ogre)
 		{
-			auto test = World();
+			auto test = InputManager();
 		}
 	};
 
