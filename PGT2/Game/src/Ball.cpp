@@ -6,7 +6,7 @@ void Ball::updateCameraNode()
 	Ball::cameraNode->setPosition(Ball::getPosition());
 }
 
-Ball::Ball(Ogre::SceneNode* _node, Ogre::SceneNode* _camNode, Ogre::Entity* _entity)
+Ball::Ball(Ogre::SceneNode* _node, Ogre::SceneNode* _camNode, Ogre::Entity* _entity, Ogre::SceneManager* _manager) : RigidBody(_node, _entity, _manager, true)
 {
 	Ball::node = _node;
 	Ball::cameraNode = _camNode;
@@ -24,6 +24,7 @@ Ball::Ball(Ogre::SceneNode* _node, Ogre::SceneNode* _camNode, Ogre::Entity* _ent
 		0, 0.4f, 0,
 		0, 0, 0.4f);
 	Ball::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
+	
 }
 
 Ball::Ball(void)

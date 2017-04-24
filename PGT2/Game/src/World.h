@@ -93,7 +93,7 @@ public:
 	std::vector<RigidBody*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
-	VerticeSection vertexSections[50][50];
+	VerticeSection vertexSections[25][25];
 	size_t bodyCount;
 
 	size_t terrainVertexCount, terrainIndexCount;
@@ -102,14 +102,6 @@ public:
 
 	void splitTerrainVertices();
 	void addRigidBody(RigidBody* body);
-	void getMeshInformation(const Ogre::MeshPtr mesh,
-		size_t &vertex_count,
-		Ogre::Vector3* &vertices,
-		size_t &index_count,
-		unsigned long* &indices,
-		const Ogre::Vector3 &position,
-		const Ogre::Quaternion &orient,
-		const Ogre::Vector3 &scale);
 	virtual void createTerrain(Ogre::SceneManager* mSceneMgr);
 	virtual void createSphere(Ogre::SceneManager* mSceneMgr);
 	virtual void createLight(Ogre::SceneManager* mSceneMgr);
@@ -141,7 +133,6 @@ private:
 	Ogre::Vector3 closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);
 	Ogre::Real clamp(Ogre::Real n, Ogre::Real lower, Ogre::Real upper);
 	int clamp(int n, int lower, int upper);
-	Ogre::Vector3 normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
 };
 
 

@@ -20,16 +20,21 @@ protected:
 	Ogre::Matrix3 inverseInertiaTensorWorld;
 	Ogre::Matrix3 inverseInertiaTensor;
 	Ogre::Matrix3 inertiaTensor;
-
+	Ogre::SceneManager* mSceneMgr;
 
 	bool isAwake;
 	bool canSleep;
+
+	size_t vertexCount, indexCount;
+	Ogre::Vector3* vertices;
+	unsigned long* indices;
+	Ogre::Vector3* normals;
 
 public:
 	Ogre::SceneNode* node; //contains Position & Orientation
 	Ogre::Entity* entity;
 
-	RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity);
+	RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity, Ogre::SceneManager* _manager, bool cut);
 	RigidBody(void);
 	void setPosition(Ogre::Vector3 _position);
 	void setVelocity(Ogre::Vector3 _velocity);
@@ -56,6 +61,10 @@ public:
 	Ogre::Real getMass();
 	Ogre::Real getInverseMass();
 
+
+	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
+	void createCopy();
+	//void cut();
 };
 
 #endif // #ifndef __RigidBody_h_

@@ -7,6 +7,7 @@ const int START_GAME_TIME = 60;
 
 Baller::Baller() 
 {
+
 }
 
 Baller::~Baller(void)
@@ -73,7 +74,7 @@ void Baller::createScene()
 {
 	init();
 	world.createLight(mSceneMgr);
-	world.createTerrain(mSceneMgr);
+	//world.createTerrain(mSceneMgr);
 	world.createSphere(mSceneMgr);
 	world.setCameraFollow();
 
