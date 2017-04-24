@@ -808,6 +808,17 @@ void RigidBody::createCopy()
 	//gebasseerd op: https://www.grahamedgecombe.com/blog/2011/08/05/custom-meshes-in-ogre3d en http://www.ogre3d.org/tikiwiki/Generating+A+Mesh
 
 
+	/*
+	
+	size_t vertexCount, indexCount;
+	Ogre::Vector3* vertices;
+	unsigned long* indices;
+	Ogre::Vector3* normals;
+
+	dit zijn allemaal variables die in de header en globally accessable zijn en die alle info bevat van de mesh
+	
+	*/
+
 	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual("CustomMesh", "General");
 	Ogre::SubMesh *subMesh = mesh->createSubMesh();
 
