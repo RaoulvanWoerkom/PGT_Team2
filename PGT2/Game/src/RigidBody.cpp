@@ -46,8 +46,8 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity, Ogre::SceneM
 		//<----hier vult hij alle data van de mesh van de ball---->
 
 		//maakt copy gebasseerd op data van mesh--DEZE DUS FIXEN
-		createCopy();
-
+		//createCopy();
+		RigidBody::cut(node->getPosition(), Ogre::Vector3(0, 1, 1));
 	}
 }
 
@@ -739,7 +739,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	memcpy(leftNormals2, newNormals, leftVertexCount2 * sizeof(Ogre::Vector3));
 	memcpy(leftIndices2, leftIndices, leftIndexCount2 * sizeof(int));
 
-	//RigidBody::createColourCube();
+	RigidBody::createMesh(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount2);
 
 	//right->vertices = new Vector3[newVertexCount];
 	//right->vertexNormals = new Vector3[newVertexCount];
@@ -802,29 +802,20 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 
 
-void RigidBody::createCopy()
+void RigidBody::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount)
 {
 
 	//gebasseerd op: https://www.grahamedgecombe.com/blog/2011/08/05/custom-meshes-in-ogre3d en http://www.ogre3d.org/tikiwiki/Generating+A+Mesh
 
 
-	/*
-	
-	size_t vertexCount, indexCount;
-	Ogre::Vector3* vertices;
-	unsigned long* indices;
-	Ogre::Vector3* normals;
-
-	dit zijn allemaal variables die in de header en globally accessable zijn en die alle info bevat van de mesh
-	
-	*/
 
 	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual("CustomMesh", "General");
 	Ogre::SubMesh *subMesh = mesh->createSubMesh();
 
+
 	/* create the vertex data structure */
 	mesh->sharedVertexData = new Ogre::VertexData;
-	mesh->sharedVertexData->vertexCount = vertexCount;
+	mesh->sharedVertexData->vertexCount = _vertexCount;
 
 	/* declare how the vertices will be represented */
 	Ogre::VertexDeclaration *decl = mesh->sharedVertexData->vertexDeclaration;
@@ -841,18 +832,18 @@ void RigidBody::createCopy()
 
 	/* lock the buffer so we can get exclusive access to its data */
 	
-	float* _vertices = new float[vertexCount * 3];
+	float* _vertices = new float[_vertexCount * 3];
 
 	/* populate the buffer with some data */
-	for (size_t i = 0; i < vertexCount; i++)
+	for (size_t i = 0; i < _vertexCount; i++)
 	{
-		Ogre::Vector3 currVertex = vertices[i];
+		Ogre::Vector3 currVertex = _verticesArr[i];
 		_vertices[i * 3] = currVertex.x;
 		_vertices[i * 3 + 1] = currVertex.y;
 		_vertices[i * 3 + 2] = currVertex.z;
 	}
 
-	vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), _vertices, true);
+	vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), _verticesArr, true);
 	Ogre::VertexBufferBinding* bind = mesh->sharedVertexData->vertexBufferBinding;
 	bind->setBinding(0, vertexBuffer);
 
@@ -860,18 +851,26 @@ void RigidBody::createCopy()
 	Ogre::HardwareIndexBufferSharedPtr indexBuffer = Ogre::HardwareBufferManager::getSingleton().
 		createIndexBuffer(
 			Ogre::HardwareIndexBuffer::IT_16BIT,
-			mesh->sharedVertexData->vertexCount,
+			_indexCount,
 			Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
 
-	indexBuffer->writeData(0, indexBuffer->getSizeInBytes(), indices, true);
+	uint16_t *_indices = static_cast<uint16_t *>(indexBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
+
+	for (size_t i = 0; i < indexCount; i++)
+	{
+		_indices[i] = _indicesArr[i];
+	}
+
+	/* unlock the buffer */
+	indexBuffer->unlock();
 
 
 	/* attach the buffers to the mesh */
 	mesh->sharedVertexData->vertexBufferBinding->setBinding(0, vertexBuffer);
 	subMesh->useSharedVertices = true;
 	subMesh->indexData->indexBuffer = indexBuffer;
-	subMesh->indexData->indexCount = mesh->sharedVertexData->vertexCount;
+	subMesh->indexData->indexCount = _indexCount;
 	subMesh->indexData->indexStart = 0;
 
 	/* set the bounds of the mesh */
@@ -883,8 +882,15 @@ void RigidBody::createCopy()
 	/* you can now create an entity/scene node based on your mesh, e.g. */
 	Ogre::Entity *entity = mSceneMgr->createEntity("CustomEntity", "CustomMesh", "General");
 	entity->setMaterialName("YourMaterial", "General");
-	Ogre::SceneNode *node = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	node->setPosition(100, 100, 100);
-	node->attachObject(entity);
+	Ogre::SceneNode *node2 = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	node2->setPosition(0, 0, 0);
+	node2->attachObject(entity);
+
+
+	size_t vertexCount2, indexCount2;
+	Ogre::Vector3* vertices2;
+	uint32_t* indices2;
+	Helper::getMeshInformation(entity->getMesh(), vertexCount2, vertices2, indexCount2, indices2, node2->getPosition(), node2->getOrientation(), node2->getScale());
+
 
 }

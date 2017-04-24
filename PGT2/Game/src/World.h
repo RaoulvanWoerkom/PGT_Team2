@@ -98,7 +98,7 @@ public:
 
 	size_t terrainVertexCount, terrainIndexCount;
 	Ogre::Vector3* terrainVertices;
-	unsigned long* terrainIndices;
+	uint32_t* terrainIndices;
 
 	void splitTerrainVertices();
 	void addRigidBody(RigidBody* body);

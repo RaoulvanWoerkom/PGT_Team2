@@ -20,7 +20,7 @@ public:
 		size_t &vertex_count,
 		Ogre::Vector3* &vertices,
 		size_t &index_count,
-		unsigned long* &indices,
+		uint32_t* &indices,
 		const Ogre::Vector3 &position,
 		const Ogre::Quaternion &orient,
 		const Ogre::Vector3 &scale);

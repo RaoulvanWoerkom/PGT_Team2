@@ -29,7 +29,7 @@ protected:
 	//<----dit is alle info die je nodig hebt---->
 	size_t vertexCount, indexCount;
 	Ogre::Vector3* vertices;
-	unsigned long* indices;
+	uint32_t* indices;
 	Ogre::Vector3* normals;
 	//<----dit is alle info die je nodig hebt---->
 
@@ -66,7 +66,7 @@ public:
 
 
 	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
-	void createCopy();
+	void createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount);
 	//void cut();
 };
 

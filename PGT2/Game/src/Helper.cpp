@@ -100,7 +100,7 @@ void Helper::getMeshInformation(const Ogre::MeshPtr mesh,
 	size_t &vertex_count,
 	Ogre::Vector3* &vertices,
 	size_t &index_count,
-	unsigned long* &indices,
+	uint32_t* &indices,
 	const Ogre::Vector3 &position,
 	const Ogre::Quaternion &orient,
 	const Ogre::Vector3 &scale)
@@ -139,7 +139,7 @@ void Helper::getMeshInformation(const Ogre::MeshPtr mesh,
 
 	// Allocate space for the vertices and indices
 	vertices = new Ogre::Vector3[vertex_count];
-	indices = new unsigned long[index_count];
+	indices = new uint32_t[index_count];
 
 	added_shared = false;
 

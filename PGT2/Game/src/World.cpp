@@ -63,7 +63,7 @@ void World::createSphere(Ogre::SceneManager* mSceneMgr)
 {
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	ballNode->setPosition(0, 300, 0);
+	ballNode->setPosition(0, 0, 0);
 	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 
 	ballNode->attachObject(sphereEntity);
