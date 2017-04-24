@@ -25,10 +25,13 @@ protected:
 	bool isAwake;
 	bool canSleep;
 
+
+	//<----dit is alle info die je nodig hebt---->
 	size_t vertexCount, indexCount;
 	Ogre::Vector3* vertices;
 	unsigned long* indices;
 	Ogre::Vector3* normals;
+	//<----dit is alle info die je nodig hebt---->
 
 public:
 	Ogre::SceneNode* node; //contains Position & Orientation

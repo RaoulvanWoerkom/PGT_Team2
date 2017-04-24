@@ -25,11 +25,9 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity, Ogre::SceneM
 
 	
 	
-	//memcpy(newNormals, normals, vertexCount * sizeof(Ogre::Vector3));
-	//delete newNormals;
-	
 	if (cut)
 	{
+		//<----hier vult hij alle data van de mesh van de ball---->
 		Helper::getMeshInformation(entity->getMesh(), vertexCount, vertices, indexCount, indices, node->getPosition(), node->getOrientation(), node->getScale());
 		normals = new Ogre::Vector3[indexCount / 3];
 		int index = 0;
@@ -45,10 +43,11 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity, Ogre::SceneM
 			normals[index] = currNormal;
 			index++;
 		}
+		//<----hier vult hij alle data van de mesh van de ball---->
 
+		//maakt copy gebasseerd op data van mesh--DEZE DUS FIXEN
 		createCopy();
 
-		//RigidBody::cut(RigidBody::node->getPosition() - Ogre::Vector3(0,10,0), Ogre::Vector3(0.5f, 0.5f, 0));
 	}
 }
 
@@ -878,83 +877,3 @@ void RigidBody::createCopy()
 	node->attachObject(entity);
 
 }
-
-/*
-/// Create the mesh via the MeshManager
-Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual("ColourCube", "General");
-
-/// Create one submesh
-Ogre::SubMesh* sub = msh->createSubMesh();
-
-
-Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
-
-
-
-Ogre::RGBA* colours = new Ogre::RGBA[nVertices];
-Ogre::RGBA *pColour = colours;
-for (Ogre::uint32 i = 0; i < nVertices; i++)
-{
-rs->convertColourValue(Ogre::ColourValue(1.0, 1.0, 1.0), pColour++);
-}
-
-const size_t ibufCount = facesCount;
-
-/// Create vertex data structure for 8 vertices shared between submeshes
-msh->sharedVertexData = new Ogre::VertexData();
-msh->sharedVertexData->vertexCount = nVertices;
-
-/// Create declaration (memory format) of vertex data
-Ogre::VertexDeclaration* decl = msh->sharedVertexData->vertexDeclaration;
-size_t offset = 0;
-
-decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-
-Ogre::HardwareVertexBufferSharedPtr vbuf =
-Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
-offset, msh->sharedVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-/// Upload the vertex data to the card
-vbuf->writeData(0, vbuf->getSizeInBytes(), vertices, true);
-
-/// Set vertex buffer binding so buffer 0 is bound to our vertex buffer
-Ogre::VertexBufferBinding* bind = msh->sharedVertexData->vertexBufferBinding;
-bind->setBinding(0, vbuf);
-
-
-/// Allocate index buffer of the requested number of vertices (ibufCount)
-Ogre::HardwareIndexBufferSharedPtr ibuf = Ogre::HardwareBufferManager::getSingleton().
-createIndexBuffer(
-Ogre::HardwareIndexBuffer::IT_16BIT,
-ibufCount,
-Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-
-/// Upload the index data to the card
-ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
-
-/// Set parameters of the submesh
-sub->useSharedVertices = true;
-sub->indexData->indexBuffer = ibuf;
-sub->indexData->indexCount = ibufCount;
-sub->indexData->indexStart = 0;
-
-/// Set bounding information (for culling)
-msh->_setBounds(Ogre::AxisAlignedBox(-100, -100, -100, 100, 100, 100));
-msh->_setBoundingSphereRadius(sqrt(3 * 100 * 100));
-
-/// Notify -Mesh object that it has been loaded
-msh->load();
-
-Ogre::MaterialPtr m_pMat = entity->getSubEntity(0)->getMaterial();
-m_pMat->getTechnique(0)->getPass(0)->setAmbient(0, 1, 0);
-m_pMat->getTechnique(0)->getPass(0)->setDiffuse(3, 20, 5, 20);
-
-
-Ogre::Entity* thisEntity = mSceneMgr->createEntity("cc", "ColourCube");
-thisEntity->setMaterialName(m_pMat->getName());
-Ogre::SceneNode* thisSceneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-thisSceneNode->setPosition(-35, 0, 0);
-thisSceneNode->attachObject(thisEntity);
-
-*/
-
