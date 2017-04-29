@@ -72,8 +72,6 @@ struct CollisionData
 
 class World
 {
-
-
 public:
 
 	World(void);
@@ -88,8 +86,6 @@ public:
 	Gravity gravity;
 	
 	
-
-
 	std::vector<RigidBody*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
@@ -120,22 +116,29 @@ public:
 	void update(const Ogre::FrameEvent evt);
 	void setCameraFollow();
 
-	ContactGenRegistration *firstContactGen;
-	BodyRegistration *firstBody;
-	ContactResolver resolver;
-	bool calculateIterations;
-	unsigned maxContacts;
-	Contact* contacts;
-	CollisionData cData;
-	unsigned generateContacts();
-	void startFrame();
-	void runPhysics(Ogre::Real duration);
+	/** Holds the maximum number of contacts. */
+	const static unsigned maxContacts = 256;
 
+	/** Holds the array of contacts. */
+	Contact contacts[maxContacts];
+
+	/** Holds the collision data structure for collision detection. */
+	CollisionData cData;
+
+	/** Holds the contact resolver. */
+	ContactResolver resolver;
+
+	/** Processes the contact generation code. */
+	void generateContacts();
+
+	/** Processes the objects in the simulation forward in time. */
+	void updateObjects(Ogre::Real duration);
 
 
 private:
 	
 	void checkBallCollision();
+	void addContact(CollisionData * data, Ogre::Vector3 contactNormal, Ogre::Vector3 contactPoint, Ogre::Real penetration, RigidBody * sphere);
 	std::vector<Ogre::Vector2> getSections(Ogre::Vector3 pos, bool surround = false);
 	std::vector<Ogre::Vector2> getSections(std::vector<Ogre::Vector3> positions);
 	Ogre::Vector3 closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);

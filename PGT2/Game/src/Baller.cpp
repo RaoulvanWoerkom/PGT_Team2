@@ -120,6 +120,21 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 		updateRemainingTime();
 		showScore(1);
 
+		Ogre::Real duration = evt.timeSinceLastFrame;
+
+		// Update the objects
+		world.updateObjects(duration);
+
+		// Perform the contact generation
+		world.generateContacts();
+
+		// Resolve detected contacts
+		world.resolver.resolveContacts(
+			world.cData.contactArray,
+			world.cData.contactCount,
+			duration
+		);
+
 		world.update(evt);
 		if (InputManager::yDown)
 		{

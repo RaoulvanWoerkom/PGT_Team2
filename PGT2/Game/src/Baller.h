@@ -36,6 +36,8 @@ protected:
 	virtual void restartGame();
 	virtual void createViewports();
 
+	
+
 private:
 	virtual void showScore(double score);
 	virtual void updateRemainingTime();

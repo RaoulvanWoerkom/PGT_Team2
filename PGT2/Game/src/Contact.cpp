@@ -26,9 +26,9 @@ void Contact::calculateContactBasis()
 {
 	Ogre::Vector3 contactTangent[2];
 
-	if (abs(contactNormal.x) > abs(contactNormal.y))
+	if (Ogre::Math::Abs(contactNormal.x) > Ogre::Math::Abs(contactNormal.y))
 	{
-		const Ogre::Real s = (Ogre::Real)1.0f / sqrt(contactNormal.z*contactNormal.z +
+		const Ogre::Real s = (Ogre::Real)1.0f / Ogre::Math::Sqrt(contactNormal.z*contactNormal.z +
 			contactNormal.x*contactNormal.x);
 
 		contactTangent[0].x = contactNormal.z*s;
@@ -42,7 +42,7 @@ void Contact::calculateContactBasis()
 	}
 	else
 	{
-		const Ogre::Real s = (Ogre::Real)1.0 / sqrt(contactNormal.z*contactNormal.z +
+		const Ogre::Real s = (Ogre::Real)1.0 / Ogre::Math::Sqrt(contactNormal.z*contactNormal.z +
 			contactNormal.y*contactNormal.y);
 
 		contactTangent[0].x = 0;
@@ -74,7 +74,6 @@ Ogre::Vector3 Contact::calculateLocalVelocity(unsigned bodyIndex, Ogre::Real dur
 		velocity.x * contactToWorld[0][1] + velocity.y * contactToWorld[1][1] + velocity.z * contactToWorld[3][1],
 		velocity.x * contactToWorld[0][2] + velocity.y * contactToWorld[1][2] + velocity.z * contactToWorld[3][2]); // transformTranspose
 
-
 	Ogre::Vector3 accVelocity = thisBody->getLastFrameAcceleration() * duration;
 
 	accVelocity = Ogre::Vector3(
@@ -97,15 +96,16 @@ void Contact::calculateDesiredDeltaVelocity(Ogre::Real duration)
 	Ogre::Real velocityFromAcc = 0;
 	
 	velocityFromAcc +=
-		(body[0]->getLastFrameAcceleration() * duration * contactNormal).length();
+		(body[0]->getLastFrameAcceleration() * duration).dotProduct(contactNormal);
 	
 	if(body[1])
 	velocityFromAcc -=
-		(body[1]->getLastFrameAcceleration() * duration * contactNormal).length();
+		(body[1]->getLastFrameAcceleration() * duration).dotProduct(contactNormal);
+
 
 	// If the velocity is very slow, limit the restitution
 	Ogre::Real thisRestitution = restitution;
-	if (abs(contactVelocity.x) < velocityLimit)
+	if (Ogre::Math::Abs(contactVelocity.x) < velocityLimit)
 	{
 		thisRestitution = (Ogre::Real)0.0f;
 	}
@@ -209,7 +209,7 @@ Ogre::Vector3 Contact::calculateFrictionlessImpulse(Ogre::Matrix3 * inverseInert
 	deltaVelWorld = deltaVelWorld.crossProduct(relativeContactPosition[0]);
 
 	// Work out the change in velocity in contact coordiantes.
-	Ogre::Real deltaVelocity = (deltaVelWorld * contactNormal).length();
+	Ogre::Real deltaVelocity = deltaVelWorld.dotProduct(contactNormal);
 
 	// Add the linear component of velocity change
 	deltaVelocity += body[0]->getInverseMass();
@@ -223,7 +223,7 @@ Ogre::Vector3 Contact::calculateFrictionlessImpulse(Ogre::Matrix3 * inverseInert
 		deltaVelWorld = deltaVelWorld.crossProduct(relativeContactPosition[1]);
 
 		// Add the change in velocity due to rotation
-		deltaVelocity += (deltaVelWorld * contactNormal).length();
+		deltaVelocity += deltaVelWorld.dotProduct(contactNormal);
 
 		// Add the change in velocity due to linear motion
 		deltaVelocity += body[1]->getInverseMass();
@@ -358,7 +358,7 @@ void Contact::applyPositionChange(Ogre::Vector3 linearChange[2],
 		angularInertiaWorld =
 			angularInertiaWorld.crossProduct(relativeContactPosition[i]);
 		angularInertia[i] =
-			(angularInertiaWorld * contactNormal).length();
+			angularInertiaWorld.dotProduct(contactNormal);
 
 		// The linear component is simply the inverse mass
 		linearInertia[i] = body[i]->getInverseMass();

@@ -4,17 +4,12 @@ const int BALL_SIZE = 100;
 const int SECTION_AMOUNT = 50;
 const int MAX_CONTACTS = 256;
 
-World::World() : 
-firstBody(NULL),
-firstContactGen(NULL),
-resolver(0)
+World::World() :
+	resolver(maxContacts * 8)
 {
-	calculateIterations = true;
+	cData.contactArray = contacts;
 	worldObjects = std::vector<RigidBody*>();
 	bodyCount = 0;
-	maxContacts = MAX_CONTACTS;
-	contacts = new Contact[maxContacts];
-	cData.contactArray = contacts;
 }
 
 World::~World()
@@ -53,7 +48,6 @@ void World::createTerrain(Ogre::SceneManager* mSceneMgr)
 	groundNode->attachObject(groundEntity);
 	groundBody = new RigidBody(groundNode, groundEntity);
 	groundBody->setIsAwake(false);
-	addRigidBody(groundBody);
 
 	splitTerrainVertices();
 }
@@ -70,31 +64,16 @@ void World::createSphere(Ogre::SceneManager* mSceneMgr)
 
 	ballBody = Ball(ballNode, ballCameraNode, sphereEntity );
 
-
-
+	addRigidBody(&ballBody);
 	registry.add(&ballBody, &gravity);
 }
 
-void World::startFrame()
-{
-	BodyRegistration *reg = firstBody;
-	while (reg)
-	{
-		// Remove all forces from the accumulator
-		reg->body->clearAccumulators();
-		reg->body->calculateDerivedData();
-
-		// Get the next registration
-		reg = reg->next;
-	}
-}
 
 void World::addRigidBody(RigidBody* body)
 {
 	worldObjects.push_back(body);
 	bodyCount++;
 }
-
 
 void World::splitTerrainVertices()
 {
@@ -421,54 +400,6 @@ void World::restartWorld()
 	ballBody.setPosition(Ogre::Vector3(0, 200, 0));
 }
 
-unsigned World::generateContacts()
-{
-	unsigned limit = maxContacts;
-	Contact *nextContact = contacts;
-
-	ContactGenRegistration * reg = firstContactGen;
-	while (reg)
-	{
-		unsigned used = reg->gen->addContact(nextContact, limit);
-		limit -= used;
-		nextContact += used;
-
-		// We've run out of contacts to fill. This means we're missing
-		// contacts.
-		if (limit <= 0) break;
-
-		reg = reg->next;
-	}
-
-	// Return the number of contacts used.
-	return maxContacts - limit;
-}
-
-void World::runPhysics(Ogre::Real duration)
-{
-	// First apply the force generators
-	registry.updateForces(duration);
-
-	// Then integrate the objects
-	BodyRegistration *reg = firstBody;
-	while (reg)
-	{
-		// Remove all forces from the accumulator
-		reg->body->integrate(duration);
-
-		// Get the next registration
-		reg = reg->next;
-	}
-
-	// Generate contacts
-	unsigned usedContacts = generateContacts();
-
-	// And process them
-	if (calculateIterations) resolver.setIterations(usedContacts * 4);
-	resolver.resolveContacts(contacts, usedContacts, duration);
-}
-
-
 void World::update(const Ogre::FrameEvent evt)
 {
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
@@ -505,28 +436,28 @@ void World::update(const Ogre::FrameEvent evt)
 		direction = direction * MOVE_SPEED; // * speed
 		ballBody.addForce(direction);
 	}
-
-	Ogre::Real duration = evt.timeSinceLastFrame;
-	registry.updateForces(duration);
-	ballBody.integrate(duration);
-
-
-	checkBallCollision();
-
-	// Update the objects
-	runPhysics(duration);
-
-	// Perform the contact generation
-	generateContacts();
-
-	// Resolve detected contacts
-	resolver.resolveContacts(
-		cData.contactArray,
-		cData.contactCount,
-		duration
-	);
 }
 
+void World::generateContacts()
+{
+	// Set up the collision data structure
+	cData.reset(maxContacts);
+	cData.friction = (Ogre::Real)0.9;
+	cData.restitution = (Ogre::Real)0.2;
+	cData.tolerance = (Ogre::Real)0.1;
+
+	checkBallCollision();
+}
+
+void World::updateObjects(Ogre::Real duration)
+{
+	registry.updateForces(duration);
+
+	for (int i = 0; i < bodyCount; i++)
+	{
+		worldObjects[i]->integrate(duration);
+	}
+}
 
 void World::checkBallCollision()
 {
@@ -565,9 +496,23 @@ void World::checkBallCollision()
 	{
 		double diffDist = BALL_SIZE - shortestLength;
 		ballPos += normalVec * diffDist;
-		ballBody.node->setPosition(ballPos);
-		ballBody.setVelocity(Ogre::Vector3(ballBody.getVelocity().x, 0, ballBody.getVelocity().z));//temporary fix, gotta make contactregistry
+		//ballBody.node->setPosition(ballPos);
+		//ballBody.setVelocity(Ogre::Vector3(ballBody.getVelocity().x, 0, ballBody.getVelocity().z));//temporary fix, gotta make contactregistry
+
+		addContact(&cData, normalVec, closestHitCoordinates, diffDist, &ballBody);
 	}
+}
+
+void World::addContact(CollisionData *data, Ogre::Vector3 contactNormal, Ogre::Vector3 contactPoint, Ogre::Real penetration, RigidBody *sphere)
+{
+	Contact* contact = data->contacts;
+	contact->contactNormal = contactNormal;
+	contact->penetration = penetration;
+	contact->contactPoint = contactPoint;
+	contact->setBodyData(sphere, NULL,
+		data->friction, data->restitution);
+
+	data->addContacts(1);
 }
 
 Ogre::Vector3 World::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition)
