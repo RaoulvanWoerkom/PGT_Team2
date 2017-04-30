@@ -16,7 +16,7 @@ Ball::Ball(Ogre::SceneNode* _node, Ogre::SceneNode* _camNode, Ogre::Entity* _ent
 	Ball::isAwake = true;
 	Ball::canSleep = false;
 	Ball::velocity = Ogre::Vector3().ZERO;
-	Ball::acceleration = Ogre::Vector3().ZERO;
+	Ball::acceleration = Ogre::Vector3(0.0f, -9.81f, 0.0f);
 	Ball::forceAccum = Ogre::Vector3().ZERO;
 	Ball::torqueAccum = Ogre::Vector3().ZERO;
 	Ball::rotation = Ogre::Vector3().ZERO;

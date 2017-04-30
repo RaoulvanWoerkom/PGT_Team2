@@ -23,7 +23,6 @@
     <ClInclude Include="src\Contact.h" />
     <ClInclude Include="src\CustomCamera.h" />
     <ClInclude Include="src\CustomTimer.h" />
-    <ClInclude Include="src\ForceGenerator.h" />
     <ClInclude Include="src\Highscore.h" />
     <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\OgreText.h" />
@@ -41,7 +40,6 @@
     <ClCompile Include="src\CustomTimer.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\World.cpp" />
-    <ClCompile Include="src\\ForceGenerator.cpp" />
     <ClCompile Include="src\Helper.cpp" />
     <ClCompile Include="src\Highscore.cpp" />
     <ClCompile Include="src\RigidBody.cpp" />

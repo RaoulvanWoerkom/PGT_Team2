@@ -3,7 +3,6 @@
 
 #include "BaseApplication.h"
 #include "RigidBody.h"
-#include "ForceGenerator.h"
 #include "CustomCamera.h"
 #include "InputManager.h"
 #include "Helper.h"
@@ -82,10 +81,6 @@ public:
 	Ball ballBody;
 	RigidBody* groundBody;
 
-	ForceRegistry registry;
-	Gravity gravity;
-	
-	
 	std::vector<RigidBody*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;

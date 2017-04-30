@@ -2,7 +2,6 @@
 const Ogre::Real MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
 const int SECTION_AMOUNT = 50;
-const int MAX_CONTACTS = 256;
 
 World::World() :
 	resolver(maxContacts * 8)
@@ -57,7 +56,7 @@ void World::createSphere(Ogre::SceneManager* mSceneMgr)
 {
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	ballNode->setPosition(0, 300, 0);
+	ballNode->setPosition(0, 300, -500);
 	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 
 	ballNode->attachObject(sphereEntity);
@@ -65,7 +64,6 @@ void World::createSphere(Ogre::SceneManager* mSceneMgr)
 	ballBody = Ball(ballNode, ballCameraNode, sphereEntity );
 
 	addRigidBody(&ballBody);
-	registry.add(&ballBody, &gravity);
 }
 
 
@@ -451,8 +449,6 @@ void World::generateContacts()
 
 void World::updateObjects(Ogre::Real duration)
 {
-	registry.updateForces(duration);
-
 	for (int i = 0; i < bodyCount; i++)
 	{
 		worldObjects[i]->integrate(duration);

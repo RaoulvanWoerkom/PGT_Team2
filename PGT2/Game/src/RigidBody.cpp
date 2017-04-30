@@ -10,14 +10,12 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::isAwake = true;
 	RigidBody::canSleep = false;
 	RigidBody::velocity = Ogre::Vector3().ZERO;
-	RigidBody::acceleration = Ogre::Vector3().ZERO;
+	RigidBody::acceleration = Ogre::Vector3(0.0f, -9.81f, 0.0f);
 	RigidBody::forceAccum = Ogre::Vector3().ZERO;
 	RigidBody::torqueAccum = Ogre::Vector3().ZERO;
 	RigidBody::rotation = Ogre::Vector3().ZERO;
 	RigidBody::lastFrameAcceleration = Ogre::Vector3().ZERO;
-	RigidBody::inertiaTensor = Ogre::Matrix3(0.4f, 0, 0,
-											 0, 0.4f, 0,
-											 0 , 0, 0.4f );
+	RigidBody::inertiaTensor = Ogre::Matrix3().ZERO;
 	RigidBody::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
 }
 
