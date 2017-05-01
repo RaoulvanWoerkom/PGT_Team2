@@ -20,16 +20,24 @@ protected:
 	Ogre::Matrix3 inverseInertiaTensorWorld;
 	Ogre::Matrix3 inverseInertiaTensor;
 	Ogre::Matrix3 inertiaTensor;
-
+	Ogre::SceneManager* mSceneMgr;
 
 	bool isAwake;
 	bool canSleep;
+
+
+	//<----dit is alle info die je nodig hebt---->
+	size_t vertexCount, indexCount;
+	Ogre::Vector3* vertices;
+	uint32_t* indices;
+	Ogre::Vector3* normals;
+	//<----dit is alle info die je nodig hebt---->
 
 public:
 	Ogre::SceneNode* node; //contains Position & Orientation
 	Ogre::Entity* entity;
 
-	RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity);
+	RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity, Ogre::SceneManager* _manager, bool cut);
 	RigidBody(void);
 	void setPosition(Ogre::Vector3 _position);
 	void setVelocity(Ogre::Vector3 _velocity);
@@ -56,6 +64,10 @@ public:
 	Ogre::Real getMass();
 	Ogre::Real getInverseMass();
 
+
+	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
+	void createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount);
+	//void cut();
 };
 
 #endif // #ifndef __RigidBody_h_

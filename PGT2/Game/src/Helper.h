@@ -16,5 +16,15 @@ public:
 	static void log(std::string name, Ogre::Vector3 vec);
 	static bool vectorListContainsVector2(std::vector<Ogre::Vector2> &list, Ogre::Vector2 vec);
 	static void log(std::string name, Ogre::Quaternion qaut);
+	static void getMeshInformation(const Ogre::MeshPtr mesh,
+		size_t &vertex_count,
+		Ogre::Vector3* &vertices,
+		size_t &index_count,
+		uint32_t* &indices,
+		const Ogre::Vector3 &position,
+		const Ogre::Quaternion &orient,
+		const Ogre::Vector3 &scale);
+
+	static Ogre::Vector3 normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3);
 };
 #endif

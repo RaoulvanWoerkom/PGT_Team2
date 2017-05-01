@@ -7,6 +7,7 @@ const int START_GAME_TIME = 60;
 
 Baller::Baller() 
 {
+
 }
 
 Baller::~Baller(void)
