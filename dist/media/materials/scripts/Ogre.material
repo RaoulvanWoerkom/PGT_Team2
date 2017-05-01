@@ -64,3 +64,23 @@ material Ogre/Eyes
 		}
 	}
 }
+
+material Skin/Dry
+{
+	technique
+	{
+		pass
+		{
+
+			ambient 0.7 0.7 0
+			diffuse 0.7 0.7 0
+
+			texture_unit
+			{
+				DrySkin.jpg
+				tex_address_mode mirror
+				scale 0.2 0.2
+			}
+		}
+	}
+}

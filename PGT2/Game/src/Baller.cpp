@@ -76,6 +76,7 @@ void Baller::createScene()
 	world.createLight(mSceneMgr);
 	world.createTerrain(mSceneMgr);
 	world.createSphere(mSceneMgr);
+	world.createHouse(mSceneMgr);
 	world.setCameraFollow();
 
 	//world.splitVertices();

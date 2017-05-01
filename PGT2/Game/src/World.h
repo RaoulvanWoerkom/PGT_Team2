@@ -41,6 +41,7 @@ public:
 	CustomCamera camera;
 	Ball ballBody;
 	RigidBody* groundBody;
+	RigidBody houseBody;
 
 	ForceRegistry registry;
 	Gravity gravity;
@@ -70,6 +71,7 @@ public:
 	virtual void createTerrain(Ogre::SceneManager* mSceneMgr);
 	virtual void createSphere(Ogre::SceneManager* mSceneMgr);
 	virtual void createLight(Ogre::SceneManager* mSceneMgr);
+	virtual void createHouse(Ogre::SceneManager* mSceneMgr);
 	bool mouseMoved(const OIS::MouseEvent &arg);
 	void createCamera(Ogre::Camera* mCamera, Ogre::SceneManager* mSceneMgr, Ogre::RenderWindow* mWindow);
 	void createViewports();
