@@ -42,7 +42,7 @@ void World::createTerrain(Ogre::SceneManager* mSceneMgr)
 	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(3, 20, 5, 20);
 	groundEntity->setMaterialName(m_pMat->getName());
 
-	Ogre::SceneNode* groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, -210, 0));
+	Ogre::SceneNode* groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, -200, 0));
 	groundNode->scale(Ogre::Vector3(500, 850, 500));
 	groundNode->attachObject(groundEntity);
 	groundBody = new RigidBody(groundNode, groundEntity);
@@ -56,7 +56,7 @@ void World::createSphere(Ogre::SceneManager* mSceneMgr)
 {
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	ballNode->setPosition(0, 300, -500);
+	ballNode->setPosition(0, 300, -520);
 	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
 
 	ballNode->attachObject(sphereEntity);

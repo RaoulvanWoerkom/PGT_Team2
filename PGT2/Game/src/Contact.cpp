@@ -70,16 +70,16 @@ Ogre::Vector3 Contact::calculateLocalVelocity(unsigned bodyIndex, Ogre::Real dur
 	velocity += thisBody->getVelocity();
 
 	Ogre::Vector3 contactVelocity = Ogre::Vector3(
-		velocity.x * contactToWorld[0][0] + velocity.y * contactToWorld[1][0] + velocity.z * contactToWorld[3][0],
-		velocity.x * contactToWorld[0][1] + velocity.y * contactToWorld[1][1] + velocity.z * contactToWorld[3][1],
-		velocity.x * contactToWorld[0][2] + velocity.y * contactToWorld[1][2] + velocity.z * contactToWorld[3][2]); // transformTranspose
+		velocity.x * contactToWorld[0][0] + velocity.y * contactToWorld[1][0] + velocity.z * contactToWorld[2][0],
+		velocity.x * contactToWorld[0][1] + velocity.y * contactToWorld[1][1] + velocity.z * contactToWorld[2][1],
+		velocity.x * contactToWorld[0][2] + velocity.y * contactToWorld[1][2] + velocity.z * contactToWorld[2][2]); // transformTranspose
 
 	Ogre::Vector3 accVelocity = thisBody->getLastFrameAcceleration() * duration;
 
 	accVelocity = Ogre::Vector3(
-		accVelocity.x * contactToWorld[0][0] + accVelocity.y * contactToWorld[1][0] + accVelocity.z * contactToWorld[3][0],
-		accVelocity.x * contactToWorld[0][1] + accVelocity.y * contactToWorld[1][1] + accVelocity.z * contactToWorld[3][1],
-		accVelocity.x * contactToWorld[0][2] + accVelocity.y * contactToWorld[1][2] + accVelocity.z * contactToWorld[3][2]); // transformTranspose
+		accVelocity.x * contactToWorld[0][0] + accVelocity.y * contactToWorld[1][0] + accVelocity.z * contactToWorld[2][0],
+		accVelocity.x * contactToWorld[0][1] + accVelocity.y * contactToWorld[1][1] + accVelocity.z * contactToWorld[2][1],
+		accVelocity.x * contactToWorld[0][2] + accVelocity.y * contactToWorld[1][2] + accVelocity.z * contactToWorld[2][2]); // transformTranspose
 	accVelocity.x = 0;
 
 	contactVelocity += accVelocity;
@@ -586,9 +586,9 @@ void ContactResolver::adjustVelocities(Contact *c,
 						// with the second body in a contact.
 						c[i].contactVelocity +=
 							Ogre::Vector3(
-								deltaVel.x * c[i].contactToWorld[0][0] + deltaVel.y * c[i].contactToWorld[1][0] + deltaVel.z * c[i].contactToWorld[3][0],
-								deltaVel.x * c[i].contactToWorld[0][1] + deltaVel.y * c[i].contactToWorld[1][1] + deltaVel.z * c[i].contactToWorld[3][1],
-								deltaVel.x * c[i].contactToWorld[0][2] + deltaVel.y * c[i].contactToWorld[1][2] + deltaVel.z * c[i].contactToWorld[3][2]) // transformTranspose
+								deltaVel.x * c[i].contactToWorld[0][0] + deltaVel.y * c[i].contactToWorld[1][0] + deltaVel.z * c[i].contactToWorld[2][0],
+								deltaVel.x * c[i].contactToWorld[0][1] + deltaVel.y * c[i].contactToWorld[1][1] + deltaVel.z * c[i].contactToWorld[2][1],
+								deltaVel.x * c[i].contactToWorld[0][2] + deltaVel.y * c[i].contactToWorld[1][2] + deltaVel.z * c[i].contactToWorld[2][2]) // transformTranspose
 							* (b ? -1 : 1);
 
 						
