@@ -26,5 +26,5 @@ Building::Building(void)
 
 void Building::integrate(Ogre::Real delta)
 {
-	RigidBody::integrate(delta);
+	//RigidBody::integrate(delta);
 }

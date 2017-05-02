@@ -65,7 +65,6 @@ public:
 	Ogre::Real getMass();
 	Ogre::Real getInverseMass();
 
-
 	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
 	
 	//void cut();

@@ -1,0 +1,17 @@
+material Building/Wall
+{
+   technique
+   {
+      pass
+      {
+         ambient 1 1 1
+
+         texture_unit
+         {
+            texture KAMEN-stup.jpg
+            tex_address_mode mirror
+            filtering anisotropic point linear
+         }
+      }
+   }
+}

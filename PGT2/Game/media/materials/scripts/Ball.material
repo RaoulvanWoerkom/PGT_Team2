@@ -1,0 +1,13 @@
+material Ball/Skin
+{
+   technique
+   {
+      pass
+      {
+         texture_unit
+         {
+            texture BumpyMetal.jpg
+         }
+      }
+   }
+}

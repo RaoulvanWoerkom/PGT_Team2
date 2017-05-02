@@ -44,6 +44,7 @@ private:
 	virtual bool keyPressed(const OIS::KeyEvent& ke);
 	virtual bool keyReleased(const OIS::KeyEvent& ke);
     bool mouseMoved(const OIS::MouseEvent &arg);
+	
 };
 
 #endif // #ifndef __Baller_h_

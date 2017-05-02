@@ -15,6 +15,8 @@ Baller::~Baller(void)
 
 }
 
+
+
 bool Baller::mouseMoved(const OIS::MouseEvent &arg)
 {
     if (mTrayMgr->injectMouseMove(arg)) return true;
@@ -78,7 +80,7 @@ void Baller::createScene()
 	world.createLight();
 	world.createTerrain();
 	world.createSphere();
-	world.createBuilding(Ogre::Vector3(100, 300, -520));
+	world.createBuilding(Ogre::Vector3(300, 300, -720));
 	world.setCameraFollow();
 
 	//world.splitVertices();

@@ -1,7 +1,7 @@
 #include "World.h"
 const Ogre::Real MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
-const int SECTION_AMOUNT = 50;
+const int SECTION_AMOUNT = 35;
 
 Ogre::SceneManager* World::mSceneMgr = NULL;
 
@@ -60,12 +60,15 @@ void World::createSphere()
 	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	ballNode->setPosition(0, 300, -520);
 
-	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "sphere.mesh");
+
+	createSphereMesh("mySphereMesh", 100, 64, 64);
+	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "mySphereMesh");
 
 	ballNode->attachObject(sphereEntity);
 
 	ballBody = new Ball(ballNode, ballCameraNode, sphereEntity);
-
+	ballBody->entity->setMaterialName("Ball/Skin");
+	
 	addRigidBody(ballBody);
 }
 
@@ -73,14 +76,107 @@ void World::createBuilding(Ogre::Vector3 pos)
 {
 	Ogre::SceneNode* buildingNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	buildingNode->setPosition(pos);
+	buildingNode->setScale(4, 10, 4);
 	Ogre::Entity* buildingEntity = mSceneMgr->createEntity("Cube", "cube.mesh");
+
+
 	buildingNode->attachObject(buildingEntity);
 	Building* buildingBody = new Building(buildingNode, buildingEntity);
+	buildingBody->entity->setMaterialName("Building/Wall");
 	//buildingBody.setIsAwake(false);
 
 	addRigidBody(buildingBody);
 
 }
+
+void World::createSphereMesh(const std::string& strName, const float r, const int nRings = 16, const int nSegments = 16)
+{
+	Ogre::MeshPtr pSphere = Ogre::MeshManager::getSingleton().createManual(strName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	Ogre::SubMesh *pSphereVertex = pSphere->createSubMesh();
+
+	pSphere->sharedVertexData = new Ogre::VertexData();
+	Ogre::VertexData* vertexData = pSphere->sharedVertexData;
+
+	// define the vertex format
+	Ogre::VertexDeclaration* vertexDecl = vertexData->vertexDeclaration;
+	size_t currOffset = 0;
+	// positions
+	vertexDecl->addElement(0, currOffset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+	currOffset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+	// normals
+	vertexDecl->addElement(0, currOffset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+	currOffset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+	// two dimensional texture coordinates
+	vertexDecl->addElement(0, currOffset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, 0);
+	currOffset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
+
+	// allocate the vertex buffer
+	vertexData->vertexCount = (nRings + 1) * (nSegments + 1);
+	Ogre::HardwareVertexBufferSharedPtr vBuf = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(vertexDecl->getVertexSize(0), vertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+	Ogre::VertexBufferBinding* binding = vertexData->vertexBufferBinding;
+	binding->setBinding(0, vBuf);
+	float* pVertex = static_cast<float*>(vBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+
+	// allocate index buffer
+	pSphereVertex->indexData->indexCount = 6 * nRings * (nSegments + 1);
+	pSphereVertex->indexData->indexBuffer = Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(Ogre::HardwareIndexBuffer::IT_16BIT, pSphereVertex->indexData->indexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+	Ogre::HardwareIndexBufferSharedPtr iBuf = pSphereVertex->indexData->indexBuffer;
+	unsigned short* pIndices = static_cast<unsigned short*>(iBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+
+	float fDeltaRingAngle = (Ogre::Math::PI / nRings);
+	float fDeltaSegAngle = (2 * Ogre::Math::PI / nSegments);
+	unsigned short wVerticeIndex = 0;
+
+	// Generate the group of rings for the sphere
+	for (int ring = 0; ring <= nRings; ring++) {
+		float r0 = r * sinf(ring * fDeltaRingAngle);
+		float y0 = r * cosf(ring * fDeltaRingAngle);
+
+		// Generate the group of segments for the current ring
+		for (int seg = 0; seg <= nSegments; seg++) {
+			float x0 = r0 * sinf(seg * fDeltaSegAngle);
+			float z0 = r0 * cosf(seg * fDeltaSegAngle);
+
+			// Add one vertex to the strip which makes up the sphere
+			*pVertex++ = x0;
+			*pVertex++ = y0;
+			*pVertex++ = z0;
+
+			Ogre::Vector3 vNormal = Ogre::Vector3(x0, y0, z0).normalisedCopy();
+			*pVertex++ = vNormal.x;
+			*pVertex++ = vNormal.y;
+			*pVertex++ = vNormal.z;
+
+			*pVertex++ = (float)seg / (float)nSegments;
+			*pVertex++ = (float)ring / (float)nRings;
+
+			if (ring != nRings) {
+				// each vertex (except the last) has six indices pointing to it
+				*pIndices++ = wVerticeIndex + nSegments + 1;
+				*pIndices++ = wVerticeIndex;
+				*pIndices++ = wVerticeIndex + nSegments;
+				*pIndices++ = wVerticeIndex + nSegments + 1;
+				*pIndices++ = wVerticeIndex + 1;
+				*pIndices++ = wVerticeIndex;
+				wVerticeIndex++;
+			}
+		}; // end for seg
+	} // end for ring
+
+	  // Unlock
+	vBuf->unlock();
+	iBuf->unlock();
+	// Generate face list
+	pSphereVertex->useSharedVertices = true;
+
+	// the original code was missing this line:
+	pSphere->_setBounds(Ogre::AxisAlignedBox(Ogre::Vector3(-r, -r, -r), Ogre::Vector3(r, r, r)), false);
+	pSphere->_setBoundingSphereRadius(r);
+	// this line makes clear the mesh is loaded (avoids memory leaks)
+	pSphere->load();
+}
+
+
 
 void World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount)
 {

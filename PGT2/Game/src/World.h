@@ -86,7 +86,7 @@ public:
 	std::vector<RigidBody*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
-	VerticeSection vertexSections[50][50];
+	VerticeSection vertexSections[35][35];
 	size_t bodyCount;
 
 	size_t terrainVertexCount, terrainIndexCount;
@@ -99,9 +99,13 @@ public:
 	virtual void createSphere();
 	virtual void createLight();
 
+	void createSphereMesh(const std::string& strName, const float r, const int nRings, const int nSegments);
+
 	void createBuilding(Ogre::Vector3 pos);
 
 	static void createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount);
+
+
 	bool mouseMoved(const OIS::MouseEvent &arg);
 	void createCamera(Ogre::Camera* mCamera, Ogre::SceneManager* mSceneMgr, Ogre::RenderWindow* mWindow);
 	void createViewports();
