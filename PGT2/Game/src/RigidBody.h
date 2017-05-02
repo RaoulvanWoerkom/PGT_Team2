@@ -4,6 +4,7 @@
 
 #include "BaseApplication.h"
 
+
 class RigidBody 
 {
 protected:
@@ -37,7 +38,7 @@ public:
 	Ogre::SceneNode* node; //contains Position & Orientation
 	Ogre::Entity* entity;
 
-	RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity, Ogre::SceneManager* _manager, bool cut);
+	RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity);
 	RigidBody(void);
 	void setPosition(Ogre::Vector3 _position);
 	void setVelocity(Ogre::Vector3 _velocity);
@@ -66,7 +67,7 @@ public:
 
 
 	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
-	void createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount);
+	
 	//void cut();
 };
 

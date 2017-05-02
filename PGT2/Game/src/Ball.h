@@ -10,7 +10,7 @@ public:
 	void updateCameraNode();
 	Ogre::SceneNode* cameraNode;
 
-	Ball(Ogre::SceneNode* _node, Ogre::SceneNode* _camNode, Ogre::Entity* _entity, Ogre::SceneManager* _manager);
+	Ball(Ogre::SceneNode* _node, Ogre::SceneNode* _camNode, Ogre::Entity* _entity);
 	Ball(void);
 
 	void integrate(Ogre::Real delta);

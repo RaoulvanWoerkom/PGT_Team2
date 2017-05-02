@@ -25,6 +25,8 @@ bool Baller::mouseMoved(const OIS::MouseEvent &arg)
 void Baller::createCamera()
 {
 	world = World();
+	World::mSceneMgr = mSceneMgr; //can't pass it in constructor,  errors i dont know how to fix...
+
 	mCamera = mSceneMgr->createCamera("PlayerCam");
 	world.createCamera(mCamera, mSceneMgr, mWindow);
 }
@@ -73,9 +75,10 @@ void Baller::restartGame()
 void Baller::createScene()
 {
 	init();
-	world.createLight(mSceneMgr);
-	world.createTerrain(mSceneMgr);
-	world.createSphere(mSceneMgr);
+	world.createLight();
+	world.createTerrain();
+	world.createSphere();
+	world.createBuilding(Ogre::Vector3(100, 100, 100));
 	world.setCameraFollow();
 
 	//world.splitVertices();

@@ -3,6 +3,8 @@ const Ogre::Real MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
 const int SECTION_AMOUNT = 50;
 
+Ogre::SceneManager* World::mSceneMgr = NULL;
+
 World::World() :
 	resolver(maxContacts * 8)
 {
@@ -17,7 +19,7 @@ World::~World()
 
 
 
-void World::createLight(Ogre::SceneManager* mSceneMgr)
+void World::createLight()
 {
 	mSceneMgr->setAmbientLight(Ogre::ColourValue::White);
 	mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
@@ -32,7 +34,7 @@ void World::createLight(Ogre::SceneManager* mSceneMgr)
 	directionalLight->setDirection(Ogre::Vector3(0, -1, 1));
 }
 
-void World::createTerrain(Ogre::SceneManager* mSceneMgr)
+void World::createTerrain()
 {
 	Ogre::Entity* groundEntity = mSceneMgr->createEntity("Plane", "World.mesh");
 
@@ -45,14 +47,14 @@ void World::createTerrain(Ogre::SceneManager* mSceneMgr)
 	Ogre::SceneNode* groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, -200, 0));
 	groundNode->scale(Ogre::Vector3(500, 850, 500));
 	groundNode->attachObject(groundEntity);
-	groundBody = new RigidBody(groundNode, groundEntity, mSceneMgr, false);
+	groundBody = new RigidBody(groundNode, groundEntity);
 	groundBody->setIsAwake(false);
 
 	splitTerrainVertices();
 }
 
 
-void World::createSphere(Ogre::SceneManager* mSceneMgr)
+void World::createSphere()
 {
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
@@ -62,9 +64,110 @@ void World::createSphere(Ogre::SceneManager* mSceneMgr)
 
 	ballNode->attachObject(sphereEntity);
 
-	ballBody = Ball(ballNode, ballCameraNode, sphereEntity, mSceneMgr);
+	ballBody = Ball(ballNode, ballCameraNode, sphereEntity);
 
 	addRigidBody(&ballBody);
+}
+
+void World::createBuilding(Ogre::Vector3 pos)
+{
+	Ogre::SceneNode* buildingNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	buildingNode->setPosition(pos);
+	Ogre::Entity* buildingEntity = mSceneMgr->createEntity("Cube", "cube.mesh");
+	buildingNode->attachObject(buildingEntity);
+	Building buildingBody = Building(buildingNode, buildingEntity);
+	//buildingBody.setIsAwake(false);
+
+	addRigidBody(&buildingBody);
+
+}
+
+void World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount)
+{
+
+	//gebasseerd op: https://www.grahamedgecombe.com/blog/2011/08/05/custom-meshes-in-ogre3d en http://www.ogre3d.org/tikiwiki/Generating+A+Mesh
+
+
+
+	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual("CustomMesh", "General");
+	Ogre::SubMesh *subMesh = mesh->createSubMesh();
+
+
+	/* create the vertex data structure */
+	mesh->sharedVertexData = new Ogre::VertexData;
+	mesh->sharedVertexData->vertexCount = _vertexCount;
+
+	/* declare how the vertices will be represented */
+	Ogre::VertexDeclaration *decl = mesh->sharedVertexData->vertexDeclaration;
+	size_t offset = 0;
+
+	/* the first three floats of each vertex represent the position */
+	decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+	offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+
+	/* create the vertex buffer */
+	Ogre::HardwareVertexBufferSharedPtr vertexBuffer =
+		Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+			offset, mesh->sharedVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+
+	/* lock the buffer so we can get exclusive access to its data */
+
+	float* _vertices = new float[_vertexCount * 3];
+
+	/* populate the buffer with some data */
+	for (size_t i = 0; i < _vertexCount; i++)
+	{
+		Ogre::Vector3 currVertex = _verticesArr[i];
+		_vertices[i * 3] = currVertex.x;
+		_vertices[i * 3 + 1] = currVertex.y;
+		_vertices[i * 3 + 2] = currVertex.z;
+	}
+
+	vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), _verticesArr, true);
+	Ogre::VertexBufferBinding* bind = mesh->sharedVertexData->vertexBufferBinding;
+	bind->setBinding(0, vertexBuffer);
+
+	/* create the index buffer */
+	Ogre::HardwareIndexBufferSharedPtr indexBuffer = Ogre::HardwareBufferManager::getSingleton().
+		createIndexBuffer(
+			Ogre::HardwareIndexBuffer::IT_16BIT,
+			_indexCount,
+			Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+
+
+	uint16_t *_indices = static_cast<uint16_t *>(indexBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
+
+	for (size_t i = 0; i < _indexCount; i++)
+	{
+		_indices[i] = _indicesArr[i];
+	}
+
+	/* unlock the buffer */
+	indexBuffer->unlock();
+
+
+	/* attach the buffers to the mesh */
+	mesh->sharedVertexData->vertexBufferBinding->setBinding(0, vertexBuffer);
+	subMesh->useSharedVertices = true;
+	subMesh->indexData->indexBuffer = indexBuffer;
+	subMesh->indexData->indexCount = _indexCount;
+	subMesh->indexData->indexStart = 0;
+
+	/* set the bounds of the mesh */
+	mesh->_setBounds(Ogre::AxisAlignedBox(-100, -100, -100, 100, 100, 100));
+
+	/* notify the mesh that we're all ready */
+	mesh->load();
+
+	/* you can now create an entity/scene node based on your mesh, e.g. */
+	
+	Ogre::Entity *entity = mSceneMgr->createEntity("CustomEntity", "CustomMesh", "General");
+	entity->setMaterialName("YourMaterial", "General");
+	Ogre::SceneNode *node2 = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	node2->setPosition(0, 0, 0);
+	node2->attachObject(entity);
+	
+
 }
 
 

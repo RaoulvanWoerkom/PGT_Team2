@@ -1,7 +1,8 @@
 #include "RigidBody.h"
 #include "Helper.h"
+#include "World.h"
 #include <cmath>
-RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity, Ogre::SceneManager* _manager, bool cut)
+RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 {
 	RigidBody::node = _node;
 	RigidBody::entity = _entity;
@@ -17,36 +18,18 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity, Ogre::SceneM
 	RigidBody::lastFrameAcceleration = Ogre::Vector3().ZERO;
 	RigidBody::inertiaTensor = Ogre::Matrix3().ZERO;
 	RigidBody::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
-	mSceneMgr = _manager;
 	
 
 
-	
+	/*
 	
 	if (cut)
 	{
 		//<----hier vult hij alle data van de mesh van de ball---->
-		Helper::getMeshInformation(entity->getMesh(), vertexCount, vertices, indexCount, indices, node->getPosition(), node->getOrientation(), node->getScale());
-		normals = new Ogre::Vector3[indexCount / 3];
-		int index = 0;
-		for (int i = 0; i < indexCount / 3; i += 3)
-		{
-			long index1 = indices[i];
-			long index2 = indices[i + 1];
-			long index3 = indices[i + 2];
-			Ogre::Vector3 point1 = vertices[index1];
-			Ogre::Vector3 point2 = vertices[index2];
-			Ogre::Vector3 point3 = vertices[index3];
-			Ogre::Vector3 currNormal = Helper::normalVector(point1, point2, point3);
-			normals[index] = currNormal;
-			index++;
-		}
-		//<----hier vult hij alle data van de mesh van de ball---->
-
-		//maakt copy gebasseerd op data van mesh--DEZE DUS FIXEN
-		//createCopy();
-		RigidBody::cut(node->getPosition(), Ogre::Vector3(0, 1, 1));
+		
 	}
+
+	*/
 }
 
 RigidBody::RigidBody(void)
@@ -737,158 +720,18 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	memcpy(leftNormals2, newNormals, leftVertexCount2 * sizeof(Ogre::Vector3));
 	memcpy(leftIndices2, leftIndices, leftIndexCount2 * sizeof(int));
 
-	RigidBody::createMesh(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount2);
+	World::createMesh(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount2);
 
-	//right->vertices = new Vector3[newVertexCount];
-	//right->vertexNormals = new Vector3[newVertexCount];
-	//right->indices = new int[rightIndexCount];
-
-	//right->vertexCount = newVertexCount;
-	//right->indexCount = rightIndexCount;
-
-	//memcpy(right->vertices, newVertices, right->vertexCount * sizeof(Vector3));
-	//memcpy(right->vertexNormals, newNormals, right->vertexCount * sizeof(Vector3));
-	//memcpy(right->indices, rightIndices, right->indexCount * sizeof(int));
 
 	delete newVertices;
 	delete newNormals;
 	delete leftIndices;
 	delete rightIndices;
-
-
-	/*
-	Ogre::Vector3* leftVertices2 = new Ogre::Vector3[newVertexCount];
-	Ogre::Vector3* leftNormals2 = new Ogre::Vector3[newVertexCount];
-	int* leftIndices2 = new int[newIndexMax];
-
-	memcpy(leftVertices2, newVertices, newVertexCount);
-	memcpy(leftNormals2, newNormals, newVertexCount);
-	memcpy(leftIndices2, leftIndices, leftIndexCount * sizeof(int));
-
-
-	const size_t vbufCount = 3 * newVertexCount;
-	float* vertices = new float[vbufCount];
-	
-	for (size_t i = 0; i < newVertexCount; i++)
-	{
-		Ogre::Vector3 currVertex = leftVertices2[i];
-		vertices[i * 3] = currVertex.x;
-		vertices[i * 3 + 1] = currVertex.y;
-		vertices[i * 3 + 2] = currVertex.z;
-	}
-	
-	Ogre::Vector3* rightVertices2 = new Ogre::Vector3[newVertexCount];
-	Ogre::Vector3* rightNormals2 = new Ogre::Vector3[newVertexCount];
-	int* rightIndices2 = new int[newIndexMax];
-
-	memcpy(rightVertices2, newVertices, newVertexCount);
-	memcpy(rightNormals2, newNormals, newVertexCount);
-	memcpy(rightIndices2, rightIndices, rightIndexCount * sizeof(int));
-	
-
-
 	delete leftVertices2;
 	delete leftNormals2;
-	delete rightVertices2;
-	delete rightNormals2;
-	delete leftIndices;
 	delete leftIndices2;
-	delete rightIndices;
-	delete rightIndices2;
-	*/
 }
 
 
 
-void RigidBody::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount)
-{
 
-	//gebasseerd op: https://www.grahamedgecombe.com/blog/2011/08/05/custom-meshes-in-ogre3d en http://www.ogre3d.org/tikiwiki/Generating+A+Mesh
-
-
-
-	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual("CustomMesh", "General");
-	Ogre::SubMesh *subMesh = mesh->createSubMesh();
-
-
-	/* create the vertex data structure */
-	mesh->sharedVertexData = new Ogre::VertexData;
-	mesh->sharedVertexData->vertexCount = _vertexCount;
-
-	/* declare how the vertices will be represented */
-	Ogre::VertexDeclaration *decl = mesh->sharedVertexData->vertexDeclaration;
-	size_t offset = 0;
-
-	/* the first three floats of each vertex represent the position */
-	decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-	offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-
-	/* create the vertex buffer */
-	Ogre::HardwareVertexBufferSharedPtr vertexBuffer =
-		Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
-			offset, mesh->sharedVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-
-	/* lock the buffer so we can get exclusive access to its data */
-	
-	float* _vertices = new float[_vertexCount * 3];
-
-	/* populate the buffer with some data */
-	for (size_t i = 0; i < _vertexCount; i++)
-	{
-		Ogre::Vector3 currVertex = _verticesArr[i];
-		_vertices[i * 3] = currVertex.x;
-		_vertices[i * 3 + 1] = currVertex.y;
-		_vertices[i * 3 + 2] = currVertex.z;
-	}
-
-	vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), _verticesArr, true);
-	Ogre::VertexBufferBinding* bind = mesh->sharedVertexData->vertexBufferBinding;
-	bind->setBinding(0, vertexBuffer);
-
-	/* create the index buffer */
-	Ogre::HardwareIndexBufferSharedPtr indexBuffer = Ogre::HardwareBufferManager::getSingleton().
-		createIndexBuffer(
-			Ogre::HardwareIndexBuffer::IT_16BIT,
-			_indexCount,
-			Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-
-
-	uint16_t *_indices = static_cast<uint16_t *>(indexBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
-
-	for (size_t i = 0; i < indexCount; i++)
-	{
-		_indices[i] = _indicesArr[i];
-	}
-
-	/* unlock the buffer */
-	indexBuffer->unlock();
-
-
-	/* attach the buffers to the mesh */
-	mesh->sharedVertexData->vertexBufferBinding->setBinding(0, vertexBuffer);
-	subMesh->useSharedVertices = true;
-	subMesh->indexData->indexBuffer = indexBuffer;
-	subMesh->indexData->indexCount = _indexCount;
-	subMesh->indexData->indexStart = 0;
-
-	/* set the bounds of the mesh */
-	mesh->_setBounds(Ogre::AxisAlignedBox(-100, -100, -100, 100, 100, 100));
-
-	/* notify the mesh that we're all ready */
-	mesh->load();
-
-	/* you can now create an entity/scene node based on your mesh, e.g. */
-	Ogre::Entity *entity = mSceneMgr->createEntity("CustomEntity", "CustomMesh", "General");
-	entity->setMaterialName("YourMaterial", "General");
-	Ogre::SceneNode *node2 = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	node2->setPosition(0, 0, 0);
-	node2->attachObject(entity);
-
-
-	size_t vertexCount2, indexCount2;
-	Ogre::Vector3* vertices2;
-	uint32_t* indices2;
-	Helper::getMeshInformation(entity->getMesh(), vertexCount2, vertices2, indexCount2, indices2, node2->getPosition(), node2->getOrientation(), node2->getScale());
-
-
-}

@@ -7,6 +7,7 @@
 #include "InputManager.h"
 #include "Helper.h"
 #include "Ball.h"
+#include "Building.h"
 #include "Contact.h"
 
 typedef struct
@@ -73,13 +74,14 @@ class World
 {
 public:
 
-	World(void);
+	World();
 	~World();
 	
 	Ogre::Light* directionalLight;
 	CustomCamera camera;
 	Ball ballBody;
 	RigidBody* groundBody;
+	static Ogre::SceneManager* mSceneMgr;
 
 	std::vector<RigidBody*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
@@ -93,9 +95,13 @@ public:
 
 	void splitTerrainVertices();
 	void addRigidBody(RigidBody* body);
-	virtual void createTerrain(Ogre::SceneManager* mSceneMgr);
-	virtual void createSphere(Ogre::SceneManager* mSceneMgr);
-	virtual void createLight(Ogre::SceneManager* mSceneMgr);
+	virtual void createTerrain();
+	virtual void createSphere();
+	virtual void createLight();
+
+	void createBuilding(Ogre::Vector3 pos);
+
+	static void createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount);
 	bool mouseMoved(const OIS::MouseEvent &arg);
 	void createCamera(Ogre::Camera* mCamera, Ogre::SceneManager* mSceneMgr, Ogre::RenderWindow* mWindow);
 	void createViewports();
