@@ -80,7 +80,7 @@ void Baller::createScene()
 	world.createLight();
 	world.createTerrain();
 	world.createSphere();
-	world.createBuilding(Ogre::Vector3(300, 300, -720));
+	world.createBuilding(Ogre::Vector3(350, 350, -720));
 	world.setCameraFollow();
 
 	//world.splitVertices();

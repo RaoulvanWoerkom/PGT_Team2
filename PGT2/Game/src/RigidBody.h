@@ -4,6 +4,15 @@
 
 #include "BaseApplication.h"
 
+struct Face
+{
+	Ogre::Vector3 point1;
+	Ogre::Vector3 point2;
+	Ogre::Vector3 point3;
+
+	Ogre::Vector3 normal;
+
+} ;
 
 class RigidBody 
 {
@@ -27,16 +36,20 @@ protected:
 	bool canSleep;
 
 
-	//<----dit is alle info die je nodig hebt---->
+
 	size_t vertexCount, indexCount;
 	Ogre::Vector3* vertices;
 	uint32_t* indices;
 	Ogre::Vector3* normals;
-	//<----dit is alle info die je nodig hebt---->
+
+	void loadMeshInfo();
 
 public:
 	Ogre::SceneNode* node; //contains Position & Orientation
 	Ogre::Entity* entity;
+
+	bool isBreakable;
+	bool canCollide;
 
 	RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity);
 	RigidBody(void);
@@ -67,6 +80,9 @@ public:
 
 	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
 	
+	size_t faceCount;
+	std::vector<Face> faces;
+
 	//void cut();
 };
 

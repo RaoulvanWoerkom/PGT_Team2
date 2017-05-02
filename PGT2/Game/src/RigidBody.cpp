@@ -10,6 +10,7 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::dampening = 0.995;
 	RigidBody::isAwake = true;
 	RigidBody::canSleep = false;
+	RigidBody::canCollide = true;
 	RigidBody::velocity = Ogre::Vector3().ZERO;
 	RigidBody::acceleration = Ogre::Vector3(0.0f, -9.81f, 0.0f);
 	RigidBody::forceAccum = Ogre::Vector3().ZERO;
@@ -18,7 +19,7 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::lastFrameAcceleration = Ogre::Vector3().ZERO;
 	RigidBody::inertiaTensor = Ogre::Matrix3().ZERO;
 	RigidBody::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
-	
+	RigidBody::loadMeshInfo();
 
 
 	/*
@@ -34,6 +35,34 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 
 RigidBody::RigidBody(void)
 {
+}
+
+void RigidBody::loadMeshInfo()
+{
+	Helper::getMeshInformation(entity->getMesh(), vertexCount, vertices, indexCount, indices, getPosition(), getOrientation(), node->getScale());
+	int max = indexCount - 3;
+	normals = new Ogre::Vector3[indexCount / 3];
+	for (int i = 0; i < max; i += 3)
+	{
+		long index1 = indices[i];
+		long index2 = indices[i + 1];
+		long index3 = indices[i + 2];
+		Ogre::Vector3 point1 = vertices[index1];
+		Ogre::Vector3 point2 = vertices[index2];
+		Ogre::Vector3 point3 = vertices[index3];
+		Ogre::Vector3 middlePoint = (point1 + point2 + point3) / 3;
+		Face face = Face();
+		face.point1 = point1;
+		face.point2 = point2;
+		face.point3 = point3;
+		face.normal = Helper::normalVector(point1, point2, point3);
+		faces.push_back(face);
+		normals[faceCount] = face.normal;
+
+		faceCount++;
+
+	}
+
 }
 
 void RigidBody::setPosition(Ogre::Vector3 position)
@@ -715,21 +744,41 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	int leftVertexCount2 = newVertexCount;
 	int leftIndexCount2 = leftIndexCount;
 
-
 	memcpy(leftVertices2, newVertices, leftVertexCount2 * sizeof(Ogre::Vector3));
 	memcpy(leftNormals2, newNormals, leftVertexCount2 * sizeof(Ogre::Vector3));
 	memcpy(leftIndices2, leftIndices, leftIndexCount2 * sizeof(int));
 
-	World::createMesh(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount2);
+	RigidBody* leftBody = World::createMesh(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount2, entity->getSubEntity(0)->getMaterialName());
+	leftBody->addForce(Ogre::Vector3(5, 0, 0) * 10);
+	leftBody->addTorque(Ogre::Vector3(1, 0, 0.4f));
 
+	Ogre::Vector3* rightVertices2 = new Ogre::Vector3[newVertexCount];
+	Ogre::Vector3* rightNormals2 = new Ogre::Vector3[newVertexCount];
+	int* rightIndices2 = new int[newIndexMax];
+	int rightVertexCount2 = newVertexCount;
+	int rightIndexCount2 = rightIndexCount;
+
+	memcpy(rightVertices2, newVertices, rightVertexCount2 * sizeof(Ogre::Vector3));
+	memcpy(rightNormals2, newNormals, rightVertexCount2 * sizeof(Ogre::Vector3));
+	memcpy(rightIndices2, rightIndices, rightIndexCount * sizeof(int));
+
+	RigidBody* rightBody = World::createMesh(rightVertices2, rightIndices2, rightVertexCount2, rightIndexCount2, entity->getSubEntity(0)->getMaterialName());
+	rightBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
+	rightBody->addRotation(Ogre::Vector3(-1, 0.4f, 0));
 
 	delete newVertices;
 	delete newNormals;
 	delete leftIndices;
 	delete rightIndices;
+
+
 	delete leftVertices2;
 	delete leftNormals2;
 	delete leftIndices2;
+
+	delete rightVertices2;
+	delete rightNormals2;
+	delete rightIndices2;
 }
 
 

@@ -10,21 +10,15 @@
 #include "Building.h"
 #include "Contact.h"
 
-typedef struct
-{
-	Ogre::Vector3 point1;
-	Ogre::Vector3 point2;
-	Ogre::Vector3 point3;
 
-	Ogre::Vector3 normal;
-
-} Vertex;
 
 typedef struct
 {
 	Ogre::Vector2 minPoint;
 	Ogre::Vector2 maxPoint;
-	std::vector<Vertex> vertices;
+	std::vector<RigidBody*> objects;
+	size_t objectCount;
+	std::vector<Face> terrainFaces;
 } VerticeSection;
 
 struct BodyRegistration
@@ -83,18 +77,20 @@ public:
 	RigidBody* groundBody;
 	static Ogre::SceneManager* mSceneMgr;
 
-	std::vector<RigidBody*> worldObjects;
+	static std::vector<RigidBody*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
 	VerticeSection vertexSections[35][35];
-	size_t bodyCount;
+	static size_t bodyCount;
 
 	size_t terrainVertexCount, terrainIndexCount;
 	Ogre::Vector3* terrainVertices;
 	uint32_t* terrainIndices;
 
 	void splitTerrainVertices();
-	void addRigidBody(RigidBody* body);
+	static void addRigidBody(RigidBody* body);
+	void removeRigidBody(RigidBody* body);
+	void addObjectVertices(RigidBody* body);
 	virtual void createTerrain();
 	virtual void createSphere();
 	virtual void createLight();
@@ -103,7 +99,7 @@ public:
 
 	void createBuilding(Ogre::Vector3 pos);
 
-	static void createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount);
+	static RigidBody* createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, Ogre::String matName);
 
 
 	bool mouseMoved(const OIS::MouseEvent &arg);

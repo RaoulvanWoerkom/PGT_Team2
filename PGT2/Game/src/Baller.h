@@ -27,6 +27,7 @@ public:
 	CustomTimer timer;
 	bool isGameOver;
 
+
 protected:
 	virtual void createScene();
 	virtual void init();

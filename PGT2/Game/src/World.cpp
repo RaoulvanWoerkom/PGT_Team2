@@ -3,6 +3,9 @@ const Ogre::Real MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
 const int SECTION_AMOUNT = 35;
 
+size_t World::bodyCount = 0;
+std::vector<RigidBody*> World::worldObjects;
+
 Ogre::SceneManager* World::mSceneMgr = NULL;
 
 World::World() :
@@ -86,6 +89,7 @@ void World::createBuilding(Ogre::Vector3 pos)
 	//buildingBody.setIsAwake(false);
 
 	addRigidBody(buildingBody);
+	addObjectVertices(buildingBody);
 
 }
 
@@ -178,14 +182,14 @@ void World::createSphereMesh(const std::string& strName, const float r, const in
 
 
 
-void World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount)
+RigidBody* World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, Ogre::String matName)
 {
 
 	//gebasseerd op: https://www.grahamedgecombe.com/blog/2011/08/05/custom-meshes-in-ogre3d en http://www.ogre3d.org/tikiwiki/Generating+A+Mesh
 
-
-
-	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual("CustomMesh", "General");
+	int randNum = rand() % (1000000000);
+	std::string meshName = "CustomMesh" + std::to_string(randNum);
+	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual(meshName, "General");
 	Ogre::SubMesh *subMesh = mesh->createSubMesh();
 
 
@@ -200,6 +204,12 @@ void World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _verte
 	/* the first three floats of each vertex represent the position */
 	decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
 	offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+
+	/*
+	decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+	offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+	*/
+
 
 	/* create the vertex buffer */
 	Ogre::HardwareVertexBufferSharedPtr vertexBuffer =
@@ -217,6 +227,13 @@ void World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _verte
 		_vertices[i * 3] = currVertex.x;
 		_vertices[i * 3 + 1] = currVertex.y;
 		_vertices[i * 3 + 2] = currVertex.z;
+		/*
+		Ogre::Vector3 vNormal = currVertex.normalisedCopy();
+
+		_vertices[i * 6 + 3] = vNormal.x;
+		_vertices[i * 6 + 4] = vNormal.y;
+		_vertices[i * 6 + 5] = vNormal.z;
+		*/
 	}
 
 	vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), _verticesArr, true);
@@ -250,20 +267,26 @@ void World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _verte
 	subMesh->indexData->indexStart = 0;
 
 	/* set the bounds of the mesh */
-	mesh->_setBounds(Ogre::AxisAlignedBox(-100, -100, -100, 100, 100, 100));
+	mesh->_setBounds(Ogre::AxisAlignedBox(-1000, -1000, -1000, 1000, 1000, 1000));
 
 	/* notify the mesh that we're all ready */
 	mesh->load();
 
 	/* you can now create an entity/scene node based on your mesh, e.g. */
 	
-	Ogre::Entity *entity = mSceneMgr->createEntity("CustomEntity", "CustomMesh", "General");
-	entity->setMaterialName("YourMaterial", "General");
+	std::string entityName = "CustomEntity" + std::to_string(randNum); 
+	Ogre::Entity *entity = mSceneMgr->createEntity(entityName, meshName, "General");
+	entity->setMaterialName(matName);
 	Ogre::SceneNode *node2 = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	node2->setPosition(0, 0, 0);
+	node2->setPosition(Ogre::Vector3(0,0,0));
 	node2->attachObject(entity);
 	
 
+	
+	RigidBody *newBody = new RigidBody(node2, entity);
+	addRigidBody(newBody);
+
+	return newBody;
 }
 
 
@@ -271,6 +294,32 @@ void World::addRigidBody(RigidBody* body)
 {
 	worldObjects.push_back(body);
 	bodyCount++;
+}
+
+void World::removeRigidBody(RigidBody* body)
+{
+	for (size_t i = 0; i < bodyCount; i++)
+	{
+		RigidBody* currBody = worldObjects.at(i);
+		if (currBody == body)
+		{
+			worldObjects.erase(worldObjects.begin() + i);
+			bodyCount--;
+			break;
+		}
+	}
+}
+
+void World::addObjectVertices(RigidBody* body)
+{
+	Ogre::Vector3 pos = body->getPosition();
+	std::vector<Ogre::Vector2> sectionList = getSections(pos, false);
+	Ogre::Vector2 coordinates = sectionList.at(0);
+
+	VerticeSection newSection = vertexSections[(int)coordinates.x][(int)coordinates.y];
+	newSection.objects.push_back(body);
+	newSection.objectCount++;
+	vertexSections[(int)coordinates.x][(int)coordinates.y] = newSection;
 }
 
 void World::splitTerrainVertices()
@@ -321,7 +370,7 @@ void World::splitTerrainVertices()
 			VerticeSection newSection = VerticeSection();
 			newSection.minPoint = Ogre::Vector2(lowestX + sectionSize.x * x, lowestZ + sectionSize.y * y);
 			newSection.maxPoint = Ogre::Vector2(lowestX + sectionSize.x * (x + 1), lowestZ + sectionSize.y * (y + 1));
-			newSection.vertices = std::vector<Vertex>();
+			newSection.terrainFaces = std::vector<Face>();
 			vertexSections[x][y] = newSection;
 			//vertexSections[x][y] 
 
@@ -340,22 +389,17 @@ void World::splitTerrainVertices()
 		Ogre::Vector3 point2 = terrainVertices[index2];
 		Ogre::Vector3 point3 = terrainVertices[index3];
 		Ogre::Vector3 middlePoint = (point1 + point2 + point3) / 3;
-		Vertex vertex = Vertex();
-		vertex.point1 = point1;
-		vertex.point2 = point2;
-		vertex.point3 = point3;
-		vertex.point3 = point3;
-		vertex.normal = Helper::normalVector(point1, point2, point3);
-		std::vector<Ogre::Vector3> pointList = std::vector<Ogre::Vector3>();
-		pointList.push_back(point1);
-		pointList.push_back(point2);
-		pointList.push_back(point3);
+		Face face = Face();
+		face.point1 = point1;
+		face.point2 = point2;
+		face.point3 = point3;
+		face.normal = Helper::normalVector(point1, point2, point3);
 
 		std::vector<Ogre::Vector2> sectionList = getSections(middlePoint, false);
 		for (size_t i = 0; i < sectionList.size(); i++)
 		{
 			Ogre::Vector2 currSection = sectionList.at(i);
-			vertexSections[(int)currSection.x][(int)currSection.y].vertices.push_back(vertex);
+			vertexSections[(int)currSection.x][(int)currSection.y].terrainFaces.push_back(face);
 		}
 
 
@@ -389,20 +433,10 @@ std::vector<Ogre::Vector2> World::getSections(Ogre::Vector3 pos, bool surround)
 {
 	std::vector<Ogre::Vector2> ret = std::vector<Ogre::Vector2>();
 	Ogre::Vector2 point1 = Ogre::Vector2(pos.x, pos.z);
-	//Ogre::Vector2 point2 = Ogre::Vector2(pos.x - size.x, pos.z + size.y);
-	//Ogre::Vector2 point3 = Ogre::Vector2(pos.x + size.x, pos.z - size.y);
-	//Ogre::Vector2 point4 = Ogre::Vector2(pos.x + size.x, pos.z + size.y);
 
 	Ogre::Vector2 adjustedPoint1 = Ogre::Vector2(point1.x + abs(lowestMapPos.x), point1.y + abs(lowestMapPos.y));
-	//Ogre::Vector2 adjustedPoint2 = Ogre::Vector2(point2.x + abs(lowestMapPos.x), point2.y + abs(lowestMapPos.y));
-	//Ogre::Vector2 adjustedPoint3 = Ogre::Vector2(point3.x + abs(lowestMapPos.x), point3.y + abs(lowestMapPos.y));
-	//Ogre::Vector2 adjustedPoint4 = Ogre::Vector2(point4.x + abs(lowestMapPos.x), point4.y + abs(lowestMapPos.y));
 
 	Ogre::Vector2 section1 = Ogre::Vector2(floor(adjustedPoint1.x / sectionSize.x), floor(adjustedPoint1.y / sectionSize.y));
-	//Ogre::Vector2 section2 = Ogre::Vector2(floor(adjustedPoint2.x / sectionSize.x), floor(adjustedPoint2.y / sectionSize.y));
-	//Ogre::Vector2 section3 = Ogre::Vector2(floor(adjustedPoint3.x / sectionSize.x), floor(adjustedPoint3.y / sectionSize.y));
-	//Ogre::Vector2 section4 = Ogre::Vector2(floor(adjustedPoint4.x / sectionSize.x), floor(adjustedPoint4.y / sectionSize.y));
-
 
 	section1 = Ogre::Vector2(clamp((int)section1.x, 0, SECTION_AMOUNT - 1), clamp((int)section1.y, 0, SECTION_AMOUNT - 1));
 	if (!Helper::vectorListContainsVector2(ret, section1))
@@ -423,19 +457,6 @@ std::vector<Ogre::Vector2> World::getSections(Ogre::Vector3 pos, bool surround)
 			}
 		}
 	}
-	
-	//section2 = Ogre::Vector2(clamp((int)section2.x, 0, SECTION_AMOUNT - 1), clamp((int)section2.y, 0, SECTION_AMOUNT - 1));
-	//section3 = Ogre::Vector2(clamp((int)section3.x, 0, SECTION_AMOUNT - 1), clamp((int)section3.y, 0, SECTION_AMOUNT - 1));
-	//section4 = Ogre::Vector2(clamp((int)section4.x, 0, SECTION_AMOUNT - 1), clamp((int)section4.y, 0, SECTION_AMOUNT - 1));
-
-	
-	//if (!Helper::vectorListContainsVector2(ret, section2))
-	//	ret.push_back(section2);
-	//if (!Helper::vectorListContainsVector2(ret, section3))
-	//	ret.push_back(section3);
-	//if (!Helper::vectorListContainsVector2(ret, section4))
-	//	ret.push_back(section4);
-
 
 
 
@@ -543,25 +564,68 @@ void World::checkBallCollision()
 	int chosenIndex = -1;
 	Ogre::Vector3 closestHitCoordinates;
 	Ogre::Vector3 normalVec = Ogre::Vector3(-1, -1, -1);
-
 	for (size_t i = 0; i < sectionList.size(); i++)
 	{
 
-		Ogre::Vector2 currSection = sectionList.at(i);
-		std::vector<Vertex> vertexList = vertexSections[(int)currSection.x][(int)currSection.y].vertices;
-		for (size_t j = 0; j < vertexList.size(); j++)
+		Ogre::Vector2 currSectionCoor = sectionList.at(i);
+		VerticeSection currSection = vertexSections[(int)currSectionCoor.x][(int)currSectionCoor.y];
+
+		std::vector<Face> terrainFaceList = currSection.terrainFaces;
+		for (size_t j = 0; j < terrainFaceList.size(); j++)
 		{
-			Vertex currVertex = vertexList.at(j);
-			Ogre::Vector3 collPoint = closestPointOnTriangle(currVertex.point1, currVertex.point2, currVertex.point3, ballPos);
+			Face currFace = terrainFaceList.at(j);
+			Ogre::Vector3 collPoint = closestPointOnTriangle(currFace.point1, currFace.point2, currFace.point3, ballPos);
 			double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
 
 			if (dist < BALL_SIZE && dist < shortestLength)
 			{
 				shortestLength = dist;
 				chosenIndex = j;
-				normalVec = currVertex.normal;
+				normalVec = currFace.normal;
 				closestHitCoordinates = collPoint;
 			}
+		}
+
+		for (size_t j = 0; j < currSection.objectCount; j++)
+		{
+			RigidBody* currBody = currSection.objects.at(j);
+			if (currBody != NULL)
+			{
+				std::vector<Face> bodyFaceList = currBody->faces;
+				for (size_t k = 0; k < currBody->faces.size(); k++)
+				{
+					Face currFace = bodyFaceList.at(k);
+					Ogre::Vector3 collPoint = closestPointOnTriangle(currFace.point1, currFace.point2, currFace.point3, ballPos);
+					double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
+					if (dist < BALL_SIZE && dist < shortestLength)
+					{
+						if (!currBody->isBreakable)
+						{
+							shortestLength = dist;
+							chosenIndex = k;
+							normalVec = currFace.normal;
+							closestHitCoordinates = collPoint;
+						}
+						else
+						{
+							currSection.objectCount--;
+							Building* building = dynamic_cast<Building*>(currBody);
+							building->fracture();
+							currSection.objects.erase(currSection.objects.begin() + j);
+							World::removeRigidBody(currBody);
+							mSceneMgr->destroyEntity(building->entity);
+							delete building;
+							break;
+						}
+					}
+				}
+				if (currSection.objectCount == 0)
+				{
+					break;
+				}
+			}
+			
+			
 		}
 	}
 
@@ -570,10 +634,10 @@ void World::checkBallCollision()
 	{
 		double diffDist = BALL_SIZE - shortestLength;
 		ballPos += normalVec * diffDist;
-		//ballBody.node->setPosition(ballPos);
-		//ballBody.setVelocity(Ogre::Vector3(ballBody.getVelocity().x, 0, ballBody.getVelocity().z));//temporary fix, gotta make contactregistry
 
 		addContact(&cData, normalVec, closestHitCoordinates, diffDist, ballBody);
+		
+		
 	}
 }
 

@@ -4,6 +4,9 @@
 
 class Building : public RigidBody
 {
+private:
+	bool isDestroyed = false;
+
 public:
 	Building(Ogre::SceneNode* _node, Ogre::Entity* _entity);
 	Building(void);
@@ -11,6 +14,6 @@ public:
 	void integrate(Ogre::Real delta);
 
 
-
+	void fracture();
 
 };

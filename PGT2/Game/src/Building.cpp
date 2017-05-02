@@ -5,6 +5,7 @@ Building::Building(Ogre::SceneNode* _node, Ogre::Entity* _entity) : RigidBody(_n
 {
 	Building::node = _node;
 	Building::entity = _entity;
+	Building:isBreakable = true;
 	Building::inverseMass = 1;
 	Building::dampening = 0.995;
 	Building::isAwake = true;
@@ -27,4 +28,21 @@ Building::Building(void)
 void Building::integrate(Ogre::Real delta)
 {
 	//RigidBody::integrate(delta);
+}
+
+void Building::fracture()
+{
+	if (!Building::isDestroyed)
+	{
+		srand(time(NULL));
+		int randNum1 = rand() % (100);
+		int randNum2 = rand() % (100);
+		int randNum3 = rand() % (100);
+		Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
+		ranDir.normalise();
+		RigidBody::cut(RigidBody::getPosition(), ranDir);
+		Building::isDestroyed = true;
+	}
+	
+
 }

@@ -8,9 +8,11 @@ void Ball::updateCameraNode()
 
 Ball::Ball(Ogre::SceneNode* _node, Ogre::SceneNode* _camNode, Ogre::Entity* _entity) : RigidBody(_node, _entity)
 {
+	
 	Ball::node = _node;
 	Ball::cameraNode = _camNode;
 	Ball::entity = _entity;
+	Ball:isBreakable = false;
 	Ball::inverseMass = 1;
 	Ball::dampening = 0.995;
 	Ball::isAwake = true;
