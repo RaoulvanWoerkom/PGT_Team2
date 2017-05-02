@@ -80,7 +80,9 @@ void World::createBuilding(Ogre::Vector3 pos)
 	Ogre::SceneNode* buildingNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	buildingNode->setPosition(pos);
 	buildingNode->setScale(4, 10, 4);
-	Ogre::Entity* buildingEntity = mSceneMgr->createEntity("Cube", "cube.mesh");
+	int randNum = rand() % (1000000000);
+	std::string meshName = "Cube" + std::to_string(randNum);
+	Ogre::Entity* buildingEntity = mSceneMgr->createEntity(meshName, "cube.mesh");
 
 
 	buildingNode->attachObject(buildingEntity);
