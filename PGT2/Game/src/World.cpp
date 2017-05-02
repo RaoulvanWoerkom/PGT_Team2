@@ -64,9 +64,9 @@ void World::createSphere()
 
 	ballNode->attachObject(sphereEntity);
 
-	ballBody = Ball(ballNode, ballCameraNode, sphereEntity);
+	ballBody = new Ball(ballNode, ballCameraNode, sphereEntity);
 
-	addRigidBody(&ballBody);
+	addRigidBody(ballBody);
 }
 
 void World::createBuilding(Ogre::Vector3 pos)
@@ -75,10 +75,10 @@ void World::createBuilding(Ogre::Vector3 pos)
 	buildingNode->setPosition(pos);
 	Ogre::Entity* buildingEntity = mSceneMgr->createEntity("Cube", "cube.mesh");
 	buildingNode->attachObject(buildingEntity);
-	Building buildingBody = Building(buildingNode, buildingEntity);
+	Building* buildingBody = new Building(buildingNode, buildingEntity);
 	//buildingBody.setIsAwake(false);
 
-	addRigidBody(&buildingBody);
+	addRigidBody(buildingBody);
 
 }
 
@@ -366,7 +366,7 @@ void World::createCamera(Ogre::Camera* mCamera, Ogre::SceneManager* mSceneMgr, O
 
 void World::setCameraFollow()
 {
-	camera.setCameraTarget(ballBody.cameraNode);
+	camera.setCameraTarget(ballBody->cameraNode);
 }
 
 
@@ -377,7 +377,7 @@ void World::createViewports()
 
 void World::restartWorld()
 {
-	ballBody.setPosition(Ogre::Vector3(0, 200, 0));
+	ballBody->setPosition(Ogre::Vector3(0, 200, 0));
 }
 
 void World::update(const Ogre::FrameEvent evt)
@@ -389,7 +389,7 @@ void World::update(const Ogre::FrameEvent evt)
 		direction.y = 0;
 		direction.normalise();
 		direction = direction * MOVE_SPEED; // * speed
-		ballBody.addForce(direction);
+		ballBody->addForce(direction);
 
 	}
 	if (InputManager::jDown)
@@ -398,7 +398,7 @@ void World::update(const Ogre::FrameEvent evt)
 		direction.y = 0;
 		direction.normalise();
 		direction = direction * MOVE_SPEED; // * speed
-		ballBody.addForce(direction);
+		ballBody->addForce(direction);
 	}
 	if (InputManager::kDown)
 	{
@@ -406,7 +406,7 @@ void World::update(const Ogre::FrameEvent evt)
 		direction.y = 0;
 		direction.normalise();
 		direction = direction * MOVE_SPEED; // * speed
-		ballBody.addForce(direction);
+		ballBody->addForce(direction);
 	}
 	if (InputManager::lDown)
 	{
@@ -414,7 +414,7 @@ void World::update(const Ogre::FrameEvent evt)
 		direction.y = 0;
 		direction.normalise();
 		direction = direction * MOVE_SPEED; // * speed
-		ballBody.addForce(direction);
+		ballBody->addForce(direction);
 	}
 }
 
@@ -439,7 +439,7 @@ void World::updateObjects(Ogre::Real duration)
 
 void World::checkBallCollision()
 {
-	Ogre::Vector3 ballPos = ballBody.node->getPosition();
+	Ogre::Vector3 ballPos = ballBody->node->getPosition();
 	std::vector<Ogre::Vector2> sectionList = getSections(ballPos, true);
 
 
@@ -477,7 +477,7 @@ void World::checkBallCollision()
 		//ballBody.node->setPosition(ballPos);
 		//ballBody.setVelocity(Ogre::Vector3(ballBody.getVelocity().x, 0, ballBody.getVelocity().z));//temporary fix, gotta make contactregistry
 
-		addContact(&cData, normalVec, closestHitCoordinates, diffDist, &ballBody);
+		addContact(&cData, normalVec, closestHitCoordinates, diffDist, ballBody);
 	}
 }
 

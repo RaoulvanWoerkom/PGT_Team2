@@ -79,7 +79,7 @@ public:
 	
 	Ogre::Light* directionalLight;
 	CustomCamera camera;
-	Ball ballBody;
+	Ball* ballBody;
 	RigidBody* groundBody;
 	static Ogre::SceneManager* mSceneMgr;
 
