@@ -25,8 +25,6 @@ World::~World()
 void World::createLight()
 {
 	mSceneMgr->setAmbientLight(Ogre::ColourValue::White);
-	mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_ADDITIVE);
-
 	// Directional light
 	directionalLight = mSceneMgr->createLight("DirectionalLight");
 	directionalLight->setType(Ogre::Light::LT_DIRECTIONAL);
@@ -61,7 +59,7 @@ void World::createSphere()
 {
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	ballNode->setPosition(0, 300, -520);
+	ballNode->setPosition(0, 300, 0);
 
 
 	createSphereMesh("mySphereMesh", 100, 64, 64);
@@ -637,11 +635,8 @@ void World::checkBallCollision()
 	if (chosenIndex >= 0)
 	{
 		double diffDist = BALL_SIZE - shortestLength;
-		ballPos += normalVec * diffDist;
 
 		addContact(&cData, normalVec, closestHitCoordinates, diffDist, ballBody);
-		
-		
 	}
 }
 

@@ -169,7 +169,7 @@ void Contact::applyVelocityChange(Ogre::Vector3 velocityChange[2],
 	}
 
 	// Convert impulse to world coordinates
-	Ogre::Vector3 impulse = contactToWorld * (impulseContact);
+	Ogre::Vector3 impulse = contactToWorld * impulseContact;
 
 	// Split in the impulse into linear and rotational components
 	Ogre::Vector3 impulsiveTorque = relativeContactPosition[0].crossProduct(impulse);
@@ -307,10 +307,10 @@ Ogre::Vector3 Contact::calculateFrictionImpulse(Ogre::Matrix3 * inverseInertiaTe
 		-contactVelocity.z);
 
 	// Find the impulse to kill target velocities
-	impulseContact = impulseMatrix * (velKill);
+	impulseContact = impulseMatrix * velKill;
 
 	// Check for exceeding friction
-	Ogre::Real planarImpulse = sqrt(
+	Ogre::Real planarImpulse = Ogre::Math::Sqrt(
 		impulseContact.y*impulseContact.y +
 		impulseContact.z*impulseContact.z
 	);
