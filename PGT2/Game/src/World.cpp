@@ -556,30 +556,32 @@ void World::updateObjects(Ogre::Real duration)
 	}
 }
 
+/**
+Checks whether the ball hits an object
+*/
 void World::checkBallCollision()
 {
 	Ogre::Vector3 ballPos = ballBody->node->getPosition();
-	std::vector<Ogre::Vector2> sectionList = getSections(ballPos, true);
-
-
+	std::vector<Ogre::Vector2> sectionList = getSections(ballPos, true); //gets all sections surrounding the ball
 	double shortestLength = 100000000000;
 	int chosenIndex = -1;
 	Ogre::Vector3 closestHitCoordinates;
 	Ogre::Vector3 normalVec = Ogre::Vector3(-1, -1, -1);
-	for (size_t i = 0; i < sectionList.size(); i++)
+	for (size_t i = 0; i < sectionList.size(); i++) //loop through all sections
 	{
 
 		Ogre::Vector2 currSectionCoor = sectionList.at(i);
-		VerticeSection currSection = vertexSections[(int)currSectionCoor.x][(int)currSectionCoor.y];
+		VerticeSection currSection = vertexSections[(int)currSectionCoor.x][(int)currSectionCoor.y]; //get section object
 
 		std::vector<Face> terrainFaceList = currSection.terrainFaces;
-		for (size_t j = 0; j < terrainFaceList.size(); j++)
+		for (size_t j = 0; j < terrainFaceList.size(); j++) //loop through all the terrain vertices inside the section object
 		{
 			Face currFace = terrainFaceList.at(j);
+			//collpoint is point on face closest to the ball
 			Ogre::Vector3 collPoint = closestPointOnTriangle(currFace.point1, currFace.point2, currFace.point3, ballPos);
 			double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
 
-			if (dist < BALL_SIZE && dist < shortestLength)
+			if (dist < BALL_SIZE && dist < shortestLength) //if collpoint is closes than the radius of the ball TO the ball
 			{
 				shortestLength = dist;
 				chosenIndex = j;
