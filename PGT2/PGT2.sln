@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxproj", "{523EAB39-AA76-4ECF-B8DF-836843209AF4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest2", "UnitTest2\UnitTest2.vcxproj", "{5EB1737C-54B8-4913-AB1C-9E5AA8A57227}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Testing", "UnitTest2\UnitTest2.vcxproj", "{5EB1737C-54B8-4913-AB1C-9E5AA8A57227}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
