@@ -18,6 +18,10 @@ cmake_minimum_required(VERSION 2.6)
 
 set(APP "OgreApp")
 
+file(GLOB HDRS ./PGT2/UnitTest2/*.h)
+
+file(GLOB HDRS ./PGT2/UnitTest2/*.cpp)
+
 file(GLOB HDRS ./PGT2/Game/src/*.h)
 
 file(GLOB SRCS ./PGT2/Game/src/*.cpp)
