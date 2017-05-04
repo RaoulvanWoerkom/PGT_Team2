@@ -33,6 +33,7 @@
     <ClInclude Include="src\Baller.h" />
     <ClInclude Include="src\UnitTestSample.h" />
     <ClInclude Include="src\World.h" />
+    <ClInclude Include="src\MeshGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ball.cpp" />
@@ -48,6 +49,7 @@
     <ClCompile Include="src\BaseApplication.cpp" />
     <ClCompile Include="src\Baller.cpp" />
     <ClCompile Include="src\UnitTestSample.cpp" />
+    <ClCompile Include="src\MeshGenerator.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{523EAB39-AA76-4ECF-B8DF-836843209AF4}</ProjectGuid>

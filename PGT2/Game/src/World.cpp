@@ -1,5 +1,12 @@
 #include "World.h"
+#include "MeshGenerator.h"
+#include <OgreMaterialManager.h>
+#include <OgreTechnique.h>
+#include <OgreMovablePlane.h>
+#include <OgreMeshManager.h>
+
 const Ogre::Real MOVE_SPEED = 10;
+
 const int BALL_SIZE = 100;
 const int SECTION_AMOUNT = 35;
 
@@ -69,9 +76,33 @@ void World::createSphere()
 
 	ballBody = new Ball(ballNode, ballCameraNode, sphereEntity);
 	ballBody->entity->setMaterialName("Ball/Skin");
-	
+
 	addRigidBody(ballBody);
 }
+
+void World::createHouse(Ogre::SceneManager* mSceneMgr) {
+
+	Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().create(
+		"Test/ColourTest", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	material->getTechnique(0)->getPass(0)->setVertexColourTracking(Ogre::TVC_EMISSIVE);
+
+
+
+	Ogre::SceneNode* thisSceneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	thisSceneNode->setPosition(0, 250, 0);
+	MeshGenerator meshG = MeshGenerator(thisSceneNode);
+	meshG.createColourCube();
+
+
+	Ogre::Entity* thisEntity = mSceneMgr->createEntity("cc", "ColourCube");
+	thisSceneNode->attachObject(thisEntity);
+	//thisEntity->setMaterialName("Ogre/Earring");
+	thisEntity->setMaterialName("Ogre/Skin");
+
+	houseBody = new RigidBody(thisSceneNode, thisEntity);
+	addRigidBody(houseBody);
+}
+
 
 void World::createBuilding(Ogre::Vector3 pos)
 {
@@ -90,6 +121,10 @@ void World::createBuilding(Ogre::Vector3 pos)
 
 	addRigidBody(buildingBody);
 	addObjectVertices(buildingBody);
+
+	Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("Skin", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	
+	Ogre::TextureUnitState* tuisTexture = mat->getTechnique(0)->getPass(0)->createTextureUnitState("DrySkin");
 
 }
 
@@ -756,4 +791,5 @@ Ogre::Real World::clamp(Ogre::Real n, Ogre::Real lower, Ogre::Real upper) {
 int World::clamp(int n, int lower, int upper) {
 	return std::max(lower, std::min(n, upper));
 }
+
 

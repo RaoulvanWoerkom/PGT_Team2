@@ -9,6 +9,7 @@
 #include "Ball.h"
 #include "Building.h"
 #include "Contact.h"
+#include "MeshGenerator.h"
 
 
 
@@ -76,6 +77,7 @@ public:
 	Ball* ballBody;
 	RigidBody* groundBody;
 	static Ogre::SceneManager* mSceneMgr;
+	RigidBody* houseBody;
 
 	static std::vector<RigidBody*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
@@ -100,7 +102,7 @@ public:
 	void createBuilding(Ogre::Vector3 pos);
 
 	static RigidBody* createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, Ogre::String matName);
-
+	virtual void createHouse(Ogre::SceneManager* mSceneMgr);
 
 	bool mouseMoved(const OIS::MouseEvent &arg);
 	void createCamera(Ogre::Camera* mCamera, Ogre::SceneManager* mSceneMgr, Ogre::RenderWindow* mWindow);
