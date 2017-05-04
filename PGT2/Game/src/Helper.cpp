@@ -234,7 +234,7 @@ Ogre::Vector3 Helper::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, O
 	long ny = e1z*e2x - e1x*e2z;
 	long nz = e1x*e2y - e1y*e2x;
 
-	Ogre::Vector3 ret = Ogre::Vector3(nx, ny, nx);
+	Ogre::Vector3 ret = Ogre::Vector3(nx, ny, nz);
 	ret.normalise();
 	return ret;
 

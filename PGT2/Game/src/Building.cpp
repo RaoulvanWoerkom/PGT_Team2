@@ -5,7 +5,7 @@ Building::Building(Ogre::SceneNode* _node, Ogre::Entity* _entity) : RigidBody(_n
 {
 	Building::node = _node;
 	Building::entity = _entity;
-	Building:isBreakable = true;
+	Building::isBreakable = true;
 	Building::inverseMass = 1;
 	Building::dampening = 0.995;
 	Building::isAwake = true;
