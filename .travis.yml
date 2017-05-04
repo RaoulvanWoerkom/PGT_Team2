@@ -5,10 +5,7 @@ addons:
     token:
       secure: "SONAR_TOKEN" # encrypted value of your token
   branches:
-    - citest
-    - CiTest
     - master
-    - CITest
 
 before_install:
   - chmod +x tools/ci/before-install.sh
@@ -17,6 +14,8 @@ before_install:
 install:
   - chmod +x tools/ci/install.sh
   - tools/ci/install.sh
+  - sudo apt-get update
+  - sudo apt-get install libcppunit-dev
 
 script:
   - chmod +x tools/ci/build.sh
