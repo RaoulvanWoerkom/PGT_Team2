@@ -1,4 +1,7 @@
 #include "World.h"
+#include <sstream>
+#include <string>
+
 const Ogre::Real MOVE_SPEED = 10;
 const int BALL_SIZE = 100;
 const int SECTION_AMOUNT = 35;
@@ -180,7 +183,14 @@ void World::createSphereMesh(const std::string& strName, const float r, const in
 	pSphere->load();
 }
 
-
+// TODO FIX FOR TRAVIS ERROR (error: ‘to_string’ is not a member of ‘std’)
+template <typename T>
+std::string to_string(T value)
+{
+	std::ostringstream os;
+	os << value;
+	return os.str();
+}
 
 RigidBody* World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, Ogre::String matName)
 {
