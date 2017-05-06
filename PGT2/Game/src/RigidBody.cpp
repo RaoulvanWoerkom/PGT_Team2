@@ -20,6 +20,7 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::inertiaTensor = Ogre::Matrix3().ZERO;
 	RigidBody::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
 	RigidBody::loadMeshInfo();
+	RigidBody::createBoundingBox();
 
 
 	/*
@@ -301,6 +302,55 @@ Ogre::Real RigidBody::getMass()
 Ogre::Real RigidBody::getInverseMass()
 {
 	return RigidBody::inverseMass;
+}
+
+void RigidBody::createBoundingBox()
+{
+	Ogre::Vector2 maxSize = Ogre::Vector2(10000000, 10000000);
+	Ogre::Vector2 minSize = Ogre::Vector2(-10000000, -10000000);
+
+	for (int i = 0; i < vertexCount; i++)
+	{
+		if (vertices[i].x < maxSize.x)
+			maxSize.x = vertices[i].x;
+		if (vertices[i].z < maxSize.y)
+			maxSize.y = vertices[i].z;
+		
+
+		if (vertices[i].x > minSize.x)
+			minSize.x = vertices[i].x;
+		if (vertices[i].z > minSize.y)
+			minSize.y = vertices[i].z;
+		
+	}
+
+	boundingBox.push_back(maxSize);
+	boundingBox.push_back(minSize);
+	//boundingBox.push_back(Ogre::Vector3(maxSize.x, maxSize.y, minSize.y));
+	//boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, maxSize.y));
+	//boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, maxSize.y));
+	//boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.y));
+	//boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.y));
+	//boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.y));
+}
+
+std::vector<Ogre::Vector2> RigidBody::getBoundingBox()
+{
+	return RigidBody::boundingBox;
+}
+
+bool RigidBody::setAndCheckIsAwake()
+{
+	if (RigidBody::velocity.length + RigidBody::rotation.length < 8)
+	{
+		RigidBody::setIsAwake(false);
+		return false;
+	}
+	else
+	{
+		RigidBody::setIsAwake(true);
+		return true;
+	}
 }
 
 void RigidBody::setInertiaTensor(const Ogre::Matrix3& inertiaTensor)

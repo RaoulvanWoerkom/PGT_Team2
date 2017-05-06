@@ -589,6 +589,44 @@ void World::updateObjects(Ogre::Real duration)
 	}
 }
 
+void World::CoarseCollisionDetection()
+{
+	//loop trough all sections
+	for (int i = 0; i < (sectionSize.x * sectionSize.y); i++)
+	{
+		//loop trough all objects
+		for (int x = 0; x < worldObjects.size(); x++)
+		{
+			Ogre::Vector3 currPos = worldObjects[x]->getPosition();
+			Ogre::Vector2 currPosXZ = Ogre::Vector2(currPos.x, currPos.z);
+			std::vector<Ogre::Vector2> boundingBox = worldObjects[x]->getBoundingBox();
+			
+			//check if object is within max and min of section
+			if (currPosXZ + boundingBox[0] < vertexSections[i]->maxPoint
+				&& currPosXZ + boundingBox[1] > vertexSections[i]->minPoint)
+			{
+				vertexSections[i]->objects.push_back(worldObjects[x]);
+				vertexSections[i]->objectCount++;
+			}
+		}
+
+		for (int z = 0; vertexSections[i]->objectCount; z++)
+		{
+			RigidBody* object = vertexSections[i]->objects[z];
+			if (object->setAndCheckIsAwake())
+			{
+				vertexSections[i]->isActive = true;
+
+				//do Collision
+			}
+			else 
+			{
+				vertexSections[i]->isActive = false;
+			}
+		}
+	}
+}
+
 /**
 Checks whether the ball hits an object
 */

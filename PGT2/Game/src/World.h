@@ -20,6 +20,7 @@ typedef struct
 	std::vector<RigidBody*> objects;
 	size_t objectCount;
 	std::vector<Face> terrainFaces;
+	bool isActive;
 } VerticeSection;
 
 struct BodyRegistration
@@ -110,6 +111,8 @@ public:
 	void restartWorld();
 	void update(const Ogre::FrameEvent evt);
 	void setCameraFollow();
+	void CoarseCollisionDetection();
+
 
 	/** Holds the maximum number of contacts. */
 	const static unsigned maxContacts = 256;
@@ -128,6 +131,7 @@ public:
 
 	/** Processes the objects in the simulation forward in time. */
 	void updateObjects(Ogre::Real duration);
+
 
 
 private:
