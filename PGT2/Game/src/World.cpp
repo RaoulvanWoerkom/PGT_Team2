@@ -589,7 +589,11 @@ void World::updateObjects(Ogre::Real duration)
 	}
 }
 
-void World::CoarseCollisionDetection()
+
+/**
+go through all the sections and all objects to check if there is movement. Then do collision check per object.
+*/
+void World::CollisionDetection()
 {
 	//loop trough all sections
 	for (int i = 0; i < (sectionSize.x * sectionSize.y); i++)
