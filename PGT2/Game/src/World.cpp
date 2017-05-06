@@ -77,7 +77,6 @@ void World::createSphere()
 	ballBody = new Ball(ballNode, ballCameraNode, sphereEntity);
 	ballBody->entity->setMaterialName("Ball/Skin");
 
-	addRigidBody(ballBody);
 }
 
 void World::createHouse(Ogre::SceneManager* mSceneMgr) {
@@ -579,6 +578,7 @@ void World::generateContacts()
 	cData.tolerance = (Ogre::Real)0.1;
 
 	checkBallCollision();
+	WorldObjectCollisionDetection();
 }
 
 void World::updateObjects(Ogre::Real duration)
@@ -587,45 +587,51 @@ void World::updateObjects(Ogre::Real duration)
 	{
 		worldObjects[i]->integrate(duration);
 	}
+
+	//ballBody is not in worldObjects because it has unique collision detection
+	ballBody->integrate(duration);
 }
 
 
 /**
-go through all the sections and all objects to check if there is movement. Then do collision check per object.
+go through all the sections and all objects to check if there is movement. Then do collision check per section. (ball collision is excluded)
 */
-void World::CollisionDetection()
+void World::WorldObjectCollisionDetection()
 {
-	//loop trough all sections
-	for (int i = 0; i < (sectionSize.x * sectionSize.y); i++)
+	//loop trough all objects
+	for (int x = 0; x < worldObjects.size(); x++)
 	{
-		//loop trough all objects
-		for (int x = 0; x < worldObjects.size(); x++)
-		{
-			Ogre::Vector3 currPos = worldObjects[x]->getPosition();
-			Ogre::Vector2 currPosXZ = Ogre::Vector2(currPos.x, currPos.z);
-			std::vector<Ogre::Vector2> boundingBox = worldObjects[x]->getBoundingBox();
-			
-			//check if object is within max and min of section
-			if (currPosXZ + boundingBox[0] < vertexSections[i]->maxPoint
-				&& currPosXZ + boundingBox[1] > vertexSections[i]->minPoint)
-			{
-				vertexSections[i]->objects.push_back(worldObjects[x]);
-				vertexSections[i]->objectCount++;
-			}
-		}
+		Ogre::Vector3 currPos = worldObjects[x]->getPosition();
+		Ogre::Vector2 currPosXZ = Ogre::Vector2(currPos.x, currPos.z);;
 
-		for (int z = 0; vertexSections[i]->objectCount; z++)
-		{
-			RigidBody* object = vertexSections[i]->objects[z];
-			if (object->setAndCheckIsAwake())
-			{
-				vertexSections[i]->isActive = true;
+		std::vector<Ogre::Vector2> boundingBox = worldObjects[x]->getBoundingBox();
 
-				//do Collision
-			}
-			else 
+		//check if object is within max and min of section (without looping through all the sections)
+		//if () 
+		//{
+			//vertexSections[i][j].objects.push_back(worldObjects[x]);
+			//vertexSections[i][j].objectCount++;
+		//}
+	}
+
+	//loop trough all sections (preferably all sections that have objects in them)
+	for (size_t i = 0; i < SECTION_AMOUNT; i++)
+	{
+		for (size_t j = 0; j < SECTION_AMOUNT; j++)
+		{
+			for (int z = 0; z < vertexSections[i][j].objectCount; z++)
 			{
-				vertexSections[i]->isActive = false;
+				RigidBody* object = vertexSections[i][j].objects[z];
+				if (object->setAndCheckIsAwake())
+				{
+					vertexSections[i][j].isActive = true;
+
+					//do Collision
+				}
+				else
+				{
+					vertexSections[i][j].isActive = false;
+				}
 			}
 		}
 	}

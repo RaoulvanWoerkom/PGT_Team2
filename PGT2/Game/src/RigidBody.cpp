@@ -341,7 +341,7 @@ std::vector<Ogre::Vector2> RigidBody::getBoundingBox()
 
 bool RigidBody::setAndCheckIsAwake()
 {
-	if (RigidBody::velocity.length + RigidBody::rotation.length < 8)
+	if (RigidBody::velocity.length() + RigidBody::rotation.length() < 8)
 	{
 		RigidBody::setIsAwake(false);
 		return false;

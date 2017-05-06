@@ -111,7 +111,7 @@ public:
 	void restartWorld();
 	void update(const Ogre::FrameEvent evt);
 	void setCameraFollow();
-	void CollisionDetection();
+	void WorldObjectCollisionDetection();
 
 
 	/** Holds the maximum number of contacts. */
