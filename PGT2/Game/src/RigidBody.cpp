@@ -306,36 +306,47 @@ Ogre::Real RigidBody::getInverseMass()
 
 void RigidBody::createBoundingBox()
 {
-	Ogre::Vector2 maxSize = Ogre::Vector2(10000000, 10000000);
-	Ogre::Vector2 minSize = Ogre::Vector2(-10000000, -10000000);
+	Ogre::Vector3 maxSize = Ogre::Vector3(10000000, 10000000, 10000000);
+	Ogre::Vector3 minSize = Ogre::Vector3(-10000000, -10000000, -10000000);
 
 	for (int i = 0; i < vertexCount; i++)
 	{
 		if (vertices[i].x < maxSize.x)
 			maxSize.x = vertices[i].x;
-		if (vertices[i].z < maxSize.y)
-			maxSize.y = vertices[i].z;
-		
-
-		if (vertices[i].x > minSize.x)
+		if (vertices[i].z > minSize.x)
 			minSize.x = vertices[i].x;
-		if (vertices[i].z > minSize.y)
-			minSize.y = vertices[i].z;
-		
+
+		if (vertices[i].y < maxSize.y)
+			maxSize.y = vertices[i].y;
+		if (vertices[i].y > minSize.y)
+			minSize.y = vertices[i].y;
+
+		if (vertices[i].z < maxSize.z)
+			maxSize.z = vertices[i].z;
+		if (vertices[i].z > minSize.x)
+			minSize.z = vertices[i].z;
 	}
 
 	boundingBox.push_back(maxSize);
 	boundingBox.push_back(minSize);
-	//boundingBox.push_back(Ogre::Vector3(maxSize.x, maxSize.y, minSize.y));
-	//boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, maxSize.y));
-	//boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, maxSize.y));
-	//boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.y));
-	//boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.y));
-	//boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.y));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, maxSize.y, minSize.y));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, maxSize.y));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, maxSize.y));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.y));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.y));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.y));
 }
 
-std::vector<Ogre::Vector2> RigidBody::getBoundingBox()
+std::vector<Ogre::Vector3> RigidBody::getBoundingBox()
 {
+	Ogre::Matrix3 rotMatrix;
+	getOrientation().ToRotationMatrix(rotMatrix);
+
+	for (int i = 0; i < boundingBox.size(); i++)
+	{
+		boundingBox[i] = boundingBox[i] * rotMatrix;
+	}
+
 	return RigidBody::boundingBox;
 }
 

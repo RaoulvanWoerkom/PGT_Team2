@@ -35,7 +35,7 @@ protected:
 	bool isAwake;
 	bool canSleep;
 
-	std::vector<Ogre::Vector2> boundingBox;
+	std::vector<Ogre::Vector3> boundingBox;
 
 	size_t vertexCount, indexCount;
 	Ogre::Vector3* vertices;
@@ -78,7 +78,7 @@ public:
 	Ogre::Real getMass();
 	Ogre::Real getInverseMass();
 	void createBoundingBox();
-	std::vector<Ogre::Vector2> getBoundingBox();
+	std::vector<Ogre::Vector3> getBoundingBox();
 	bool setAndCheckIsAwake();
 
 	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);

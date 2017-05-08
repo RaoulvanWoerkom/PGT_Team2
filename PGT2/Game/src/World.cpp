@@ -604,7 +604,7 @@ void World::WorldObjectCollisionDetection()
 		Ogre::Vector3 currPos = worldObjects[x]->getPosition();
 		Ogre::Vector2 currPosXZ = Ogre::Vector2(currPos.x, currPos.z);;
 
-		std::vector<Ogre::Vector2> boundingBox = worldObjects[x]->getBoundingBox();
+		std::vector<Ogre::Vector3> boundingBox = worldObjects[x]->getBoundingBox();
 
 		//check if object is within max and min of section (without looping through all the sections)
 		//if () 
