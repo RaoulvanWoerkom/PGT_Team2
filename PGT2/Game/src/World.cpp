@@ -504,6 +504,7 @@ bool World::mouseMoved(const OIS::MouseEvent &arg)
 {
 	camera.camNode->pitch(Ogre::Degree(-arg.state.Y.rel * 0.25f));
 	camera.camNode->yaw(Ogre::Degree(-arg.state.X.rel * 0.25f));
+	camera.zoomCamera(-arg.state.Z.rel * 0.25f);
 	return true;
 }
 

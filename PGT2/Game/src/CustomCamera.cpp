@@ -37,5 +37,12 @@ void CustomCamera::setCameraTarget(Ogre::SceneNode* node)
 	camera->setAutoTracking(true, node);
 }
 
+void CustomCamera::zoomCamera(float zoomAmount)
+{
+	Ogre::Vector3 nodePostion = camPitchNode->getPosition();
+	nodePostion.z += zoomAmount;
+	camPitchNode->setPosition(nodePostion);
+}
+
 
 
