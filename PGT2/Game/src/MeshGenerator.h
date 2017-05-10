@@ -5,7 +5,7 @@
 #include "BaseApplication.h"
 #include "RigidBody.h"
 
-class MeshGenerator : public RigidBody
+class MeshGenerator
 {
 protected:
 

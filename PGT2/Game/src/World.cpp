@@ -117,6 +117,7 @@ void World::createBuilding(Ogre::Vector3 pos)
 	buildingNode->attachObject(buildingEntity);
 	Building* buildingBody = new Building(buildingNode, buildingEntity);
 	buildingBody->entity->setMaterialName("Building/Wall");
+
 	//buildingBody.setIsAwake(false);
 
 	addRigidBody(buildingBody);
@@ -240,10 +241,13 @@ RigidBody* World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int 
 	decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
 	offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
 
-	/*
+	
 	decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
-	offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-	*/
+
+	/* two dimensional texture coordinates */
+	decl->addElement(0, offset, Ogre::VET_FLOAT4, Ogre::VES_TEXTURE_COORDINATES);
+
+	
 
 
 	/* create the vertex buffer */
@@ -312,6 +316,9 @@ RigidBody* World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int 
 	std::string entityName = "CustomEntity" + std::to_string(randNum); 
 	Ogre::Entity *entity = mSceneMgr->createEntity(entityName, meshName, "General");
 	entity->setMaterialName(matName);
+
+	
+
 	Ogre::SceneNode *node2 = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	node2->setPosition(Ogre::Vector3(0,0,0));
 	node2->attachObject(entity);
