@@ -9,6 +9,8 @@ const Ogre::Real MOVE_SPEED = 10;
 
 const int BALL_SIZE = 100;
 const int SECTION_AMOUNT = 35;
+const int JUMP_CHARGE = 5;
+const int JUMP_MAX = 500;
 
 size_t World::bodyCount = 0;
 std::vector<RigidBody*> World::worldObjects;
@@ -21,6 +23,7 @@ World::World() :
 	cData.contactArray = contacts;
 	worldObjects = std::vector<RigidBody*>();
 	bodyCount = 0;
+	jumpPower = 0;
 }
 
 World::~World()
@@ -568,6 +571,20 @@ void World::update(const Ogre::FrameEvent evt)
 		direction.normalise();
 		direction = direction * MOVE_SPEED; // * speed
 		ballBody->addForce(direction);
+	}
+	if (InputManager::spaceDown && jumpPower < JUMP_MAX)
+	{
+   		jumpPower += JUMP_CHARGE;
+		if (jumpPower > JUMP_MAX)
+		{
+			jumpPower = JUMP_MAX;
+		}
+	}
+	else if (jumpPower > 0 && !InputManager::spaceDown)
+	{
+		Ogre::Vector3 jumpDirection = Ogre::Vector3(0, jumpPower, 0);
+		ballBody->addForce(jumpDirection);
+		jumpPower = 0;
 	}
 }
 
