@@ -373,7 +373,10 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	int rightIndexCount = 0;
 	int* rightIndices = new int[newIndexMax];
 	
-
+	// Array to store the array index of the new intersection vertices, so we can loop through them.
+	int numIntersections = faceCount * 2;
+	int intersectionCount = -1;
+	int* newIntersections = new int[numIntersections];
 	
 	// Iterate through each face and decide which list to put it in and whether to divide it
 	for (int i = 0; i < faceCount; ++i)
@@ -450,6 +453,10 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 				intersect1index = newVertexCount++;
 				intersect2index = newVertexCount++;
 
+				// Store intersection index in the intersection array
+				newIntersections[intersectionCount++] = intersect1index;
+				newIntersections[intersectionCount++] = intersect2index;
+
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
 				newVertices[intersect2index] = intersect2;
@@ -501,6 +508,10 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 				intersect1index = newVertexCount++;
 				intersect2index = newVertexCount++;
 
+				// Store intersection index in the intersection array
+				newIntersections[intersectionCount++] = intersect1index;
+				newIntersections[intersectionCount++] = intersect2index;
+
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
 				newVertices[intersect2index] = intersect2;
@@ -551,6 +562,10 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 				intersect1index = newVertexCount++;
 				intersect2index = newVertexCount++;
+
+				// Store intersection index in the intersection array
+				newIntersections[intersectionCount++] = intersect1index;
+				newIntersections[intersectionCount++] = intersect2index;
 
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
@@ -607,6 +622,10 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 				intersect1index = newVertexCount++;
 				intersect2index = newVertexCount++;
 
+				// Store intersection index in the intersection array
+				newIntersections[intersectionCount++] = intersect1index;
+				newIntersections[intersectionCount++] = intersect2index;
+
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
 				newVertices[intersect2index] = intersect2;
@@ -658,6 +677,10 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 				intersect1index = newVertexCount++;
 				intersect2index = newVertexCount++;
 
+				// Store intersection index in the intersection array
+				newIntersections[intersectionCount++] = intersect1index;
+				newIntersections[intersectionCount++] = intersect2index;
+
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
 				newVertices[intersect2index] = intersect2;
@@ -708,6 +731,10 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 				intersect1index = newVertexCount++;
 				intersect2index = newVertexCount++;
+
+				// Store intersection index in the intersection array
+				newIntersections[intersectionCount++] = intersect1index;
+				newIntersections[intersectionCount++] = intersect2index;
 
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
