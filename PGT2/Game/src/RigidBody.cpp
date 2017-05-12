@@ -777,6 +777,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	newVertices[middlePointIndex] = planePoint;
 
 	// When creating missing intersection faces: Amount of new indices added = intersectionPoints * 3
+	// intersectionCount--;
 	int missingFacesIndices = intersectionCount * 3;
 
 	// copy left and right indice index arrays, size needs to be increased to account for the new missing face indices
@@ -799,7 +800,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 	for (int i = 0; i < intersectionCount; i++)
 	{
-		if (i < intersectionCount - 1)
+		if (i < intersectionCount -1)
 		{
 			leftIndices[leftIndexCount++] = intersectionsArray[i];
 			leftIndices[leftIndexCount++] = intersectionsArray[i + 1];
@@ -830,17 +831,17 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 	for (int i = 0; i < intersectionCount; i++)
 	{
-		if (i < intersectionCount - 1)
+		if (i < intersectionCount -1)
 		{
 			rightIndices[rightIndexCount++] = intersectionsArray[i];
-			rightIndices[rightIndexCount++] = intersectionsArray[i + 1];
 			rightIndices[rightIndexCount++] = middlePointIndex;
+			rightIndices[rightIndexCount++] = intersectionsArray[i + 1];
 		}
 		else
 		{
 			rightIndices[rightIndexCount++] = intersectionsArray[i];
-			rightIndices[rightIndexCount++] = intersectionsArray[0];
 			rightIndices[rightIndexCount++] = middlePointIndex;
+			rightIndices[rightIndexCount++] = intersectionsArray[0];
 		}
 
 	}
@@ -886,7 +887,7 @@ void RigidBody::fillIntersectionFaces(Ogre::Vector3* _verticesArr, int* _indices
 	// Left
 	for (int i = 0; i < intersectionTotal; i++)
 	{
-		if (i < intersectionTotal - 1)
+		if (i < intersectionTotal)
 		{
 			_indicesArr[_indexCount++] = intersectionsArray[i];
 			_indicesArr[_indexCount++] = intersectionsArray[i + 1];
