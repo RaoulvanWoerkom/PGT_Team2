@@ -374,9 +374,9 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	int* rightIndices = new int[newIndexMax];
 	
 	// Array to store the array index of the new intersection vertices, so we can loop through them.
-	int intersectionTotal = faceCount * 2;
-	int intersectionCount = -1;
-	int* intersectionsArray = new int[intersectionTotal];
+	int intersectionMax = faceCount * 2;
+	int intersectionCount = 0;
+	int* intersectionsArray = new int[intersectionMax];
 	
 	// Iterate through each face and decide which list to put it in and whether to divide it
 	for (int i = 0; i < faceCount; ++i)
@@ -765,24 +765,54 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 		}
 	}
 
-	// TODO: THIS IS DEBUG CODE, NEEDS TO BE REMOVED.
-	int INDEX = 6661236829396;
-	Ogre::Vector3 INTERSECTION_VERTEX = newVertices[0];
+	// updating newVertices, leftIndices and rightIndices arrays with new array sizes because of soon to be added data for the missing faces.
 
-	// Loop through every intersection vertex
-	for (int i = 0; i < intersectionTotal; ++i)
-	{
-		// The index number in the newVertices array of the intersection point [i]
-		INDEX = intersectionsArray[i];
-		// The vertex with coordinates with the associated index number
-		INTERSECTION_VERTEX = newVertices[INDEX];
-	}
+	// Adding new middle point for filling in the missing faces
+	newVertexMax++;
+	Ogre::Vector3* newArr = new Ogre::Vector3[newVertexMax];
+	std::copy(newVertices, newVertices + std::min(newVertexMax - 1, newVertexMax), newArr);
+	delete[] newVertices;
+	newVertices = newArr;
+	int middlePointIndex = newVertexCount++;
+	newVertices[middlePointIndex] = planePoint;
 
+	// When creating missing intersection faces: Amount of new indices added = intersectionPoints * 3
+	int missingFacesIndices = intersectionCount * 3;
+
+	// copy left and right indice index arrays, size needs to be increased to account for the new missing face indices
+	int* newArr2 = new int[newIndexMax + missingFacesIndices];
+	std::copy(leftIndices, leftIndices + std::min(newIndexMax, newIndexMax + missingFacesIndices), newArr2);
+	delete[] leftIndices;
+	leftIndices = newArr2;
+
+	int* newArr3 = new int[newIndexMax + missingFacesIndices];
+	std::copy(rightIndices, rightIndices + std::min(newIndexMax, newIndexMax + missingFacesIndices), newArr3);
+	delete[] rightIndices;
+	rightIndices = newArr3;
+
+	// Todo: Refactor into function so we can reuse it for left and right
 	Ogre::Vector3* leftVertices2 = new Ogre::Vector3[newVertexCount];
 	Ogre::Vector3* leftNormals2 = new Ogre::Vector3[newVertexCount];
-	int* leftIndices2 = new int[newIndexMax];
+	int* leftIndices2 = new int[newIndexMax + missingFacesIndices];
 	int leftVertexCount2 = newVertexCount;
-	int leftIndexCount2 = leftIndexCount;
+	int leftIndexCount2 = leftIndexCount + missingFacesIndices;
+
+	for (int i = 0; i < intersectionCount; i++)
+	{
+		if (i < intersectionCount - 1)
+		{
+			leftIndices[leftIndexCount++] = intersectionsArray[i];
+			leftIndices[leftIndexCount++] = intersectionsArray[i + 1];
+			leftIndices[leftIndexCount++] = middlePointIndex;
+		}
+		else
+		{
+			leftIndices[leftIndexCount++] = intersectionsArray[i];
+			leftIndices[leftIndexCount++] = intersectionsArray[0];
+			leftIndices[leftIndexCount++] = middlePointIndex;
+		}
+
+	}
 
 	memcpy(leftVertices2, newVertices, leftVertexCount2 * sizeof(Ogre::Vector3));
 	memcpy(leftNormals2, newNormals, leftVertexCount2 * sizeof(Ogre::Vector3));
@@ -794,9 +824,26 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 	Ogre::Vector3* rightVertices2 = new Ogre::Vector3[newVertexCount];
 	Ogre::Vector3* rightNormals2 = new Ogre::Vector3[newVertexCount];
-	int* rightIndices2 = new int[newIndexMax];
+	int* rightIndices2 = new int[newIndexMax + missingFacesIndices];
 	int rightVertexCount2 = newVertexCount;
-	int rightIndexCount2 = rightIndexCount;
+	int rightIndexCount2 = rightIndexCount + missingFacesIndices;
+
+	for (int i = 0; i < intersectionCount; i++)
+	{
+		if (i < intersectionCount - 1)
+		{
+			rightIndices[rightIndexCount++] = intersectionsArray[i];
+			rightIndices[rightIndexCount++] = intersectionsArray[i + 1];
+			rightIndices[rightIndexCount++] = middlePointIndex;
+		}
+		else
+		{
+			rightIndices[rightIndexCount++] = intersectionsArray[i];
+			rightIndices[rightIndexCount++] = intersectionsArray[0];
+			rightIndices[rightIndexCount++] = middlePointIndex;
+		}
+
+	}
 
 	memcpy(rightVertices2, newVertices, rightVertexCount2 * sizeof(Ogre::Vector3));
 	memcpy(rightNormals2, newNormals, rightVertexCount2 * sizeof(Ogre::Vector3));
@@ -819,6 +866,54 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	delete rightVertices2;
 	delete rightNormals2;
 	delete rightIndices2;
+}
+
+
+
+
+/// \brief Fill in the missing faces on the intersection plane after slicing a mesh.
+///
+/// When slicing a mesh with the cut() method, the place where the meshes are cut is not yet filled with faces.
+/// This results in a visual bug and collision issues.
+/// This method will create new faces on the place where the mesh is cut, using the vertices that where created
+/// in the cut method along the slicing plane edge. To create triangular faces from these intersection vertices,
+/// indices are created between them and planePoint, because it is always exactly in the middle of all the other vertices.
+
+// fillIntersectionFaces(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount, intersectionMax, intersectionsArray, newVertices, planePoint);
+void RigidBody::fillIntersectionFaces(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, int intersectionTotal, int* intersectionsArray, Ogre::Vector3* newVertices, int middlePointIndex)
+{
+	// Add triangles
+	// Left
+	for (int i = 0; i < intersectionTotal; i++)
+	{
+		if (i < intersectionTotal - 1)
+		{
+			_indicesArr[_indexCount++] = intersectionsArray[i];
+			_indicesArr[_indexCount++] = intersectionsArray[i + 1];
+			_indicesArr[_indexCount++] = middlePointIndex;
+		}
+		else
+		{
+			_indicesArr[_indexCount++] = intersectionsArray[i];
+			_indicesArr[_indexCount++] = intersectionsArray[0];
+			_indicesArr[_indexCount++] = middlePointIndex;
+		}
+	}
+	// leftIndices[leftIndexCount++] = i2;
+	// leftIndices[leftIndexCount++] = intersect2index;
+	// leftIndices[leftIndexCount++] = intersect1index;
+	/*
+	// Loop through every intersection vertex
+	for (int i = 0; i < intersectionTotal; ++i)
+	{
+		// The index number in the newVertices array of the intersection point [i]
+		INDEX = intersectionsArray[i];
+		// The vertex with coordinates with the associated index number
+		INTERSECTION_VERTEX = newVertices[INDEX];
+	}
+	*/
+
+	
 }
 
 
