@@ -337,6 +337,10 @@ void RigidBody::createBoundingBox()
 	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.y));
 }
 
+
+/**
+gets boundingbox coordinates in world space
+*/
 std::vector<Ogre::Vector3> RigidBody::getBoundingBox()
 {
 	Ogre::Matrix3 rotMatrix;
@@ -344,7 +348,7 @@ std::vector<Ogre::Vector3> RigidBody::getBoundingBox()
 
 	for (int i = 0; i < boundingBox.size(); i++)
 	{
-		boundingBox[i] = boundingBox[i] * rotMatrix;
+		boundingBox[i] = RigidBody::getPosition() + (boundingBox[i] * rotMatrix);
 	}
 
 	return RigidBody::boundingBox;

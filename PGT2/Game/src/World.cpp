@@ -602,37 +602,15 @@ void World::WorldObjectCollisionDetection()
 	for (int x = 0; x < worldObjects.size(); x++)
 	{
 		Ogre::Vector3 currPos = worldObjects[x]->getPosition();
-		Ogre::Vector2 currPosXZ = Ogre::Vector2(currPos.x, currPos.z);;
+		std::vector<Ogre::Vector3> boundingBox = worldObjects[x]->getBoundingBox(); //bounding box is already in world space coordinates
 
-		std::vector<Ogre::Vector3> boundingBox = worldObjects[x]->getBoundingBox();
+		std::vector<Ogre::Vector2> sectionList = getSections(boundingBox); //holds the sections... i think
 
-		//check if object is within max and min of section (without looping through all the sections)
-		//if () 
-		//{
-			//vertexSections[i][j].objects.push_back(worldObjects[x]);
-			//vertexSections[i][j].objectCount++;
-		//}
-	}
-
-	//loop trough all sections (preferably all sections that have objects in them)
-	for (size_t i = 0; i < SECTION_AMOUNT; i++)
-	{
-		for (size_t j = 0; j < SECTION_AMOUNT; j++)
+		for (size_t i = 0; i < sectionList.size(); i++)
 		{
-			for (int z = 0; z < vertexSections[i][j].objectCount; z++)
-			{
-				RigidBody* object = vertexSections[i][j].objects[z];
-				if (object->setAndCheckIsAwake())
-				{
-					vertexSections[i][j].isActive = true;
-
-					//do Collision
-				}
-				else
-				{
-					vertexSections[i][j].isActive = false;
-				}
-			}
+			Ogre::Vector2 currSection = sectionList.at(i);
+			vertexSections[(int)currSection.x][(int)currSection.y].objects.push_back(worldObjects[x]);
+			vertexSections[(int)currSection.x][(int)currSection.y].objectCount++;
 		}
 	}
 }

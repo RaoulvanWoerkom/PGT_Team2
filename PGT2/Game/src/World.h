@@ -20,7 +20,6 @@ typedef struct
 	std::vector<RigidBody*> objects;
 	size_t objectCount;
 	std::vector<Face> terrainFaces;
-	bool isActive;
 } VerticeSection;
 
 struct BodyRegistration
