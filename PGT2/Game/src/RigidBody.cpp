@@ -21,7 +21,6 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
 	RigidBody::loadMeshInfo();
 
-
 	/*
 	
 	if (cut)
@@ -47,19 +46,22 @@ void RigidBody::loadMeshInfo()
 		long index1 = indices[i];
 		long index2 = indices[i + 1];
 		long index3 = indices[i + 2];
-		Ogre::Vector3 point1 = vertices[index1];
-		Ogre::Vector3 point2 = vertices[index2];
-		Ogre::Vector3 point3 = vertices[index3];
-		Ogre::Vector3 middlePoint = (point1 + point2 + point3) / 3;
-		Face face = Face();
-		face.point1 = point1;
-		face.point2 = point2;
-		face.point3 = point3;
-		face.normal = Helper::normalVector(point1, point2, point3);
-		faces.push_back(face);
-		normals[faceCount] = face.normal;
+		if (index1 < 50000)
+		{
+			Ogre::Vector3 point1 = vertices[index1];
+			Ogre::Vector3 point2 = vertices[index2];
+			Ogre::Vector3 point3 = vertices[index3];
+			Ogre::Vector3 middlePoint = (point1 + point2 + point3) / 3;
+			Face face = Face();
+			face.point1 = point1;
+			face.point2 = point2;
+			face.point3 = point3;
+			face.normal = Helper::normalVector(point1, point2, point3);
+			faces.push_back(face);
+			normals[faceCount] = face.normal;
 
-		faceCount++;
+			faceCount++;
+		}
 
 	}
 
@@ -798,21 +800,15 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	int leftVertexCount2 = newVertexCount;
 	int leftIndexCount2 = leftIndexCount + missingFacesIndices;
 
-	for (int i = 0; i < intersectionCount; i++)
+	for (int i = 0; i < intersectionCount; i+=2)
 	{
-		if (i < intersectionCount -1)
-		{
-			leftIndices[leftIndexCount++] = intersectionsArray[i];
-			leftIndices[leftIndexCount++] = intersectionsArray[i + 1];
-			leftIndices[leftIndexCount++] = middlePointIndex;
-		}
-		else
-		{
-			leftIndices[leftIndexCount++] = intersectionsArray[i];
-			leftIndices[leftIndexCount++] = intersectionsArray[0];
-			leftIndices[leftIndexCount++] = middlePointIndex;
-		}
+		leftIndices[leftIndexCount++] = intersectionsArray[i];
+		leftIndices[leftIndexCount++] = intersectionsArray[i + 1];
+		leftIndices[leftIndexCount++] = middlePointIndex;
 
+		leftIndices[leftIndexCount++] = intersectionsArray[i + 1];
+		leftIndices[leftIndexCount++] = intersectionsArray[i];
+		leftIndices[leftIndexCount++] = middlePointIndex;
 	}
 
 	memcpy(leftVertices2, newVertices, leftVertexCount2 * sizeof(Ogre::Vector3));
@@ -829,21 +825,16 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	int rightVertexCount2 = newVertexCount;
 	int rightIndexCount2 = rightIndexCount + missingFacesIndices;
 
-	for (int i = 0; i < intersectionCount; i++)
+	for (int i = 0; i < intersectionCount; i+=2)
 	{
-		if (i < intersectionCount -1)
-		{
-			rightIndices[rightIndexCount++] = intersectionsArray[i];
-			rightIndices[rightIndexCount++] = middlePointIndex;
-			rightIndices[rightIndexCount++] = intersectionsArray[i + 1];
-		}
-		else
-		{
-			rightIndices[rightIndexCount++] = intersectionsArray[i];
-			rightIndices[rightIndexCount++] = middlePointIndex;
-			rightIndices[rightIndexCount++] = intersectionsArray[0];
-		}
 
+		rightIndices[rightIndexCount++] = intersectionsArray[i];
+		rightIndices[rightIndexCount++] = middlePointIndex;
+		rightIndices[rightIndexCount++] = intersectionsArray[i + 1];
+
+		rightIndices[rightIndexCount++] = middlePointIndex;
+		rightIndices[rightIndexCount++] = intersectionsArray[i];
+		rightIndices[rightIndexCount++] = intersectionsArray[i + 1];
 	}
 
 	memcpy(rightVertices2, newVertices, rightVertexCount2 * sizeof(Ogre::Vector3));
@@ -870,6 +861,20 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 }
 
 
+bool RigidBody::IsClockwise(Ogre::Vector3* newVertices, int index1, int index2, int index3)
+{
+	double sum = 0.0;
+	Ogre::Vector3 point1 = newVertices[index1];
+	Ogre::Vector3 point2 = newVertices[index2];
+	Ogre::Vector3 point3 = newVertices[index3];
+
+	//  (x2 ? x1)(y2 + y1)
+
+	sum += (point2.x - point1.x) * (point2.y - point1.y) * (point2.z - point1.z);
+	sum += (point3.x - point2.x) * (point3.y - point2.y) * (point3.z - point2.z);
+
+	return sum > 0.0;
+}
 
 
 /// \brief Fill in the missing faces on the intersection plane after slicing a mesh.
