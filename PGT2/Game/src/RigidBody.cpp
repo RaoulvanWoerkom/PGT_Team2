@@ -4,8 +4,10 @@
 #include <cmath>
 RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 {
+	
 	RigidBody::node = _node;
 	RigidBody::entity = _entity;
+	RigidBody::name = RigidBody::entity->getName();
 	RigidBody::inverseMass = 1;
 	RigidBody::dampening = 0.995;
 	RigidBody::isAwake = true;
@@ -20,6 +22,7 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::inertiaTensor = Ogre::Matrix3().ZERO;
 	RigidBody::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
 	RigidBody::loadMeshInfo();
+	RigidBody::createBoundingBox();
 
 
 	/*
@@ -238,6 +241,22 @@ void RigidBody::calculateDerivedData()
 
 }
 
+bool RigidBody::hitBoxContainsPoint(Ogre::Vector3 point)
+{
+	Ogre::Vector3* boundingBox = RigidBody::getBoundingBox(false);
+
+	Ogre::Matrix3 rotMatrix;
+	getOrientation().ToRotationMatrix(rotMatrix);
+	rotMatrix = rotMatrix.Inverse();
+	Ogre::Vector3 translatedPoint = point * rotMatrix;
+	Ogre::Vector3 point1 = boundingBox[0];
+	Ogre::Vector3 point2 = boundingBox[1];
+	if (point1.x <= translatedPoint.x && translatedPoint.x <= point2.x && point1.y <= translatedPoint.y && translatedPoint.y <= point2.y) {
+		return true;
+	}
+	return false;
+}
+
 
 void RigidBody::integrate(Ogre::Real delta)
 {
@@ -301,6 +320,74 @@ Ogre::Real RigidBody::getMass()
 Ogre::Real RigidBody::getInverseMass()
 {
 	return RigidBody::inverseMass;
+}
+
+void RigidBody::createBoundingBox()
+{
+	Ogre::Vector3 maxSize = Ogre::Vector3(10000000, 10000000, 10000000);
+	Ogre::Vector3 minSize = Ogre::Vector3(-10000000, -10000000, -10000000);
+
+	for (int i = 0; i < vertexCount; i++)
+	{
+		if (vertices[i].x < maxSize.x)
+			maxSize.x = vertices[i].x;
+		if (vertices[i].x > minSize.x)
+			minSize.x = vertices[i].x;
+
+		if (vertices[i].y < maxSize.y)
+			maxSize.y = vertices[i].y;
+		if (vertices[i].y > minSize.y)
+			minSize.y = vertices[i].y;
+
+		if (vertices[i].z < maxSize.z)
+			maxSize.z = vertices[i].z;
+		if (vertices[i].z > minSize.z)
+			minSize.z = vertices[i].z;
+	}
+
+	boundingBox.push_back(maxSize);
+	boundingBox.push_back(minSize);
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, maxSize.y, minSize.y));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, maxSize.y));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, maxSize.y));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.y));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.y));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.y));
+}
+
+
+/**
+gets boundingbox coordinates in either world space or local(???) space
+*/
+Ogre::Vector3* RigidBody::getBoundingBox(bool worldPosition)
+{
+	Ogre::Vector3 retBoundingBox[8];
+	Ogre::Matrix3 rotMatrix;
+	getOrientation().ToRotationMatrix(rotMatrix);
+	for (int i = 0; i < boundingBox.size(); i++)
+	{
+		retBoundingBox[i] = boundingBox[i];
+		if (worldPosition)
+		{
+			retBoundingBox[i] += RigidBody::getPosition() * rotMatrix;
+		}
+	}
+	Ogre::Vector3* a = retBoundingBox;
+	return a;
+}
+
+bool RigidBody::setAndCheckIsAwake()
+{
+	if (RigidBody::velocity.length() + RigidBody::rotation.length() < 8)
+	{
+		RigidBody::setIsAwake(false);
+		return false;
+	}
+	else
+	{
+		RigidBody::setIsAwake(true);
+		return true;
+	}
 }
 
 void RigidBody::setInertiaTensor(const Ogre::Matrix3& inertiaTensor)
@@ -748,9 +835,10 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	memcpy(leftNormals2, newNormals, leftVertexCount2 * sizeof(Ogre::Vector3));
 	memcpy(leftIndices2, leftIndices, leftIndexCount2 * sizeof(int));
 
-	RigidBody* leftBody = World::createMesh(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount2, entity->getSubEntity(0)->getMaterialName());
-	leftBody->addForce(Ogre::Vector3(5, 0, 0) * 10);
-	leftBody->addTorque(Ogre::Vector3(1, 0, 0.4f));
+	Ogre::Entity* leftEntity = World::createCustomEntity(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount2, entity->getSubEntity(0)->getMaterialName());
+	//leftBody->canCollide = false;
+	//leftBody->addForce(Ogre::Vector3(5, 0, 0) * 10);
+	//leftBody->addTorque(Ogre::Vector3(1, 0, 0.4f));
 
 	Ogre::Vector3* rightVertices2 = new Ogre::Vector3[newVertexCount];
 	Ogre::Vector3* rightNormals2 = new Ogre::Vector3[newVertexCount];
@@ -762,9 +850,28 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	memcpy(rightNormals2, newNormals, rightVertexCount2 * sizeof(Ogre::Vector3));
 	memcpy(rightIndices2, rightIndices, rightIndexCount * sizeof(int));
 
-	RigidBody* rightBody = World::createMesh(rightVertices2, rightIndices2, rightVertexCount2, rightIndexCount2, entity->getSubEntity(0)->getMaterialName());
+	Ogre::Entity* rightEntity = World::createCustomEntity(rightVertices2, rightIndices2, rightVertexCount2, rightIndexCount2, entity->getSubEntity(0)->getMaterialName());
+	
+
+	Ogre::SceneNode *leftNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	leftNode->setPosition(Ogre::Vector3(0, 0, 0));
+	leftNode->attachObject(leftEntity);
+	Ogre::SceneNode *rightNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	rightNode->setPosition(Ogre::Vector3(0, 0, 0));
+	rightNode->attachObject(rightEntity);
+
+
+	RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
+	leftBody->canCollide = false;
+	leftBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
+	leftBody->addRotation(Ogre::Vector3(1, -0.4f, 0));
+	World::addRigidBody(leftBody);
+
+	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
+	rightBody->canCollide = false;
 	rightBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
 	rightBody->addRotation(Ogre::Vector3(-1, 0.4f, 0));
+	World::addRigidBody(rightBody);
 
 	delete newVertices;
 	delete newNormals;

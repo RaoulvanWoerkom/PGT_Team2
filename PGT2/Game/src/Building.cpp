@@ -41,7 +41,6 @@ void Building::fracture()
 		Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
 		ranDir.normalise();
 		RigidBody::cut(RigidBody::getPosition(), ranDir);
-		Building::isDestroyed = true;
 	}
 	
 
