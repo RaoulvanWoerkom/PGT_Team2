@@ -161,6 +161,11 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CppUnitTest.h" />
+    <ClInclude Include="CppUnitTestAssert.h" />
+    <ClInclude Include="CppUnitTestCommon.h" />
+    <ClInclude Include="CppUnitTestException.h" />
+    <ClInclude Include="CppUnitTestLogger.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

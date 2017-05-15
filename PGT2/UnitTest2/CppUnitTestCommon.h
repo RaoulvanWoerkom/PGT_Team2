@@ -48,12 +48,6 @@
 #define MS_CPP_UNITTESTFRAMEWORK_MAX_BUF_LENGTH 2048
 #define MS_CPP_UNITTESTFRAMEWORK_NEW_LINE L"\r\n"
 
-
-#include <sdkddkver.h>
-#include <cstdlib>
-#include <cstdint>
-#include <crtdbg.h>
-
 #define CPPUNIT_SET_STA_THREADING int __cli___threading_model = 0; \
 extern "C" {\
 int __refSTAThread = 0;\
