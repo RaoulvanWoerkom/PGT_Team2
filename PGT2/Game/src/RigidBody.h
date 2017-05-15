@@ -37,17 +37,15 @@ protected:
 
 	std::vector<Ogre::Vector3> boundingBox;
 
-	size_t vertexCount, indexCount;
-	Ogre::Vector3* vertices;
-	uint32_t* indices;
-	Ogre::Vector3* normals;
+	
 
 	void loadMeshInfo();
 
 public:
 	Ogre::SceneNode* node; //contains Position & Orientation
 	Ogre::Entity* entity;
-
+	std::string name;
+	bool isDestroyed = false;
 	bool isBreakable;
 	bool canCollide;
 
@@ -78,14 +76,18 @@ public:
 	Ogre::Real getMass();
 	Ogre::Real getInverseMass();
 	void createBoundingBox();
-	std::vector<Ogre::Vector3> getBoundingBox();
+	Ogre::Vector3* getBoundingBox(bool worldPosition = true);
+	bool hitBoxContainsPoint(Ogre::Vector3 point);
 	bool setAndCheckIsAwake();
 
 	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
 	
 	size_t faceCount;
 	std::vector<Face> faces;
-
+	size_t vertexCount, indexCount;
+	Ogre::Vector3* vertices;
+	uint32_t* indices;
+	Ogre::Vector3* normals;
 	//void cut();
 };
 

@@ -82,7 +82,7 @@ public:
 	static std::vector<RigidBody*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
-	VerticeSection vertexSections[35][35];
+	VerticeSection vertexSections[10][10];
 	static size_t bodyCount;
 
 	size_t terrainVertexCount, terrainIndexCount;
@@ -101,7 +101,7 @@ public:
 
 	void createBuilding(Ogre::Vector3 pos);
 
-	static RigidBody* createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, Ogre::String matName);
+	static Ogre::Entity* createCustomEntity(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, Ogre::String matName);
 	virtual void createHouse(Ogre::SceneManager* mSceneMgr);
 
 	bool mouseMoved(const OIS::MouseEvent &arg);
@@ -110,8 +110,9 @@ public:
 	void restartWorld();
 	void update(const Ogre::FrameEvent evt);
 	void setCameraFollow();
-	void WorldObjectCollisionDetection();
-
+	void emptySectionObjects();
+	void populateSections();
+	
 
 	/** Holds the maximum number of contacts. */
 	const static unsigned maxContacts = 256;
@@ -136,8 +137,10 @@ public:
 private:
 	
 	void checkBallCollision();
+	void checkWorldCollision();
 	void addContact(CollisionData * data, Ogre::Vector3 contactNormal, Ogre::Vector3 contactPoint, Ogre::Real penetration, RigidBody * sphere);
 	std::vector<Ogre::Vector2> getSections(Ogre::Vector3 pos, bool surround = false);
+	std::vector<Ogre::Vector2> getSections(Ogre::Vector3* positions, int size);
 	std::vector<Ogre::Vector2> getSections(std::vector<Ogre::Vector3> positions);
 	Ogre::Vector3 closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition);
 	Ogre::Real clamp(Ogre::Real n, Ogre::Real lower, Ogre::Real upper);

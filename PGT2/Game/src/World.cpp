@@ -8,7 +8,7 @@
 const Ogre::Real MOVE_SPEED = 10;
 
 const int BALL_SIZE = 100;
-const int SECTION_AMOUNT = 35;
+const int SECTION_AMOUNT = 10;
 
 size_t World::bodyCount = 0;
 std::vector<RigidBody*> World::worldObjects;
@@ -215,8 +215,7 @@ void World::createSphereMesh(const std::string& strName, const float r, const in
 }
 
 
-
-RigidBody* World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, Ogre::String matName)
+Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, Ogre::String matName)
 {
 
 	//gebasseerd op: https://www.grahamedgecombe.com/blog/2011/08/05/custom-meshes-in-ogre3d en http://www.ogre3d.org/tikiwiki/Generating+A+Mesh
@@ -307,20 +306,18 @@ RigidBody* World::createMesh(Ogre::Vector3* _verticesArr, int* _indicesArr, int 
 	mesh->load();
 
 	/* you can now create an entity/scene node based on your mesh, e.g. */
-	
-	std::string entityName = "CustomEntity" + std::to_string(randNum); 
-	Ogre::Entity *entity = mSceneMgr->createEntity(entityName, meshName, "General");
+	Ogre::Entity *entity = mSceneMgr->createEntity(meshName);
 	entity->setMaterialName(matName);
-	Ogre::SceneNode *node2 = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	node2->setPosition(Ogre::Vector3(0,0,0));
-	node2->attachObject(entity);
+	//Ogre::SceneNode *node2 = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	//node2->setPosition(Ogre::Vector3(0,0,0));
+	//node2->attachObject(entity);
 	
 
 	
-	RigidBody *newBody = new RigidBody(node2, entity);
-	addRigidBody(newBody);
+	//RigidBody *newBody = new RigidBody(node2, entity);
+	//addRigidBody(newBody);
 
-	return newBody;
+	return entity;
 }
 
 
@@ -328,20 +325,6 @@ void World::addRigidBody(RigidBody* body)
 {
 	worldObjects.push_back(body);
 	bodyCount++;
-}
-
-void World::removeRigidBody(RigidBody* body)
-{
-	for (size_t i = 0; i < bodyCount; i++)
-	{
-		RigidBody* currBody = worldObjects.at(i);
-		if (currBody == body)
-		{
-			worldObjects.erase(worldObjects.begin() + i);
-			bodyCount--;
-			break;
-		}
-	}
 }
 
 void World::addObjectVertices(RigidBody* body)
@@ -450,6 +433,26 @@ std::vector<Ogre::Vector2> World::getSections(std::vector<Ogre::Vector3> positio
 	for (size_t i = 0; i < positions.size(); i++)
 	{
 		Ogre::Vector3 currPos = positions.at(i);
+		std::vector<Ogre::Vector2> currSectorList = getSections(currPos);
+		for (size_t j = 0; j < currSectorList.size(); j++)
+		{
+			Ogre::Vector2 currSectionPos = currSectorList.at(j);
+			if (!Helper::vectorListContainsVector2(ret, currSectionPos))
+			{
+				ret.push_back(currSectionPos);
+			}
+		}
+	}
+	return ret;
+}
+
+std::vector<Ogre::Vector2> World::getSections(Ogre::Vector3* positions, int size)
+{
+	std::vector<Ogre::Vector2> ret = std::vector<Ogre::Vector2>();
+
+	for (size_t i = 0; i < size; i++)
+	{
+		Ogre::Vector3 currPos = positions[i];
 		std::vector<Ogre::Vector2> currSectorList = getSections(currPos);
 		for (size_t j = 0; j < currSectorList.size(); j++)
 		{
@@ -576,16 +579,21 @@ void World::generateContacts()
 	cData.friction = (Ogre::Real)0.9;
 	cData.restitution = (Ogre::Real)0.2;
 	cData.tolerance = (Ogre::Real)0.1;
-
+	emptySectionObjects();
+	populateSections();
 	checkBallCollision();
-	WorldObjectCollisionDetection();
+	checkWorldCollision();
+	
 }
 
 void World::updateObjects(Ogre::Real duration)
 {
-	for (int i = 0; i < bodyCount; i++)
+	for (int i = 0; i < worldObjects.size(); i++)
 	{
-		worldObjects[i]->integrate(duration);
+		RigidBody* currRigidBody = worldObjects[i];
+		if (currRigidBody->isDestroyed)
+			continue;
+		currRigidBody->integrate(duration);
 	}
 
 	//ballBody is not in worldObjects because it has unique collision detection
@@ -593,26 +601,54 @@ void World::updateObjects(Ogre::Real duration)
 }
 
 
+void World::emptySectionObjects()
+{
+	for (int y = 0; y < SECTION_AMOUNT; y++)
+	{
+		for (int x = 0; x < SECTION_AMOUNT; x++)
+		{
+			VerticeSection currSection = vertexSections[(int)x][(int)y];
+			currSection.objects.empty();
+			currSection.objectCount = 0;
+		}
+	}
+}
+
 /**
 go through all the sections and all objects to check if there is movement. Then do collision check per section. (ball collision is excluded)
 */
-void World::WorldObjectCollisionDetection()
+void World::populateSections()
 {
+
 	//loop trough all objects
-	for (int x = 0; x < worldObjects.size(); x++)
+	std::vector<RigidBody*>::iterator i = worldObjects.begin();
+	while (i != worldObjects.end())
 	{
-		Ogre::Vector3 currPos = worldObjects[x]->getPosition();
-		std::vector<Ogre::Vector3> boundingBox = worldObjects[x]->getBoundingBox(); //bounding box is already in world space coordinates
-
-		std::vector<Ogre::Vector2> sectionList = getSections(boundingBox); //holds the sections... i think
-
-		for (size_t i = 0; i < sectionList.size(); i++)
+		RigidBody* currBody = (*i);
+		bool isDestroyed = currBody->isDestroyed;
+		if (isDestroyed)
 		{
-			Ogre::Vector2 currSection = sectionList.at(i);
-			vertexSections[(int)currSection.x][(int)currSection.y].objects.push_back(worldObjects[x]);
-			vertexSections[(int)currSection.x][(int)currSection.y].objectCount++;
+			delete currBody;
+			i = worldObjects.erase(i);
+			
+		}
+		else
+		{
+			Ogre::Vector3 currPos = currBody->getPosition();
+			Ogre::Vector3* boundingBox = currBody->getBoundingBox(false); //bounding box is already in world space coordinates
+			std::vector<Ogre::Vector2> sectionList = getSections(boundingBox, 8); //holds the sections... i think
+
+			for (size_t i = 0; i < sectionList.size(); i++)
+			{
+				Ogre::Vector2 currSectionCoor = sectionList.at(i);
+				VerticeSection currSection = vertexSections[(int)currSectionCoor.x][(int)currSectionCoor.y];
+				currSection.objects.push_back(currBody);
+				currSection.objectCount++;
+			}
+			++i;
 		}
 	}
+
 }
 
 /**
@@ -652,7 +688,7 @@ void World::checkBallCollision()
 		for (size_t j = 0; j < currSection.objectCount; j++)
 		{
 			RigidBody* currBody = currSection.objects.at(j);
-			if (currBody != NULL)
+			if (!currBody->isDestroyed && currBody->canCollide)
 			{
 				std::vector<Face> bodyFaceList = currBody->faces;
 				for (size_t k = 0; k < currBody->faces.size(); k++)
@@ -660,44 +696,56 @@ void World::checkBallCollision()
 					Face currFace = bodyFaceList.at(k);
 					Ogre::Vector3 collPoint = closestPointOnTriangle(currFace.point1, currFace.point2, currFace.point3, ballPos);
 					double dist = sqrt(pow((ballPos.x - collPoint.x), 2) + pow((ballPos.y - collPoint.y), 2) + pow((ballPos.z - collPoint.z), 2));
+
+					
+
 					if (dist < BALL_SIZE && dist < shortestLength)
 					{
-						if (!currBody->isBreakable)
+
+						if (currBody->hitBoxContainsPoint(ballPos))
 						{
-							shortestLength = dist;
-							chosenIndex = k;
-							normalVec = currFace.normal;
-							closestHitCoordinates = collPoint;
+							Helper::log("test", ballPos);
 						}
-						else
+
+						if (currBody->isBreakable)
 						{
-							currSection.objectCount--;
-							Building* building = dynamic_cast<Building*>(currBody);
-							building->fracture();
-							currSection.objects.erase(currSection.objects.begin() + j);
-							World::removeRigidBody(currBody);
-							mSceneMgr->destroyEntity(building->entity);
-							delete building;
-							break;
+							//Building* building = dynamic_cast<Building*>(currBody);
+							//building->fracture();
+							//building->isDestroyed = true;
+							//mSceneMgr->destroyEntity(building->entity);
+							//break;
 						}
 					}
 				}
-				if (currSection.objectCount == 0)
-				{
-					break;
-				}
 			}
-			
-			
 		}
 	}
-
-
 	if (chosenIndex >= 0)
 	{
 		double diffDist = BALL_SIZE - shortestLength;
-
 		addContact(&cData, normalVec, closestHitCoordinates, diffDist, ballBody);
+	}
+}
+
+void World::checkWorldCollision()
+{
+	for (size_t i = 0; i < worldObjects.size(); i++)
+	{
+		RigidBody* currBody = worldObjects[i];
+		Ogre::Vector3 currPos = currBody->node->getPosition();
+		std::vector<Ogre::Vector2> sectionList = getSections(currPos);
+		VerticeSection currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
+
+
+
+		for (size_t j = 0; j < currSection.objectCount; j++)
+		{
+			RigidBody* otherBody = currSection.objects[j];
+			if (otherBody != currBody)
+			{
+
+			}
+		}
 	}
 }
 
