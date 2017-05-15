@@ -22,8 +22,8 @@ file(GLOB HDRS ./PGT2/Game/src/*.h)
 
 file(GLOB SRCS ./PGT2/Game/src/*.cpp)
 
-file(GLOB HDRS ./PGT2/UnitTest2/*.h)
+file(GLOB TESTHDRS ./PGT2/UnitTest2/*.h)
 
-file(GLOB SRCS ./PGT2/UnitTest2/*.cpp)
+file(GLOB TESTSRCS ./PGT2/UnitTest2/*.cpp)
  
 include("tools/cmake/common.cmake") 
