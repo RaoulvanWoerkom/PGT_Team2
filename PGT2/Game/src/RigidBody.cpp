@@ -396,7 +396,7 @@ void RigidBody::setInertiaTensor(const Ogre::Matrix3& inertiaTensor)
 }
 
 
-
+// In this method we calculate the diverance between 
 void sub3(const Ogre::Vector3* first, const Ogre::Vector3* second, Ogre::Vector3* result)
 {
 	result->x = first->x - second->x;

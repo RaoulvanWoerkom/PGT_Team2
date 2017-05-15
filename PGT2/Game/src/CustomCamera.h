@@ -17,6 +17,7 @@ public:
 
 	void setCameraTarget(Ogre::SceneNode* node);
 	void createViewports();
+	void zoomCamera(float zoomAmount);
 };
 
 #endif // #ifndef __CustomCamera_h_

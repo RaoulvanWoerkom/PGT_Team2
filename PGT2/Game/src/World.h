@@ -79,6 +79,8 @@ public:
 	static Ogre::SceneManager* mSceneMgr;
 	RigidBody* houseBody;
 
+	float jumpPower;
+
 	static std::vector<RigidBody*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;

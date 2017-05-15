@@ -10,6 +10,7 @@ public:
 	static bool kDown;
 	static bool lDown;
 	static bool yDown;
+	static bool spaceDown;
 
 	InputManager();
 	void keyPressed(const OIS::KeyEvent& ke);
