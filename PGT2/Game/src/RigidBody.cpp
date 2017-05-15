@@ -243,15 +243,24 @@ void RigidBody::calculateDerivedData()
 
 bool RigidBody::hitBoxContainsPoint(Ogre::Vector3 point)
 {
-	Ogre::Vector3* boundingBox = RigidBody::getBoundingBox(false);
-
 	Ogre::Matrix3 rotMatrix;
 	getOrientation().ToRotationMatrix(rotMatrix);
-	rotMatrix = rotMatrix.Inverse();
-	Ogre::Vector3 translatedPoint = point * rotMatrix;
-	Ogre::Vector3 point1 = boundingBox[0];
-	Ogre::Vector3 point2 = boundingBox[1];
-	if (point1.x <= translatedPoint.x && translatedPoint.x <= point2.x && point1.y <= translatedPoint.y && translatedPoint.y <= point2.y) {
+	Ogre::Matrix3 inverseRotMatrix = rotMatrix.Inverse();
+	Ogre::Vector3 currPos = getPosition();
+	Ogre::Vector3* _boundingBox = RigidBody::getBoundingBox();
+	for (size_t i = 0; i < 8; i++)
+	{
+		_boundingBox[i] = (_boundingBox[i] - currPos) * inverseRotMatrix;
+	}
+	Ogre::Vector3 translatedPoint = (point - currPos) * inverseRotMatrix;
+
+	
+	Ogre::Vector3 point1 = _boundingBox[0];
+	Ogre::Vector3 point2 = _boundingBox[1];
+	
+	if (point1.x <= translatedPoint.x && translatedPoint.x <= point2.x && 
+		point1.y <= translatedPoint.y && translatedPoint.y <= point2.y &&
+		point1.z <= translatedPoint.z && translatedPoint.z <= point2.z) {
 		return true;
 	}
 	return false;
@@ -326,7 +335,7 @@ void RigidBody::createBoundingBox()
 {
 	Ogre::Vector3 maxSize = Ogre::Vector3(10000000, 10000000, 10000000);
 	Ogre::Vector3 minSize = Ogre::Vector3(-10000000, -10000000, -10000000);
-
+	Ogre::Vector3 currPos = getPosition();
 	for (int i = 0; i < vertexCount; i++)
 	{
 		if (vertices[i].x < maxSize.x)
@@ -344,33 +353,31 @@ void RigidBody::createBoundingBox()
 		if (vertices[i].z > minSize.z)
 			minSize.z = vertices[i].z;
 	}
+	maxSize = maxSize - currPos;
+	minSize = minSize - currPos;
 
 	boundingBox.push_back(maxSize);
 	boundingBox.push_back(minSize);
-	boundingBox.push_back(Ogre::Vector3(maxSize.x, maxSize.y, minSize.y));
-	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, maxSize.y));
-	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, maxSize.y));
-	boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.y));
-	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.y));
-	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.y));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, maxSize.y, minSize.z));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, maxSize.z));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, maxSize.z));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.z));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.z));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.z));
 }
 
 
 /**
 gets boundingbox coordinates in either world space or local(???) space
 */
-Ogre::Vector3* RigidBody::getBoundingBox(bool worldPosition)
+Ogre::Vector3* RigidBody::getBoundingBox()
 {
 	Ogre::Vector3 retBoundingBox[8];
 	Ogre::Matrix3 rotMatrix;
 	getOrientation().ToRotationMatrix(rotMatrix);
 	for (int i = 0; i < boundingBox.size(); i++)
 	{
-		retBoundingBox[i] = boundingBox[i];
-		if (worldPosition)
-		{
-			retBoundingBox[i] += RigidBody::getPosition() * rotMatrix;
-		}
+		retBoundingBox[i] = boundingBox[i] * rotMatrix + RigidBody::getPosition();
 	}
 	Ogre::Vector3* a = retBoundingBox;
 	return a;

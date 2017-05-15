@@ -76,7 +76,7 @@ public:
 	Ogre::Real getMass();
 	Ogre::Real getInverseMass();
 	void createBoundingBox();
-	Ogre::Vector3* getBoundingBox(bool worldPosition = true);
+	Ogre::Vector3* getBoundingBox();
 	bool hitBoxContainsPoint(Ogre::Vector3 point);
 	bool setAndCheckIsAwake();
 

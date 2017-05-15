@@ -635,7 +635,7 @@ void World::populateSections()
 		else
 		{
 			Ogre::Vector3 currPos = currBody->getPosition();
-			Ogre::Vector3* boundingBox = currBody->getBoundingBox(false); //bounding box is already in world space coordinates
+			Ogre::Vector3* boundingBox = currBody->getBoundingBox(); //bounding box is already in world space coordinates
 			std::vector<Ogre::Vector2> sectionList = getSections(boundingBox, 8); //holds the sections... i think
 
 			for (size_t i = 0; i < sectionList.size(); i++)
@@ -701,8 +701,7 @@ void World::checkBallCollision()
 
 					if (dist < BALL_SIZE && dist < shortestLength)
 					{
-
-						if (currBody->hitBoxContainsPoint(ballPos))
+						if (currBody->hitBoxContainsPoint(collPoint))
 						{
 							Helper::log("test", ballPos);
 						}
