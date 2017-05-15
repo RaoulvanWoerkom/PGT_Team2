@@ -24,6 +24,7 @@ bool Baller::mouseMoved(const OIS::MouseEvent &arg)
 	return true;
 }
 
+
 void Baller::createCamera()
 {
 	world = World();
@@ -40,6 +41,8 @@ void Baller::createViewports()
 
 void Baller::init()
 {
+	sound = Sound();
+	sound.loopingSound();
 	inputManager = InputManager();
 	isGameOver = false;
 	timer = CustomTimer();
