@@ -5,6 +5,9 @@ OgreText *timerText;
 OgreText *loseText;
 const int START_GAME_TIME = 60;
 
+double currentHighscore;
+double currentScore;
+
 Baller::Baller() 
 {
 
@@ -50,6 +53,13 @@ void Baller::init()
 	timerText = new OgreText();
 	timerText->setPos(0.4f, 0.1f);        // Text position, using relative co-ordinates
 	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
+
+	// Retrieve current Highscore from File
+	Highscore * highscore = new Highscore();
+	currentHighscore = highscore->getHighscore();
+
+	// Set current Score to zero
+	currentScore = 0;
 }
 
 void Baller::initGameOver()
@@ -62,8 +72,12 @@ void Baller::initGameOver()
 	loseText->setPos(0.4f, 0.2f);
 	loseText->setCol(1.0f, 1.0f, 1.0f, 1.0f);
 
+	// Dummy add some score
+	currentScore = currentHighscore + 100;
+
+	// Add current Score to ScoreBoard
 	Highscore * highscore = new Highscore();
-	highscore->addToScoreboard("WreckingBall", 100);	
+	highscore->addToScoreboard(currentScore);	
 }
 
 void Baller::restartGame()
@@ -90,10 +104,12 @@ void Baller::createScene()
 	//world.splitVertices();
 }
 
-void Baller::showScore(double score)
+void Baller::showScore()
 {
-	scoreText->setText("Score: " + static_cast<std::ostringstream*>(&(std::ostringstream() << score))->str());    // Text to be displayed
-										  // Now it is possible to use the Ogre::String as parameter too
+	// Text to be displayed
+	scoreText->setText("Score: " + static_cast<std::ostringstream*>(&(std::ostringstream() << currentScore))->str() + " Highscore: " + static_cast<std::ostringstream*>(&(std::ostringstream() << currentHighscore)
+		)->str());    
+	// Now it is possible to use the Ogre::String as parameter too
 }
 
 void Baller::updateRemainingTime()
@@ -128,7 +144,7 @@ bool Baller::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	if (!isGameOver)
 	{
 		updateRemainingTime();
-		showScore(1);
+		showScore();
 
 		Ogre::Real duration = evt.timeSinceLastFrame;
 

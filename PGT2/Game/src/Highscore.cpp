@@ -35,19 +35,49 @@ Highscore::~Highscore()
 {
 }
 
+
+	
+
+string getHighscoreFromFile()
+{
+	std::ifstream fileRead("scoreboard.txt");
+
+	string highscore;
+	getline(fileRead, highscore);
+
+	fileRead.close();
+	return highscore;
+}
+
+double Highscore::getHighscore()
+{	
+	return atof(getHighscoreFromFile().c_str());
+}
+
+	bool Highscore::checkIfExceedsPreviousHighscore(double score)
+{
+	if(std::to_string(score) > getHighscoreFromFile())
+	{
+		return true;
+	}
+	return false;
+}
+
 // https://cboard.cprogramming.com/c-programming/135750-scoreboard-saved-txt-file.html
 // https://stackoverflow.com/questions/15388041/how-to-write-stdstring-to-file
-void Highscore::addToScoreboard(std::string name, double score)
+void Highscore::addToScoreboard(double score)
 {	
-	std::ofstream file("scoreboard.txt");
+	if(checkIfExceedsPreviousHighscore(score))
+	{
+		std::ofstream fileWrite("scoreboard.txt");
 
-	highscores::highscore highscore;
+		highscores::highscore highscore;
 
-	highscore.name = name;
-	highscore.score = score;
-	highscore.timestamp = currentDateTime();
+		highscore.name = "John Doe";
+		highscore.score = score;
+		highscore.timestamp = currentDateTime();
 
-	file << ("Name: %s \nPoints: %d\n\n\n", highscore.name, highscore.score);
-
-	file.close();
+		fileWrite << (highscore.score);
+		fileWrite.close();
+	}	
 };

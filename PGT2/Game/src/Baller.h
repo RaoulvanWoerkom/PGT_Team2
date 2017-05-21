@@ -39,7 +39,7 @@ protected:
 	
 
 private:
-	virtual void showScore(double score);
+	virtual void showScore();
 	virtual void updateRemainingTime();
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 	virtual bool keyPressed(const OIS::KeyEvent& ke);

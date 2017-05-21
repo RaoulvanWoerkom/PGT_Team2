@@ -6,6 +6,8 @@ class Highscore
 public:
 	Highscore();
 	~Highscore();
-	void addToScoreboard(std::string name, double score);
+	void addToScoreboard(double score);
+	static double getHighscore();
+	bool checkIfExceedsPreviousHighscore(double score);
 };
 
