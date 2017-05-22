@@ -37,7 +37,8 @@ protected:
 
 	std::vector<Ogre::Vector3> boundingBox;
 	float boundingSphereDistance;
-	
+
+	bool* cutList;
 
 	void loadMeshInfo();
 
