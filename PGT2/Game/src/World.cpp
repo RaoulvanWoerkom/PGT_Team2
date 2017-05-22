@@ -701,18 +701,18 @@ void World::checkBallCollision()
 
 					if (dist < BALL_SIZE && dist < shortestLength)
 					{
-						if (currBody->hitBoxContainsPoint(collPoint))
-						{
-							Helper::log("test", ballPos);
-						}
+						//if (currBody->hitBoxContainsPoint(collPoint))
+						//{
+						//	Helper::log("test", ballPos);
+						//}
 
 						if (currBody->isBreakable)
 						{
-							//Building* building = dynamic_cast<Building*>(currBody);
-							//building->fracture();
-							//building->isDestroyed = true;
-							//mSceneMgr->destroyEntity(building->entity);
-							//break;
+							Building* building = dynamic_cast<Building*>(currBody);
+							building->fracture();
+							building->isDestroyed = true;
+							mSceneMgr->destroyEntity(building->entity);
+							break;
 						}
 					}
 				}
@@ -736,7 +736,36 @@ void World::checkWorldCollision()
 		VerticeSection currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
 
 
+		double shortestLength = 100000000000;
+		int chosenIndex = -1;
+		Ogre::Vector3 closestHitCoordinates;
+		Ogre::Vector3 normalVec = Ogre::Vector3(-1, -1, -1);
+		float boundingBallSize = currBody->getBoundingSphere(0.5f);
 
+		std::vector<Face> terrainFaceList = currSection.terrainFaces;
+		for (size_t j = 0; j < terrainFaceList.size(); j++) //loop through all the terrain vertices inside the section object
+		{
+			Face currFace = terrainFaceList.at(j);
+			//collpoint is point on face closest to the ball
+			Ogre::Vector3 collPoint = closestPointOnTriangle(currFace.point1, currFace.point2, currFace.point3, currPos);
+			double dist = sqrt(pow((currPos.x - collPoint.x), 2) + pow((currPos.y - collPoint.y), 2) + pow((currPos.z - collPoint.z), 2));
+
+			if (dist < boundingBallSize && dist < shortestLength)
+			{
+				shortestLength = dist;
+				chosenIndex = j;
+				normalVec = currFace.normal;
+				closestHitCoordinates = collPoint;
+			}
+		}
+
+		if (chosenIndex >= 0)
+		{
+			double diffDist = boundingBallSize - shortestLength;
+			addContact(&cData, normalVec, closestHitCoordinates, diffDist, currBody);
+		}
+
+		/*
 		for (size_t j = 0; j < currSection.objectCount; j++)
 		{
 			RigidBody* otherBody = currSection.objects[j];
@@ -745,6 +774,7 @@ void World::checkWorldCollision()
 
 			}
 		}
+		*/
 	}
 }
 

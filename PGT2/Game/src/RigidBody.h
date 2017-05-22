@@ -36,7 +36,7 @@ protected:
 	bool canSleep;
 
 	std::vector<Ogre::Vector3> boundingBox;
-
+	float boundingSphereDistance;
 	
 
 	void loadMeshInfo();
@@ -76,11 +76,14 @@ public:
 	Ogre::Real getMass();
 	Ogre::Real getInverseMass();
 	void createBoundingBox();
+	void createBoundingSphere();
 	Ogre::Vector3* getBoundingBox();
+	float getBoundingSphere(float perc);
+	Ogre::Vector3 getMeshCenterPoint();
 	bool hitBoxContainsPoint(Ogre::Vector3 point);
 	bool setAndCheckIsAwake();
 
-	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
+	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sliceAmount, bool test = false);
 	
 	size_t faceCount;
 	std::vector<Face> faces;

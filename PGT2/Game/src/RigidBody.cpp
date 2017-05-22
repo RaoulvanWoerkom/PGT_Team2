@@ -22,6 +22,7 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::inertiaTensor = Ogre::Matrix3().ZERO;
 	RigidBody::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
 	RigidBody::loadMeshInfo();
+	RigidBody::createBoundingSphere();
 	RigidBody::createBoundingBox();
 
 
@@ -67,6 +68,170 @@ void RigidBody::loadMeshInfo()
 	}
 
 }
+
+void RigidBody::createBoundingBox()
+{
+	Ogre::Vector3 minSize = Ogre::Vector3(10000000, 10000000, 10000000);
+	Ogre::Vector3 maxSize = Ogre::Vector3(-10000000, -10000000, -10000000);
+	Ogre::Vector3 currPos = getPosition();
+	for (int i = 0; i < vertexCount; i++)
+	{
+		if (vertices[i].x < minSize.x)
+			minSize.x = vertices[i].x;
+		if (vertices[i].x > maxSize.x)
+			maxSize.x = vertices[i].x;
+
+		if (vertices[i].y < minSize.y)
+			minSize.y = vertices[i].y;
+		if (vertices[i].y > maxSize.y)
+			maxSize.y = vertices[i].y;
+
+		if (vertices[i].z < minSize.z)
+			minSize.z = vertices[i].z;
+		if (vertices[i].z > maxSize.z)
+			maxSize.z = vertices[i].z;
+	}
+	maxSize = maxSize - currPos;
+	minSize = minSize - currPos;
+
+	boundingBox.push_back(maxSize);
+	boundingBox.push_back(minSize);
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, maxSize.y, minSize.z));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, maxSize.z));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, maxSize.z));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.z));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.z));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.z));
+}
+
+
+
+void RigidBody::createBoundingSphere()
+{
+	Ogre::Vector3 minSize = Ogre::Vector3(10000000, 10000000, 10000000);
+	Ogre::Vector3 maxSize = Ogre::Vector3(-10000000, -10000000, -10000000);
+	Ogre::Vector3 currPos = getPosition();
+	for (int i = 0; i < faceCount; i++)
+	{
+		if (faces[i].point1.x < minSize.x)
+			minSize.x = faces[i].point1.x;
+		if (faces[i].point1.x > maxSize.x)
+			maxSize.x = faces[i].point1.x;
+
+		if (faces[i].point2.x < minSize.x)
+			minSize.x = faces[i].point2.x;
+		if (faces[i].point2.x > maxSize.x)
+			maxSize.x = faces[i].point2.x;
+
+		if (faces[i].point3.x < minSize.x)
+			minSize.x = faces[i].point3.x;
+		if (faces[i].point3.x > maxSize.x)
+			maxSize.x = faces[i].point3.x;
+		//--
+		if (faces[i].point1.y < minSize.y)
+			minSize.y = faces[i].point1.y;
+		if (faces[i].point1.y > maxSize.y)
+			maxSize.y = faces[i].point1.y;
+
+		if (faces[i].point2.y < minSize.y)
+			minSize.y = faces[i].point2.y;
+		if (faces[i].point2.y > maxSize.y)
+			maxSize.y = faces[i].point2.y;
+
+		if (faces[i].point3.y < minSize.y)
+			minSize.y = faces[i].point3.y;
+		if (faces[i].point3.y > maxSize.y)
+			maxSize.y = faces[i].point3.y;
+		//--
+		if (faces[i].point1.z < minSize.z)
+			minSize.z = faces[i].point1.z;
+		if (faces[i].point1.z > maxSize.z)
+			maxSize.z = faces[i].point1.z;
+
+		if (faces[i].point2.z < minSize.z)
+			minSize.z = faces[i].point2.z;
+		if (faces[i].point2.z > maxSize.z)
+			maxSize.z = faces[i].point2.z;
+
+		if (faces[i].point3.z < minSize.z)
+			minSize.z = faces[i].point3.z;
+		if (faces[i].point3.z > maxSize.z)
+			maxSize.z = faces[i].point3.z;
+
+	}
+	maxSize = maxSize - currPos;
+	minSize = minSize - currPos;
+
+	double dist = sqrt(pow((maxSize.x - minSize.x), 2) + pow((maxSize.y - minSize.y), 2) + pow((maxSize.z - minSize.z), 2));
+	boundingSphereDistance = dist * 0.5f;
+}
+
+float RigidBody::getBoundingSphere(float perc)
+{
+	return boundingSphereDistance * perc;
+}
+
+Ogre::Vector3 RigidBody::getMeshCenterPoint()
+{
+	Ogre::Vector3 minSize = Ogre::Vector3(10000000, 10000000, 10000000);
+	Ogre::Vector3 maxSize = Ogre::Vector3(-10000000, -10000000, -10000000);
+	Ogre::Vector3 currPos = getPosition();
+	for (int i = 0; i < faceCount; i++)
+	{
+		if (faces[i].point1.x < minSize.x)
+			minSize.x = faces[i].point1.x;
+		if (faces[i].point1.x > maxSize.x)
+			maxSize.x = faces[i].point1.x;
+
+		if (faces[i].point2.x < minSize.x)
+			minSize.x = faces[i].point2.x;
+		if (faces[i].point2.x > maxSize.x)
+			maxSize.x = faces[i].point2.x;
+
+		if (faces[i].point3.x < minSize.x)
+			minSize.x = faces[i].point3.x;
+		if (faces[i].point3.x > maxSize.x)
+			maxSize.x = faces[i].point3.x;
+		//--
+		if (faces[i].point1.y < minSize.y)
+			minSize.y = faces[i].point1.y;
+		if (faces[i].point1.y > maxSize.y)
+			maxSize.y = faces[i].point1.y;
+
+		if (faces[i].point2.y < minSize.y)
+			minSize.y = faces[i].point2.y;
+		if (faces[i].point2.y > maxSize.y)
+			maxSize.y = faces[i].point2.y;
+
+		if (faces[i].point3.y < minSize.y)
+			minSize.y = faces[i].point3.y;
+		if (faces[i].point3.y > maxSize.y)
+			maxSize.y = faces[i].point3.y;
+		//--
+		if (faces[i].point1.z < minSize.z)
+			minSize.z = faces[i].point1.z;
+		if (faces[i].point1.z > maxSize.z)
+			maxSize.z = faces[i].point1.z;
+
+		if (faces[i].point2.z < minSize.z)
+			minSize.z = faces[i].point2.z;
+		if (faces[i].point2.z > maxSize.z)
+			maxSize.z = faces[i].point2.z;
+
+		if (faces[i].point3.z < minSize.z)
+			minSize.z = faces[i].point3.z;
+		if (faces[i].point3.z > maxSize.z)
+			maxSize.z = faces[i].point3.z;
+
+	}
+	maxSize = maxSize - currPos;
+	minSize = minSize - currPos;
+
+	Ogre::Vector3 centerPoint = minSize + (maxSize - minSize) / 2;
+
+	return centerPoint;
+}
+
 
 void RigidBody::setPosition(Ogre::Vector3 position)
 {
@@ -267,6 +432,8 @@ bool RigidBody::hitBoxContainsPoint(Ogre::Vector3 point)
 }
 
 
+
+
 void RigidBody::integrate(Ogre::Real delta)
 {
 	if (RigidBody::isAwake)
@@ -331,40 +498,6 @@ Ogre::Real RigidBody::getInverseMass()
 	return RigidBody::inverseMass;
 }
 
-void RigidBody::createBoundingBox()
-{
-	Ogre::Vector3 maxSize = Ogre::Vector3(10000000, 10000000, 10000000);
-	Ogre::Vector3 minSize = Ogre::Vector3(-10000000, -10000000, -10000000);
-	Ogre::Vector3 currPos = getPosition();
-	for (int i = 0; i < vertexCount; i++)
-	{
-		if (vertices[i].x < maxSize.x)
-			maxSize.x = vertices[i].x;
-		if (vertices[i].x > minSize.x)
-			minSize.x = vertices[i].x;
-
-		if (vertices[i].y < maxSize.y)
-			maxSize.y = vertices[i].y;
-		if (vertices[i].y > minSize.y)
-			minSize.y = vertices[i].y;
-
-		if (vertices[i].z < maxSize.z)
-			maxSize.z = vertices[i].z;
-		if (vertices[i].z > minSize.z)
-			minSize.z = vertices[i].z;
-	}
-	maxSize = maxSize - currPos;
-	minSize = minSize - currPos;
-
-	boundingBox.push_back(maxSize);
-	boundingBox.push_back(minSize);
-	boundingBox.push_back(Ogre::Vector3(maxSize.x, maxSize.y, minSize.z));
-	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, maxSize.z));
-	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, maxSize.z));
-	boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.z));
-	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.z));
-	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.z));
-}
 
 
 /**
@@ -440,9 +573,16 @@ float linePlaneCoefficient(const Ogre::Vector3* linePoint, const Ogre::Vector3* 
 	return result;
 }
 
-void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
+void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sliceAmount, bool test)
 {
-	
+	if (sliceAmount <= 0)
+		return;
+	sliceAmount--;
+
+	Ogre::Vector3 oldPos = RigidBody::getPosition();
+	//RigidBody::setPosition(Ogre::Vector3(0, 0, 0));
+
+
 	int faceCount = indexCount / 3;
 
 	// The maximum number of vertices for the new meshes is vertexCount + faceCount * 2
@@ -858,27 +998,49 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	memcpy(rightIndices2, rightIndices, rightIndexCount * sizeof(int));
 
 	Ogre::Entity* rightEntity = World::createCustomEntity(rightVertices2, rightIndices2, rightVertexCount2, rightIndexCount2, entity->getSubEntity(0)->getMaterialName());
-	
+
 
 	Ogre::SceneNode *leftNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	leftNode->setPosition(Ogre::Vector3(0, 0, 0));
-	leftNode->attachObject(leftEntity);
-	Ogre::SceneNode *rightNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	rightNode->setPosition(Ogre::Vector3(0, 0, 0));
-	rightNode->attachObject(rightEntity);
-
-
+	Ogre::SceneNode *leftAnchorNode = leftNode->createChildSceneNode();
 	RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
+	Ogre::Vector3 leftAnchorPoint = -leftBody->getMeshCenterPoint();
+	leftAnchorNode->setPosition(leftAnchorPoint);
+	leftAnchorNode->attachObject(leftEntity);
+	leftNode->setPosition(-leftAnchorPoint);
 	leftBody->canCollide = false;
-	leftBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
-	leftBody->addRotation(Ogre::Vector3(1, -0.4f, 0));
 	World::addRigidBody(leftBody);
+	srand(time(NULL));
+	int randNum1 = rand() % (100) - 50;
+	int randNum2 = rand() % (100) - 50;
+	int randNum3 = rand() % (100) - 50;
+	Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
+	ranDir.normalise();
 
+	//leftBody->cut(leftAnchorPoint, ranDir, sliceAmount);
+
+
+	
+
+	Ogre::SceneNode *rightNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	Ogre::SceneNode *rightAnchorNode = rightNode->createChildSceneNode();
 	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
+	Ogre::Vector3 rightAnchorPoint = -rightBody->getMeshCenterPoint();
+	rightAnchorNode->setPosition(rightAnchorPoint);
+	rightAnchorNode->attachObject(rightEntity);
+	rightNode->setPosition(-rightAnchorPoint);
 	rightBody->canCollide = false;
-	rightBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
-	rightBody->addRotation(Ogre::Vector3(-1, 0.4f, 0));
 	World::addRigidBody(rightBody);
+	srand(time(NULL));
+	randNum1 = rand() % (100) - 50;
+	randNum2 = rand() % (100) - 50;
+	randNum3 = rand() % (100) - 50;
+	ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
+	ranDir.normalise();
+
+	//rightBody->cut(rightAnchorPoint, ranDir, sliceAmount);
+
+
+
 
 	delete newVertices;
 	delete newNormals;
@@ -895,7 +1057,69 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	delete rightIndices2;
 }
 
+/*
+Ogre::Vector3* leftVertices2 = new Ogre::Vector3[newVertexCount];
+Ogre::Vector3* leftNormals2 = new Ogre::Vector3[newVertexCount];
+int* leftIndices2 = new int[newIndexMax];
+int leftVertexCount2 = newVertexCount;
+int leftIndexCount2 = leftIndexCount;
 
+memcpy(leftVertices2, newVertices, leftVertexCount2 * sizeof(Ogre::Vector3));
+memcpy(leftNormals2, newNormals, leftVertexCount2 * sizeof(Ogre::Vector3));
+memcpy(leftIndices2, leftIndices, leftIndexCount2 * sizeof(int));
+
+Ogre::Entity* leftEntity = World::createCustomEntity(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount2, entity->getSubEntity(0)->getMaterialName());
+//leftBody->canCollide = false;
+//leftBody->addForce(Ogre::Vector3(5, 0, 0) * 10);
+//leftBody->addTorque(Ogre::Vector3(1, 0, 0.4f));
+
+Ogre::Vector3* rightVertices2 = new Ogre::Vector3[newVertexCount];
+Ogre::Vector3* rightNormals2 = new Ogre::Vector3[newVertexCount];
+int* rightIndices2 = new int[newIndexMax];
+int rightVertexCount2 = newVertexCount;
+int rightIndexCount2 = rightIndexCount;
+
+memcpy(rightVertices2, newVertices, rightVertexCount2 * sizeof(Ogre::Vector3));
+memcpy(rightNormals2, newNormals, rightVertexCount2 * sizeof(Ogre::Vector3));
+memcpy(rightIndices2, rightIndices, rightIndexCount * sizeof(int));
+
+Ogre::Entity* rightEntity = World::createCustomEntity(rightVertices2, rightIndices2, rightVertexCount2, rightIndexCount2, entity->getSubEntity(0)->getMaterialName());
+
+
+Ogre::SceneNode *leftNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
+leftNode->setPosition(Ogre::Vector3(0, 0, 0));
+leftNode->attachObject(leftEntity);
+Ogre::SceneNode *rightNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
+rightNode->setPosition(Ogre::Vector3(0, 0, 0));
+rightNode->attachObject(rightEntity);
+
+
+RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
+leftBody->canCollide = false;
+//leftBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
+//leftBody->addRotation(Ogre::Vector3(1, -0.4f, 0));
+World::addRigidBody(leftBody);
+
+RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
+rightBody->canCollide = false;
+//rightBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
+//rightBody->addRotation(Ogre::Vector3(-1, 0.4f, 0));
+World::addRigidBody(rightBody);
+
+delete newVertices;
+delete newNormals;
+delete leftIndices;
+delete rightIndices;
+
+
+delete leftVertices2;
+delete leftNormals2;
+delete leftIndices2;
+
+delete rightVertices2;
+delete rightNormals2;
+delete rightIndices2;
+*/
 
 
 
