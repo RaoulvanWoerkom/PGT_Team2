@@ -85,6 +85,8 @@ void Baller::restartGame()
 	isGameOver = false;
 	timer.reset();
 	loseText->setText("");
+	// Set current Score to zero
+	currentScore = 0;
 	world.restartWorld();
 }
 
