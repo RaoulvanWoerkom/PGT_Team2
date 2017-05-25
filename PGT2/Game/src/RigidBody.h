@@ -81,7 +81,8 @@ public:
 	bool setAndCheckIsAwake();
 
 	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
-	void fillIntersectionFaces(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, int intersectionTotal, int* intersectionsArray, Ogre::Vector3* newVertices, int middlePointIndex);
+	bool IsClockwise(Ogre::Vector3* newVertices, int index1, int index2, int index3);
+	void fillIntersectionFaces(int* &_indicesArr, int &_indexCount, int* intersectionsArray, int intersectionCount, int middlePointIndex);
 	
 	size_t faceCount;
 	std::vector<Face> faces;

@@ -24,7 +24,6 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::loadMeshInfo();
 	RigidBody::createBoundingBox();
 
-
 	/*
 	
 	if (cut)
@@ -50,19 +49,22 @@ void RigidBody::loadMeshInfo()
 		long index1 = indices[i];
 		long index2 = indices[i + 1];
 		long index3 = indices[i + 2];
-		Ogre::Vector3 point1 = vertices[index1];
-		Ogre::Vector3 point2 = vertices[index2];
-		Ogre::Vector3 point3 = vertices[index3];
-		Ogre::Vector3 middlePoint = (point1 + point2 + point3) / 3;
-		Face face = Face();
-		face.point1 = point1;
-		face.point2 = point2;
-		face.point3 = point3;
-		face.normal = Helper::normalVector(point1, point2, point3);
-		faces.push_back(face);
-		normals[faceCount] = face.normal;
+		if (index1 < 50000)
+		{
+			Ogre::Vector3 point1 = vertices[index1];
+			Ogre::Vector3 point2 = vertices[index2];
+			Ogre::Vector3 point3 = vertices[index3];
+			Ogre::Vector3 middlePoint = (point1 + point2 + point3) / 3;
+			Face face = Face();
+			face.point1 = point1;
+			face.point2 = point2;
+			face.point3 = point3;
+			face.normal = Helper::normalVector(point1, point2, point3);
+			faces.push_back(face);
+			normals[faceCount] = face.normal;
 
-		faceCount++;
+			faceCount++;
+		}
 
 	}
 
@@ -303,6 +305,7 @@ void RigidBody::integrate(Ogre::Real delta)
 	}
 }
 
+/// Returns true if this object is moveable.
 bool RigidBody::hasFiniteMass()
 {
 	if (RigidBody::inverseMass == 0)
@@ -312,11 +315,13 @@ bool RigidBody::hasFiniteMass()
 	return true;
 }
 
+/// Get the mass.
 Ogre::Real RigidBody::getMass()
 {
 	return 1 / RigidBody::inverseMass;
 }
 
+/// Get the inverse Mass.
 Ogre::Real RigidBody::getInverseMass()
 {
 	return RigidBody::inverseMass;
@@ -395,8 +400,9 @@ void RigidBody::setInertiaTensor(const Ogre::Matrix3& inertiaTensor)
 	RigidBody::inverseInertiaTensor = inertiaTensor.Inverse();
 }
 
-
-// In this method we calculate the diverance between 
+/// \brief Calculate resulting vector after subtraction.
+///
+/// TODO: this method could be placed in a math helper class.
 void sub3(const Ogre::Vector3* first, const Ogre::Vector3* second, Ogre::Vector3* result)
 {
 	result->x = first->x - second->x;
@@ -404,6 +410,9 @@ void sub3(const Ogre::Vector3* first, const Ogre::Vector3* second, Ogre::Vector3
 	result->z = first->z - second->z;
 }
 
+/// \brief Calculate the dot product of two vectors.
+///
+/// TODO: This method could be placed in a math helper class.
 float dot3(const Ogre::Vector3* first, const Ogre::Vector3* second)
 {
 	float dot = first->x * second->x + first->y * second->y + first->z * second->z;
@@ -433,6 +442,14 @@ float linePlaneCoefficient(const Ogre::Vector3* linePoint, const Ogre::Vector3* 
 	return result;
 }
 
+/// \brief Slice a mesh into two new meshes.
+///
+/// This function will be called when the wrecking ball hits a building or other destroyable mesh.
+/// What should happen is the mesh being cut according to the force of the ball. Right now, a random plane
+/// is used to indicute the cutting edge, but the of cutting the mesh with a slicing plane still applies.
+///
+/// Using the slicing plane, each intersection vertex can be found. Using those, the mesh is seperated at
+/// these points, and new indices + faces are created for the missing parts of the two new meshes.
 void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 {
 	
@@ -885,22 +902,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	int leftVertexCount2 = newVertexCount;
 	int leftIndexCount2 = leftIndexCount + missingFacesIndices;
 
-	for (int i = 0; i < intersectionCount; i++)
-	{
-		if (i < intersectionCount -1)
-		{
-			leftIndices[leftIndexCount++] = intersectionsArray[i];
-			leftIndices[leftIndexCount++] = intersectionsArray[i + 1];
-			leftIndices[leftIndexCount++] = middlePointIndex;
-		}
-		else
-		{
-			leftIndices[leftIndexCount++] = intersectionsArray[i];
-			leftIndices[leftIndexCount++] = intersectionsArray[0];
-			leftIndices[leftIndexCount++] = middlePointIndex;
-		}
-
-	}
+	fillIntersectionFaces(leftIndices, leftIndexCount, intersectionsArray, intersectionCount, middlePointIndex);
 
 	memcpy(leftVertices2, newVertices, leftVertexCount2 * sizeof(Ogre::Vector3));
 	memcpy(leftNormals2, newNormals, leftVertexCount2 * sizeof(Ogre::Vector3));
@@ -917,22 +919,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	int rightVertexCount2 = newVertexCount;
 	int rightIndexCount2 = rightIndexCount + missingFacesIndices;
 
-	for (int i = 0; i < intersectionCount; i++)
-	{
-		if (i < intersectionCount -1)
-		{
-			rightIndices[rightIndexCount++] = intersectionsArray[i];
-			rightIndices[rightIndexCount++] = middlePointIndex;
-			rightIndices[rightIndexCount++] = intersectionsArray[i + 1];
-		}
-		else
-		{
-			rightIndices[rightIndexCount++] = intersectionsArray[i];
-			rightIndices[rightIndexCount++] = middlePointIndex;
-			rightIndices[rightIndexCount++] = intersectionsArray[0];
-		}
-
-	}
+	fillIntersectionFaces(rightIndices, rightIndexCount, intersectionsArray, intersectionCount, middlePointIndex);
 
 	memcpy(rightVertices2, newVertices, rightVertexCount2 * sizeof(Ogre::Vector3));
 	memcpy(rightNormals2, newNormals, rightVertexCount2 * sizeof(Ogre::Vector3));
@@ -976,9 +963,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	delete rightIndices2;
 }
 
-
-
-
 /// \brief Fill in the missing faces on the intersection plane after slicing a mesh.
 ///
 /// When slicing a mesh with the cut() method, the place where the meshes are cut is not yet filled with faces.
@@ -986,42 +970,19 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 /// This method will create new faces on the place where the mesh is cut, using the vertices that where created
 /// in the cut method along the slicing plane edge. To create triangular faces from these intersection vertices,
 /// indices are created between them and planePoint, because it is always exactly in the middle of all the other vertices.
-
-// fillIntersectionFaces(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount, intersectionMax, intersectionsArray, newVertices, planePoint);
-void RigidBody::fillIntersectionFaces(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, int intersectionTotal, int* intersectionsArray, Ogre::Vector3* newVertices, int middlePointIndex)
+void RigidBody::fillIntersectionFaces(int* &_indicesArr, int &_indexCount, int* intersectionsArray, int intersectionCount, int middlePointIndex)
 {
-	// Add triangles
-	// Left
-	for (int i = 0; i < intersectionTotal; i++)
+	for (int i = 0; i < intersectionCount; i += 2)
 	{
-		if (i < intersectionTotal)
-		{
-			_indicesArr[_indexCount++] = intersectionsArray[i];
-			_indicesArr[_indexCount++] = intersectionsArray[i + 1];
-			_indicesArr[_indexCount++] = middlePointIndex;
-		}
-		else
-		{
-			_indicesArr[_indexCount++] = intersectionsArray[i];
-			_indicesArr[_indexCount++] = intersectionsArray[0];
-			_indicesArr[_indexCount++] = middlePointIndex;
-		}
-	}
-	// leftIndices[leftIndexCount++] = i2;
-	// leftIndices[leftIndexCount++] = intersect2index;
-	// leftIndices[leftIndexCount++] = intersect1index;
-	/*
-	// Loop through every intersection vertex
-	for (int i = 0; i < intersectionTotal; ++i)
-	{
-		// The index number in the newVertices array of the intersection point [i]
-		INDEX = intersectionsArray[i];
-		// The vertex with coordinates with the associated index number
-		INTERSECTION_VERTEX = newVertices[INDEX];
-	}
-	*/
 
-	
+		_indicesArr[_indexCount++] = intersectionsArray[i];
+		_indicesArr[_indexCount++] = middlePointIndex;
+		_indicesArr[_indexCount++] = intersectionsArray[i + 1];
+
+		_indicesArr[_indexCount++] = middlePointIndex;
+		_indicesArr[_indexCount++] = intersectionsArray[i];
+		_indicesArr[_indexCount++] = intersectionsArray[i + 1];
+	}
 }
 
 
