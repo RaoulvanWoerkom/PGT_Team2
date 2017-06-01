@@ -49,6 +49,10 @@ public:
 	bool isBreakable;
 	bool canCollide;
 
+	bool* cutList;
+	int cutListCount;
+
+
 	RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity);
 	RigidBody(void);
 	void setPosition(Ogre::Vector3 _position);
@@ -82,7 +86,7 @@ public:
 
 	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
 	bool IsClockwise(Ogre::Vector3* newVertices, int index1, int index2, int index3);
-	void fillIntersectionFaces(int* &_indicesArr, int &_indexCount, int* intersectionsArray, int intersectionCount, int middlePointIndex);
+	std::vector<int> fillIntersectionFaces(std::vector<int> _indices, std::vector<int> intersections, int middlePointIndex);
 	
 	size_t faceCount;
 	std::vector<Face> faces;

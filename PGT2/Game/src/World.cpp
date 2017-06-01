@@ -226,7 +226,7 @@ void World::createSphereMesh(const std::string& strName, const float r, const in
 	pSphere->load();
 }
 
-Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, Ogre::String matName)
+Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, std::vector<int> _indiceList, int _vertexCount, Ogre::String matName)
 {
 
 	//gebasseerd op: https://www.grahamedgecombe.com/blog/2011/08/05/custom-meshes-in-ogre3d en http://www.ogre3d.org/tikiwiki/Generating+A+Mesh
@@ -249,11 +249,6 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, int* _indic
 	decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
 	offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
 
-	/*
-	decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
-	offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-	*/
-
 
 	/* create the vertex buffer */
 	Ogre::HardwareVertexBufferSharedPtr vertexBuffer =
@@ -271,13 +266,6 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, int* _indic
 		_vertices[i * 3] = currVertex.x;
 		_vertices[i * 3 + 1] = currVertex.y;
 		_vertices[i * 3 + 2] = currVertex.z;
-		/*
-		Ogre::Vector3 vNormal = currVertex.normalisedCopy();
-
-		_vertices[i * 6 + 3] = vNormal.x;
-		_vertices[i * 6 + 4] = vNormal.y;
-		_vertices[i * 6 + 5] = vNormal.z;
-		*/
 	}
 
 	vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), _verticesArr, true);
@@ -288,15 +276,15 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, int* _indic
 	Ogre::HardwareIndexBufferSharedPtr indexBuffer = Ogre::HardwareBufferManager::getSingleton().
 		createIndexBuffer(
 			Ogre::HardwareIndexBuffer::IT_16BIT,
-			_indexCount,
+			_indiceList.size(),
 			Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
 
 	uint16_t *_indices = static_cast<uint16_t *>(indexBuffer->lock(Ogre::HardwareBuffer::HBL_NORMAL));
 
-	for (size_t i = 0; i < _indexCount; i++)
+	for (size_t i = 0; i < _indiceList.size(); i++)
 	{
-		_indices[i] = _indicesArr[i];
+		_indices[i] = _indiceList.at(i);
 	}
 
 	/* unlock the buffer */
@@ -307,7 +295,7 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, int* _indic
 	mesh->sharedVertexData->vertexBufferBinding->setBinding(0, vertexBuffer);
 	subMesh->useSharedVertices = true;
 	subMesh->indexData->indexBuffer = indexBuffer;
-	subMesh->indexData->indexCount = _indexCount;
+	subMesh->indexData->indexCount = _indiceList.size();
 	subMesh->indexData->indexStart = 0;
 
 	/* set the bounds of the mesh */
@@ -735,11 +723,11 @@ void World::checkBallCollision()
 
 						if (currBody->isBreakable)
 						{
-							//Building* building = dynamic_cast<Building*>(currBody);
-							//building->fracture();
-							//building->isDestroyed = true;
-							//mSceneMgr->destroyEntity(building->entity);
-							//break;
+							Building* building = dynamic_cast<Building*>(currBody);
+							building->fracture();
+							building->isDestroyed = true;
+							mSceneMgr->destroyEntity(building->entity);
+							break;
 						}
 					}
 				}

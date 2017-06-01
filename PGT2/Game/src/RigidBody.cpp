@@ -42,6 +42,8 @@ RigidBody::RigidBody(void)
 void RigidBody::loadMeshInfo()
 {
 	Helper::getMeshInformation(entity->getMesh(), vertexCount, vertices, indexCount, indices, getPosition(), getOrientation(), node->getScale());
+	cutList = new bool[vertexCount] {0};
+	cutListCount = vertexCount;
 	int max = indexCount - 3;
 	normals = new Ogre::Vector3[indexCount / 3];
 	for (int i = 0; i < max; i += 3)
@@ -471,16 +473,22 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	int newIndexCount = indexCount;
 	int newIndexMax = indexCount + faceCount * 9;
 
-	int leftIndexCount = 0;
-	int* leftIndices = new int[newIndexMax];
+	//int leftIndexCount = 0;
+	std::vector<int> leftIndices = std::vector<int>();
 
-	int rightIndexCount = 0;
-	int* rightIndices = new int[newIndexMax];
+	std::vector<int> rightIndices = std::vector<int>();
 	
+	bool* leftCutList = new bool[newVertexMax - 1]{ 0 };
+	bool* rightCutList = new bool[newVertexMax - 1]{ 0 };
+	for (size_t i = 0; i < cutListCount; i++)
+	{
+		leftCutList[i] = cutList[i];
+		rightCutList[i] = cutList[i];
+	}
 	// Array to store the array index of the new intersection vertices, so we can loop through them.
-	int intersectionMax = faceCount * 2;
-	int intersectionCount = 0;
-	int* intersectionsArray = new int[intersectionMax];
+	//int intersectionMax = faceCount * 2;
+
+	std::vector<int> intersectionsArray = std::vector<int>();
 	
 	// Iterate through each face and decide which list to put it in and whether to divide it
 	for (int i = 0; i < faceCount; ++i)
@@ -511,18 +519,31 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 		// All terrainVertices to left
 		if (pointsToLeft == 3)
 		{
+			rightCutList[i1] = true;
+			rightCutList[i2] = true;
+			rightCutList[i3] = true;
 			// Add all terrainVertices to left
-			leftIndices[leftIndexCount++] = i1;
-			leftIndices[leftIndexCount++] = i2;
-			leftIndices[leftIndexCount++] = i3;
+			if (!cutList[i1] && !cutList[i2] && !cutList[i3])
+			{
+				leftIndices.push_back(i1);
+				leftIndices.push_back(i2);
+				leftIndices.push_back(i3);
+			}
 		}
 		// All terrainVertices to right
 		else if (pointsToLeft == 0)
 		{
+			leftCutList[i1] = true;
+			leftCutList[i2] = true;
+			leftCutList[i3] = true;
 			// Add all terrainVertices to right
-			rightIndices[rightIndexCount++] = i1;
-			rightIndices[rightIndexCount++] = i2;
-			rightIndices[rightIndexCount++] = i3;
+			if (!cutList[i1] && !cutList[i2] && !cutList[i3])
+			{
+				rightIndices.push_back(i1);
+				rightIndices.push_back(i2);
+				rightIndices.push_back(i3);
+			}
+			
 		}
 		// One vertex to left
 		else if (pointsToLeft == 1)
@@ -558,8 +579,8 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 				intersect2index = newVertexCount++;
 
 				// Store intersection index in the intersection array
-				intersectionsArray[intersectionCount++] = intersect1index;
-				intersectionsArray[intersectionCount++] = intersect2index;
+				intersectionsArray.push_back(intersect1index);
+				intersectionsArray.push_back(intersect2index);
 
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
@@ -570,18 +591,29 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 				// Add triangles
 				// Left
-				leftIndices[leftIndexCount++] = i1;
-				leftIndices[leftIndexCount++] = intersect1index;
-				leftIndices[leftIndexCount++] = intersect2index;
+				rightCutList[i1] = true;
+				if (!cutList[i1])
+				{
+					leftIndices.push_back(i1);
+					leftIndices.push_back(intersect1index);
+					leftIndices.push_back(intersect2index);
+				}
+				
 
 				// Right
-				rightIndices[rightIndexCount++] = intersect1index;
-				rightIndices[rightIndexCount++] = i2;
-				rightIndices[rightIndexCount++] = i3;
+				leftCutList[i2] = true;
+				leftCutList[i3] = true;
+				if (!cutList[i2] && !cutList[i3])
+				{
+					rightIndices.push_back(intersect1index);
+					rightIndices.push_back(i2);
+					rightIndices.push_back(i3);
 
-				rightIndices[rightIndexCount++] = intersect1index;
-				rightIndices[rightIndexCount++] = i3;
-				rightIndices[rightIndexCount++] = intersect2index;
+					rightIndices.push_back(intersect1index);
+					rightIndices.push_back(i3);
+					rightIndices.push_back(intersect2index);
+				}
+				
 			}
 			else if (v2Left)
 			{
@@ -613,8 +645,8 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 				intersect2index = newVertexCount++;
 
 				// Store intersection index in the intersection array
-				intersectionsArray[intersectionCount++] = intersect1index;
-				intersectionsArray[intersectionCount++] = intersect2index;
+				intersectionsArray.push_back(intersect1index);
+				intersectionsArray.push_back(intersect2index);
 
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
@@ -625,18 +657,28 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 				// Add triangles
 				// Left
-				leftIndices[leftIndexCount++] = i2;
-				leftIndices[leftIndexCount++] = intersect2index;
-				leftIndices[leftIndexCount++] = intersect1index;
+				rightCutList[i2] = true;
+				if (!cutList[i2])
+				{
+					leftIndices.push_back(i2);
+					leftIndices.push_back(intersect2index);
+					leftIndices.push_back(intersect1index);
+				}
 
 				// Right
-				rightIndices[rightIndexCount++] = intersect1index;
-				rightIndices[rightIndexCount++] = intersect2index;
-				rightIndices[rightIndexCount++] = i3;
+				leftCutList[i1] = true;
+				leftCutList[i3] = true;
+				if (!cutList[i1] && !cutList[i3])
+				{
+					rightIndices.push_back(intersect1index);
+					rightIndices.push_back(intersect2index);
+					rightIndices.push_back(i3);
 
-				rightIndices[rightIndexCount++] = intersect1index;
-				rightIndices[rightIndexCount++] = i3;
-				rightIndices[rightIndexCount++] = i1;
+					rightIndices.push_back(intersect1index);
+					rightIndices.push_back(i3);
+					rightIndices.push_back(i1);
+				}
+				
 			}
 			else
 			{
@@ -668,8 +710,8 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 				intersect2index = newVertexCount++;
 
 				// Store intersection index in the intersection array
-				intersectionsArray[intersectionCount++] = intersect1index;
-				intersectionsArray[intersectionCount++] = intersect2index;
+				intersectionsArray.push_back(intersect1index);
+				intersectionsArray.push_back(intersect2index);
 
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
@@ -680,18 +722,28 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 				// Add triangles
 				// Left
-				leftIndices[leftIndexCount++] = intersect1index;
-				leftIndices[leftIndexCount++] = intersect2index;
-				leftIndices[leftIndexCount++] = i3;
+				rightCutList[i3] = true;
+				if (!cutList[i3])
+				{
+					leftIndices.push_back(intersect1index);
+					leftIndices.push_back(intersect2index);
+					leftIndices.push_back(i3);
+				}
 
 				// Right
-				rightIndices[rightIndexCount++] = i2;
-				rightIndices[rightIndexCount++] = intersect2index;
-				rightIndices[rightIndexCount++] = intersect1index;
+				leftCutList[i1] = true;
+				leftCutList[i2] = true;
+				if (!cutList[i1] && !cutList[i2])
+				{
+					rightIndices.push_back(i2);
+					rightIndices.push_back(intersect2index);
+					rightIndices.push_back(intersect1index);
 
-				rightIndices[rightIndexCount++] = i2;
-				rightIndices[rightIndexCount++] = intersect1index;
-				rightIndices[rightIndexCount++] = i1;
+					rightIndices.push_back(i2);
+					rightIndices.push_back(intersect1index);
+					rightIndices.push_back(i1);
+				}
+				
 			}
 		}
 		// Two terrainVertices to left
@@ -727,8 +779,8 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 				intersect2index = newVertexCount++;
 
 				// Store intersection index in the intersection array
-				intersectionsArray[intersectionCount++] = intersect1index;
-				intersectionsArray[intersectionCount++] = intersect2index;
+				intersectionsArray.push_back(intersect1index);
+				intersectionsArray.push_back(intersect2index);
 
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
@@ -739,18 +791,29 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 				// Add triangles
 				// Right
-				rightIndices[rightIndexCount++] = i1;
-				rightIndices[rightIndexCount++] = intersect1index;
-				rightIndices[rightIndexCount++] = intersect2index;
+				leftCutList[i1] = true;
+				if (!cutList[i1])
+				{
+					rightIndices.push_back(i1);
+					rightIndices.push_back(intersect1index);
+					rightIndices.push_back(intersect2index);
+				}
+				
 
 				// Left
-				leftIndices[leftIndexCount++] = intersect1index;
-				leftIndices[leftIndexCount++] = i2;
-				leftIndices[leftIndexCount++] = i3;
+				rightCutList[i2] = true;
+				rightCutList[i3] = true;
+				if (!cutList[i2] && !cutList[i3])
+				{
+					leftIndices.push_back(intersect1index);
+					leftIndices.push_back(i2);
+					leftIndices.push_back(i3);
 
-				leftIndices[leftIndexCount++] = intersect1index;
-				leftIndices[leftIndexCount++] = i3;
-				leftIndices[leftIndexCount++] = intersect2index;
+					leftIndices.push_back(intersect1index);
+					leftIndices.push_back(i3);
+					leftIndices.push_back(intersect2index);
+				}
+				
 			}
 			else if (!v2Left)
 			{
@@ -782,8 +845,8 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 				intersect2index = newVertexCount++;
 
 				// Store intersection index in the intersection array
-				intersectionsArray[intersectionCount++] = intersect1index;
-				intersectionsArray[intersectionCount++] = intersect2index;
+				intersectionsArray.push_back(intersect1index);
+				intersectionsArray.push_back(intersect2index);
 
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
@@ -794,18 +857,29 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 				// Add triangles
 				// Right
-				rightIndices[rightIndexCount++] = i2;
-				rightIndices[rightIndexCount++] = intersect2index;
-				rightIndices[rightIndexCount++] = intersect1index;
+				leftCutList[i2] = true;
+				if (!cutList[i2])
+				{
+					rightIndices.push_back(i2);
+					rightIndices.push_back(intersect2index);
+					rightIndices.push_back(intersect1index);
+				}
+				
 
 				// Left
-				leftIndices[leftIndexCount++] = intersect1index;
-				leftIndices[leftIndexCount++] = intersect2index;
-				leftIndices[leftIndexCount++] = i3;
+				rightCutList[i1] = true;
+				rightCutList[i3] = true;
+				if (!cutList[i1] && !cutList[i3])
+				{
+					leftIndices.push_back(intersect1index);
+					leftIndices.push_back(intersect2index);
+					leftIndices.push_back(i3);
 
-				leftIndices[leftIndexCount++] = intersect1index;
-				leftIndices[leftIndexCount++] = i3;
-				leftIndices[leftIndexCount++] = i1;
+					leftIndices.push_back(intersect1index);
+					leftIndices.push_back(i3);
+					leftIndices.push_back(i1);
+				}
+				
 			}
 			else if (!v3Left)
 			{
@@ -837,8 +911,8 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 				intersect2index = newVertexCount++;
 
 				// Store intersection index in the intersection array
-				intersectionsArray[intersectionCount++] = intersect1index;
-				intersectionsArray[intersectionCount++] = intersect2index;
+				intersectionsArray.push_back(intersect1index);
+				intersectionsArray.push_back(intersect2index);
 
 				// Save intersections as new terrainVertices
 				newVertices[intersect1index] = intersect1;
@@ -849,18 +923,28 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 				// Add triangles
 				// Right
-				rightIndices[rightIndexCount++] = intersect1index;
-				rightIndices[rightIndexCount++] = intersect2index;
-				rightIndices[rightIndexCount++] = i3;
+				leftCutList[i3] = true;
+				if (!cutList[i3])
+				{
+					rightIndices.push_back(intersect1index);
+					rightIndices.push_back(intersect2index);
+					rightIndices.push_back(i3);
+				}
 
 				// Left
-				leftIndices[leftIndexCount++] = i2;
-				leftIndices[leftIndexCount++] = intersect2index;
-				leftIndices[leftIndexCount++] = intersect1index;
+				rightCutList[i1] = true;
+				rightCutList[i2] = true;
+				if (!cutList[i1] && !cutList[i2])
+				{
+					leftIndices.push_back(i2);
+					leftIndices.push_back(intersect2index);
+					leftIndices.push_back(intersect1index);
 
-				leftIndices[leftIndexCount++] = i2;
-				leftIndices[leftIndexCount++] = intersect1index;
-				leftIndices[leftIndexCount++] = i1;
+					leftIndices.push_back(i2);
+					leftIndices.push_back(intersect1index);
+					leftIndices.push_back(i1);
+				}
+				
 			}
 		}
 		else
@@ -880,87 +964,60 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	int middlePointIndex = newVertexCount++;
 	newVertices[middlePointIndex] = planePoint;
 
-	// When creating missing intersection faces: Amount of new indices added = intersectionPoints * 3
-	// intersectionCount--;
-	int missingFacesIndices = intersectionCount * 3;
-
-	// copy left and right indice index arrays, size needs to be increased to account for the new missing face indices
-	int* newArr2 = new int[newIndexMax + missingFacesIndices];
-	std::copy(leftIndices, leftIndices + std::min(newIndexMax, newIndexMax + missingFacesIndices), newArr2);
-	delete[] leftIndices;
-	leftIndices = newArr2;
-
-	int* newArr3 = new int[newIndexMax + missingFacesIndices];
-	std::copy(rightIndices, rightIndices + std::min(newIndexMax, newIndexMax + missingFacesIndices), newArr3);
-	delete[] rightIndices;
-	rightIndices = newArr3;
 
 	// Todo: Refactor into function so we can reuse it for left and right
 	Ogre::Vector3* leftVertices2 = new Ogre::Vector3[newVertexCount];
-	Ogre::Vector3* leftNormals2 = new Ogre::Vector3[newVertexCount];
-	int* leftIndices2 = new int[newIndexMax + missingFacesIndices];
-	int leftVertexCount2 = newVertexCount;
-	int leftIndexCount2 = leftIndexCount + missingFacesIndices;
-
-	fillIntersectionFaces(leftIndices, leftIndexCount, intersectionsArray, intersectionCount, middlePointIndex);
-
-	memcpy(leftVertices2, newVertices, leftVertexCount2 * sizeof(Ogre::Vector3));
-	memcpy(leftNormals2, newNormals, leftVertexCount2 * sizeof(Ogre::Vector3));
-	memcpy(leftIndices2, leftIndices, leftIndexCount2 * sizeof(int));
-
-	Ogre::Entity* leftEntity = World::createCustomEntity(leftVertices2, leftIndices2, leftVertexCount2, leftIndexCount2, entity->getSubEntity(0)->getMaterialName());
-	//leftBody->canCollide = false;
-	//leftBody->addForce(Ogre::Vector3(5, 0, 0) * 10);
-	//leftBody->addTorque(Ogre::Vector3(1, 0, 0.4f));
-
 	Ogre::Vector3* rightVertices2 = new Ogre::Vector3[newVertexCount];
-	Ogre::Vector3* rightNormals2 = new Ogre::Vector3[newVertexCount];
-	int* rightIndices2 = new int[newIndexMax + missingFacesIndices];
-	int rightVertexCount2 = newVertexCount;
-	int rightIndexCount2 = rightIndexCount + missingFacesIndices;
 
-	fillIntersectionFaces(rightIndices, rightIndexCount, intersectionsArray, intersectionCount, middlePointIndex);
 
-	memcpy(rightVertices2, newVertices, rightVertexCount2 * sizeof(Ogre::Vector3));
-	memcpy(rightNormals2, newNormals, rightVertexCount2 * sizeof(Ogre::Vector3));
-	memcpy(rightIndices2, rightIndices, rightIndexCount * sizeof(int));
+	leftIndices = fillIntersectionFaces(leftIndices, intersectionsArray, middlePointIndex);
+	rightIndices = fillIntersectionFaces(leftIndices, intersectionsArray, middlePointIndex);
 
-	Ogre::Entity* rightEntity = World::createCustomEntity(rightVertices2, rightIndices2, rightVertexCount2, rightIndexCount2, entity->getSubEntity(0)->getMaterialName());
-	
+	memcpy(leftVertices2, newVertices, newVertexCount * sizeof(Ogre::Vector3));
+	memcpy(rightVertices2, newVertices, newVertexCount * sizeof(Ogre::Vector3));
+
+	Ogre::Entity* leftEntity = World::createCustomEntity(leftVertices2, leftIndices, newVertexCount, entity->getSubEntity(0)->getMaterialName());
+	Ogre::Entity* rightEntity = World::createCustomEntity(rightVertices2, rightIndices, newVertexCount, entity->getSubEntity(0)->getMaterialName());
+
 
 	Ogre::SceneNode *leftNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	leftNode->setPosition(Ogre::Vector3(0, 0, 0));
 	leftNode->attachObject(leftEntity);
+	
 	Ogre::SceneNode *rightNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	rightNode->setPosition(Ogre::Vector3(0, 0, 0));
 	rightNode->attachObject(rightEntity);
-
+	
 
 	RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
 	leftBody->canCollide = false;
-	leftBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
-	leftBody->addRotation(Ogre::Vector3(1, -0.4f, 0));
+	leftBody->addForce(Ogre::Vector3(5, 0, 0) * 10);
+	leftBody->addRotation(Ogre::Vector3(1, 0.4f, 0));
 	World::addRigidBody(leftBody);
+	leftBody->cutList = leftCutList;
 
+
+	
 	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
 	rightBody->canCollide = false;
 	rightBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
 	rightBody->addRotation(Ogre::Vector3(-1, 0.4f, 0));
 	World::addRigidBody(rightBody);
+	rightBody->cutList = rightCutList;
 
 	delete newVertices;
 	delete newNormals;
-	delete leftIndices;
-	delete rightIndices;
+	//delete leftIndices;
+	//delete rightIndices;
 
 
 	delete leftVertices2;
-	delete leftNormals2;
-	delete leftIndices2;
+	//delete leftNormals2;
+	//delete leftIndices2;
 
 	delete rightVertices2;
-	delete rightNormals2;
-	delete rightIndices2;
+	//delete rightNormals2;
+	//delete rightIndices2;
 }
 
 /// \brief Fill in the missing faces on the intersection plane after slicing a mesh.
@@ -970,19 +1027,19 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 /// This method will create new faces on the place where the mesh is cut, using the vertices that where created
 /// in the cut method along the slicing plane edge. To create triangular faces from these intersection vertices,
 /// indices are created between them and planePoint, because it is always exactly in the middle of all the other vertices.
-void RigidBody::fillIntersectionFaces(int* &_indicesArr, int &_indexCount, int* intersectionsArray, int intersectionCount, int middlePointIndex)
+std::vector<int> RigidBody::fillIntersectionFaces(std::vector<int> _indices, std::vector<int> intersections, int middlePointIndex)
 {
-	for (int i = 0; i < intersectionCount; i += 2)
+	for (int i = 0; i < intersections.size(); i += 2)
 	{
+		_indices.push_back(intersections[i]);
+		_indices.push_back(middlePointIndex);
+		_indices.push_back(intersections[i + 1]);
 
-		_indicesArr[_indexCount++] = intersectionsArray[i];
-		_indicesArr[_indexCount++] = middlePointIndex;
-		_indicesArr[_indexCount++] = intersectionsArray[i + 1];
-
-		_indicesArr[_indexCount++] = middlePointIndex;
-		_indicesArr[_indexCount++] = intersectionsArray[i];
-		_indicesArr[_indexCount++] = intersectionsArray[i + 1];
+		_indices.push_back(middlePointIndex);
+		_indices.push_back(intersections[i]);
+		_indices.push_back(intersections[i + 1]);
 	}
+	return _indices;
 }
 
 

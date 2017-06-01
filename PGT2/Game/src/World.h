@@ -103,7 +103,7 @@ public:
 
 	void createBuilding(Ogre::Vector3 pos);
 
-	static Ogre::Entity* createCustomEntity(Ogre::Vector3* _verticesArr, int* _indicesArr, int _vertexCount, int _indexCount, Ogre::String matName);
+	static Ogre::Entity* createCustomEntity(Ogre::Vector3* _verticesArr, std::vector<int> _indiceList, int _vertexCount, Ogre::String matName);
 	virtual void createHouse(Ogre::SceneManager* mSceneMgr);
 
 	bool mouseMoved(const OIS::MouseEvent &arg);
