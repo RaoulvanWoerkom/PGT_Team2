@@ -22,7 +22,7 @@ int Sound::loopingSound()
 		return 0;
 	}
 
-	engine->play2D("getout.ogg", true);
+	engine->play2D("media/sounds/getout.ogg", true);
 
 	return 0;
 }
