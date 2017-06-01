@@ -22,6 +22,7 @@
 *.la
 *.a
 *.lib
+!Sound/irrKlang.lib
 
 # Executables
 *.exe
