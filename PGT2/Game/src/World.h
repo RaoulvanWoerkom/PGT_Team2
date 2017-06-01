@@ -10,7 +10,7 @@
 #include "Building.h"
 #include "Contact.h"
 #include "MeshGenerator.h"
-
+#include "CollisionDetector.h"
 
 
 typedef struct
@@ -34,36 +34,7 @@ struct ContactGenRegistration
 	ContactGenRegistration* next;
 };
 
-struct CollisionData
-{
-	Contact *contactArray;
-	Contact *contacts;
-	int contactsLeft;
-	unsigned contactCount;
-	Ogre::Real friction;
-	Ogre::Real restitution;
-	Ogre::Real tolerance;
 
-	bool hasMoreContacts()
-	{
-		return contactsLeft > 0;
-	}
-
-	void reset(unsigned maxContacts)
-	{
-		contactsLeft = maxContacts;
-		contactCount = 0;
-		contacts = contactArray;
-	}
-
-	void addContacts(unsigned count)
-	{
-		contactsLeft -= count;
-		contactCount += count;
-
-		contacts += count;
-	}
-};
 
 class World
 {
