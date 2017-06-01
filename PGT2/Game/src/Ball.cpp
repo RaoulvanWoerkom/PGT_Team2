@@ -1,11 +1,19 @@
 #include "Ball.h"
 #include "Helper.h"
-
+/// \brief A method to update the Camera position
+///
+/// A method used to update the Camera position by giving the Scenenode where the camera is attached to
+/// the exact same position as the Ball object.
 void Ball::updateCameraNode()
 {
 	Ball::cameraNode->setPosition(Ball::getPosition());
 }
-
+/// \brief A method to create a ball object from the ball class
+///
+/// With this method you can create a Ball object from the Ball class.
+/// Here the variables needed for the Ball object are initialised and defined using variables passed on from elsewhere
+/// and hardcoded variables.
+/// After initialising and defining all variables the method makes a copy of the mesh used for the Ball object.
 Ball::Ball(Ogre::SceneNode* _node, Ogre::SceneNode* _camNode, Ogre::Entity* _entity) : RigidBody(_node, _entity)
 {
 	
@@ -53,7 +61,10 @@ Ball::Ball(Ogre::SceneNode* _node, Ogre::SceneNode* _camNode, Ogre::Entity* _ent
 Ball::Ball(void)
 {
 }
-
+/// \brief A method to update the ball object.
+///
+/// This method updates all forces working on the Ball object en converts them to velocity
+/// it also calls the UpdateCameraNode method to make sure the camera stays on top of the Ball.
 void Ball::integrate(Ogre::Real delta)
 {
 	RigidBody::integrate(delta);
