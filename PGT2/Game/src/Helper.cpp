@@ -2,7 +2,9 @@
 
 #include "Helper.h"
 #include <stdio.h>
-
+/// \brief A logger for int values
+///
+/// A method used to log int values for debugging.
 void Helper::log(std::string name, int number)
 { 
 	char charAr[1024];
@@ -12,7 +14,9 @@ void Helper::log(std::string name, int number)
 
 	sprintf(buffer, "%s: %d\n", charAr, number);
 }
-
+/// \brief A logger for Ogre::Real values
+///
+/// A method used to log Ogre::Real values for debugging.
 void Helper::log(std::string name, Ogre::Real fl)
 {
 	char charAr[1024];
@@ -45,7 +49,9 @@ void Helper::log(std::string name, long l)
 
 	sprintf(buffer, " %s: %f\n", charAr, l);
 }
-
+/// \brief A logger for Vector2 values
+///
+/// A method used to log Vector2 values for debugging.
 void Helper::log(std::string name, Ogre::Vector2 vec)
 {
 	char charAr[1024];
@@ -56,7 +62,9 @@ void Helper::log(std::string name, Ogre::Vector2 vec)
 	Ogre::Real y = vec.y;
 	sprintf(buffer, " %s:  x: %f  y: %f\n", charAr, x, y);
 }
-
+/// \brief A logger for Vector3 values
+///
+/// A method used to log Vector3 values for debugging.
 void Helper::log(std::string name, Ogre::Vector3 vec)
 {
 	char charAr[1024];
@@ -68,7 +76,9 @@ void Helper::log(std::string name, Ogre::Vector3 vec)
 	Ogre::Real z = vec.z;
 	sprintf(buffer, " %s:  x: %f  y: %f  z: %f\n", charAr, x, y, z);
 }
-
+/// \brief A logger for Quaternion values
+///
+/// A method used to log Quaternion values for debugging.
 void Helper::log(std::string name, Ogre::Quaternion qaut)
 {
 	char charAr[1024];
@@ -81,7 +91,11 @@ void Helper::log(std::string name, Ogre::Quaternion qaut)
 	Ogre::Real w = qaut.w;
 	sprintf(buffer, " %s:  x: %f  y: %f  z: %f, w: %f\n", charAr, x, y, z, w);
 }
-
+/// \brief A method to check if a Vector2 value is in a VectorList
+///
+/// A method used to check if a certain Vector2 value is in a VectorList.
+/// This is done by looping through the VectorList and comparing the x and y values of the all the
+/// Vector2 values in the list with the one that is passed on when the method is called.
 bool Helper::vectorListContainsVector2(std::vector<Ogre::Vector2> &list, Ogre::Vector2 vec)
 {
 	for (size_t i = 0; i < list.size(); i++)
@@ -95,7 +109,9 @@ bool Helper::vectorListContainsVector2(std::vector<Ogre::Vector2> &list, Ogre::V
 	return false;
 }
 
-
+/// \brief A method to get information on a certain mesh
+///
+///
 void Helper::getMeshInformation(const Ogre::MeshPtr mesh,
 	size_t &vertex_count,
 	Ogre::Vector3* &vertices,
@@ -219,7 +235,9 @@ void Helper::getMeshInformation(const Ogre::MeshPtr mesh,
 		current_offset = next_offset;
 	}
 }
-
+/// \brief A method to get the NormalVector of 3 points
+///
+/// 
 Ogre::Vector3 Helper::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3)
 {
 	long e1x = point2.x - point1.x;
