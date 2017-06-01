@@ -44,7 +44,6 @@ RigidBody::RigidBody(void)
 void RigidBody::loadMeshInfo()
 {
 	Helper::getMeshInformation(entity->getMesh(), vertexCount, vertices, indexCount, indices, getPosition(), getOrientation(), node->getScale());
-	cutList = new bool[indexCount];
 	int max = indexCount - 3;
 	normals = new Ogre::Vector3[indexCount / 3];
 	for (int i = 0; i < max; i += 3)
@@ -317,7 +316,7 @@ void RigidBody::addForceAtPoint(Ogre::Vector3 force, Ogre::Vector3 point)
 	RigidBody::forceAccum += force;
 	RigidBody::torqueAccum += Ogre::Vector3(pt.y*force.z - pt.z*force.y,
 											pt.z*force.x - pt.x*force.z,
-											pt.x*force.y - pt.y*force.x); 
+											pt.x*force.y - pt.y*force.x);  ;
 }
 
 void RigidBody::setIsAwake(const bool awake)
@@ -580,9 +579,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 		return;
 	sliceAmount--;
 
-	
-
-
 	Ogre::Vector3 oldPos = RigidBody::getPosition();
 	//RigidBody::setPosition(Ogre::Vector3(0, 0, 0));
 
@@ -611,7 +607,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 	int rightIndexCount = 0;
 	int* rightIndices = new int[newIndexMax];
 	
-	
+
 	
 	// Iterate through each face and decide which list to put it in and whether to divide it
 	for (int i = 0; i < faceCount; ++i)
@@ -646,7 +642,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 			leftIndices[leftIndexCount++] = i1;
 			leftIndices[leftIndexCount++] = i2;
 			leftIndices[leftIndexCount++] = i3;
-			
 		}
 		// All terrainVertices to right
 		else if (pointsToLeft == 0)
@@ -655,7 +650,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 			rightIndices[rightIndexCount++] = i1;
 			rightIndices[rightIndexCount++] = i2;
 			rightIndices[rightIndexCount++] = i3;
-
 		}
 		// One vertex to left
 		else if (pointsToLeft == 1)
@@ -703,9 +697,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				leftIndices[leftIndexCount++] = intersect1index;
 				leftIndices[leftIndexCount++] = intersect2index;
 
-				rightCutList->push_back(i1);
-
-
 				// Right
 				rightIndices[rightIndexCount++] = intersect1index;
 				rightIndices[rightIndexCount++] = i2;
@@ -714,9 +705,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				rightIndices[rightIndexCount++] = intersect1index;
 				rightIndices[rightIndexCount++] = i3;
 				rightIndices[rightIndexCount++] = intersect2index;
-
-				leftCutList->push_back(i2);
-				leftCutList->push_back(i3);
 			}
 			else if (v2Left)
 			{
@@ -760,8 +748,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				leftIndices[leftIndexCount++] = intersect2index;
 				leftIndices[leftIndexCount++] = intersect1index;
 
-				rightCutList->push_back(i2);
-
 				// Right
 				rightIndices[rightIndexCount++] = intersect1index;
 				rightIndices[rightIndexCount++] = intersect2index;
@@ -770,9 +756,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				rightIndices[rightIndexCount++] = intersect1index;
 				rightIndices[rightIndexCount++] = i3;
 				rightIndices[rightIndexCount++] = i1;
-
-				leftCutList->push_back(i1);
-				leftCutList->push_back(i3);
 			}
 			else
 			{
@@ -816,8 +799,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				leftIndices[leftIndexCount++] = intersect2index;
 				leftIndices[leftIndexCount++] = i3;
 
-				rightCutList->push_back(i3);
-
 				// Right
 				rightIndices[rightIndexCount++] = i2;
 				rightIndices[rightIndexCount++] = intersect2index;
@@ -826,9 +807,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				rightIndices[rightIndexCount++] = i2;
 				rightIndices[rightIndexCount++] = intersect1index;
 				rightIndices[rightIndexCount++] = i1;
-
-				leftCutList->push_back(i1);
-				leftCutList->push_back(i2);
 			}
 		}
 		// Two terrainVertices to left
@@ -876,8 +854,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				rightIndices[rightIndexCount++] = intersect1index;
 				rightIndices[rightIndexCount++] = intersect2index;
 
-				leftCutList->push_back(i1);
-
 				// Left
 				leftIndices[leftIndexCount++] = intersect1index;
 				leftIndices[leftIndexCount++] = i2;
@@ -886,9 +862,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				leftIndices[leftIndexCount++] = intersect1index;
 				leftIndices[leftIndexCount++] = i3;
 				leftIndices[leftIndexCount++] = intersect2index;
-
-				rightCutList->push_back(i2);
-				rightCutList->push_back(i3);
 			}
 			else if (!v2Left)
 			{
@@ -932,8 +905,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				rightIndices[rightIndexCount++] = intersect2index;
 				rightIndices[rightIndexCount++] = intersect1index;
 
-				leftCutList->push_back(i1);
-
 				// Left
 				leftIndices[leftIndexCount++] = intersect1index;
 				leftIndices[leftIndexCount++] = intersect2index;
@@ -942,9 +913,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				leftIndices[leftIndexCount++] = intersect1index;
 				leftIndices[leftIndexCount++] = i3;
 				leftIndices[leftIndexCount++] = i1;
-
-				rightCutList->push_back(i1);
-				rightCutList->push_back(i3);
 			}
 			else if (!v3Left)
 			{
@@ -988,8 +956,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				rightIndices[rightIndexCount++] = intersect2index;
 				rightIndices[rightIndexCount++] = i3;
 
-				leftCutList->push_back(i3);
-
 				// Left
 				leftIndices[leftIndexCount++] = i2;
 				leftIndices[leftIndexCount++] = intersect2index;
@@ -998,9 +964,6 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, int sli
 				leftIndices[leftIndexCount++] = i2;
 				leftIndices[leftIndexCount++] = intersect1index;
 				leftIndices[leftIndexCount++] = i1;
-
-				rightCutList->push_back(i1);
-				rightCutList->push_back(i2);
 			}
 		}
 		else
