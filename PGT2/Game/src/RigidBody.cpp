@@ -12,7 +12,7 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::canSleep = false;
 	RigidBody::canCollide = true;
 	RigidBody::velocity = Ogre::Vector3().ZERO;
-	RigidBody::acceleration = Ogre::Vector3(0.0f, -9.81f, 0.0f);
+	//RigidBody::acceleration = Ogre::Vector3(0.0f, -9.81f, 0.0f);
 	RigidBody::forceAccum = Ogre::Vector3().ZERO;
 	RigidBody::torqueAccum = Ogre::Vector3().ZERO;
 	RigidBody::rotation = Ogre::Vector3().ZERO;

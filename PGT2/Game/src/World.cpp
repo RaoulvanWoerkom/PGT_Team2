@@ -44,10 +44,10 @@ void World::createLight()
 
 void World::createTerrain()
 {
-	int worldsize = 6;
+	int worldsize = 5;
 	int planeId = 0;
-	for (int i = 0; i < worldsize; i++) {
-		for (int j = 0; j < worldsize; j++) {
+	for (int i = 0; i < worldsize + 1; i++) {
+		for (int j = 0; j < worldsize + 1; j++) {
 			planeId++;
 			std::string chunk("plane");
 			chunk += std::to_string(rand() % 5);
@@ -79,6 +79,12 @@ void World::createTerrain()
 			if (i == 0 && j == 0) {
 				groundNode->yaw(Ogre::Degree(-90));
 			}
+			else if (i == worldsize && j == worldsize) {
+				groundNode->yaw(Ogre::Degree(90));
+			}
+			else if (i == worldsize && j == 0) {
+				groundNode->yaw(Ogre::Degree(0));
+			}
 			else if (i == 0) {
 				groundNode->yaw(Ogre::Degree(180));
 			}
@@ -86,10 +92,10 @@ void World::createTerrain()
 				groundNode->yaw(Ogre::Degree(-90));
 			}
 			else if (i == worldsize) {
-				groundNode->yaw(Ogre::Degree(-90));
+				groundNode->yaw(Ogre::Degree(0));
 			}
 			else if (j == worldsize) {
-				groundNode->yaw(Ogre::Degree(180));
+				groundNode->yaw(Ogre::Degree(90));
 			}
 
 			groundNode->attachObject(groundEntity);
@@ -108,7 +114,7 @@ void World::createSphere()
 	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	ballNode->setPosition(0, 300, 0);
 
-
+	
 	createSphereMesh("mySphereMesh", 100, 64, 64);
 	Ogre::Entity* sphereEntity = mSceneMgr->createEntity("Sphere", "mySphereMesh");
 
@@ -116,7 +122,7 @@ void World::createSphere()
 
 	ballBody = new Ball(ballNode, ballCameraNode, sphereEntity);
 	ballBody->entity->setMaterialName("Ball/Skin");
-	ballBody->setIsAwake(false);
+	//ballBody->setIsAwake(false);
 
 	addRigidBody(ballBody);
 }
