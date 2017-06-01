@@ -44,21 +44,61 @@ void World::createLight()
 
 void World::createTerrain()
 {
-	Ogre::Entity* groundEntity = mSceneMgr->createEntity("Plane", "World.mesh");
+	int worldsize = 6;
+	int planeId = 0;
+	for (int i = 0; i < worldsize; i++) {
+		for (int j = 0; j < worldsize; j++) {
+			planeId++;
+			std::string chunk("plane");
+			chunk += std::to_string(rand() % 5);
+			chunk += ".mesh";
+			std::string entityName("Plane");
+			entityName += std::to_string(planeId);
 
-	Ogre::MaterialPtr m_pMat = groundEntity->getSubEntity(0)->getMaterial()->clone("carrots");
-	m_pMat->getTechnique(0)->getPass(0)->setAmbient(0, 1, 0);
-	//	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(1, 10, 3, 50);
-	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(3, 20, 5, 20);
-	groundEntity->setMaterialName(m_pMat->getName());
+			//Ogre::Entity* groundEntity = mSceneMgr->createEntity("Plane", "World.mesh");
+			Ogre::Entity* groundEntity;
+			if (i == 0 && j == 0 || i == worldsize && j == worldsize || i == worldsize && j == 0 || j == worldsize && i == 0) {
+				groundEntity = mSceneMgr->createEntity(entityName, "planece.mesh");
+			}
+			else if (i == 0 || j == 0 || i == worldsize || j == worldsize) {
+				groundEntity = mSceneMgr->createEntity(entityName, "planee.mesh");
+			}
+			else {
+				groundEntity = mSceneMgr->createEntity(entityName, chunk);
+			}
 
-	Ogre::SceneNode* groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, -200, 0));
-	groundNode->scale(Ogre::Vector3(500, 850, 500));
-	groundNode->attachObject(groundEntity);
-	groundBody = new RigidBody(groundNode, groundEntity);
-	groundBody->setIsAwake(false);
+			Ogre::MaterialPtr m_pMat = groundEntity->getSubEntity(0)->getMaterial()->clone("material");
+			m_pMat->getTechnique(0)->getPass(0)->setAmbient(0, 1, 0);
+			//	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(1, 10, 3, 50);
+			m_pMat->getTechnique(0)->getPass(0)->setDiffuse(3, 20, 5, 20);
+			groundEntity->setMaterialName(m_pMat->getName());
 
-	splitTerrainVertices();
+			Ogre::SceneNode* groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(-3000 + (3000 * j), 0, -3000 + (3000 * i)));
+			//groundNode->scale(Ogre::Vector3(500, 850, 500));
+			groundNode->scale(Ogre::Vector3(1500, 2500, 1500));
+			if (i == 0 && j == 0) {
+				groundNode->yaw(Ogre::Degree(-90));
+			}
+			else if (i == 0) {
+				groundNode->yaw(Ogre::Degree(180));
+			}
+			else if (j == 0){
+				groundNode->yaw(Ogre::Degree(-90));
+			}
+			else if (i == worldsize) {
+				groundNode->yaw(Ogre::Degree(-90));
+			}
+			else if (j == worldsize) {
+				groundNode->yaw(Ogre::Degree(180));
+			}
+
+			groundNode->attachObject(groundEntity);
+			groundBody = new RigidBody(groundNode, groundEntity);
+			groundBody->setIsAwake(false);
+
+			splitTerrainVertices();
+		}
+	}
 }
 
 
@@ -76,6 +116,7 @@ void World::createSphere()
 
 	ballBody = new Ball(ballNode, ballCameraNode, sphereEntity);
 	ballBody->entity->setMaterialName("Ball/Skin");
+	ballBody->setIsAwake(false);
 
 	addRigidBody(ballBody);
 }
@@ -97,7 +138,7 @@ void World::createHouse(Ogre::SceneManager* mSceneMgr) {
 	Ogre::Entity* thisEntity = mSceneMgr->createEntity("cc", "ColourCube");
 	thisSceneNode->attachObject(thisEntity);
 	//thisEntity->setMaterialName("Ogre/Earring");
-	thisEntity->setMaterialName("Ogre/Skin");
+	thisEntity->setMaterialName("Building/Wall");
 
 	houseBody = new RigidBody(thisSceneNode, thisEntity);
 	addRigidBody(houseBody);

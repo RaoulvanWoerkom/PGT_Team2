@@ -34,6 +34,7 @@
     <ClInclude Include="src\UnitTestSample.h" />
     <ClInclude Include="src\World.h" />
     <ClInclude Include="src\MeshGenerator.h" />
+    <ClInclude Include="src\WorldGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ball.cpp" />
@@ -50,6 +51,7 @@
     <ClCompile Include="src\Baller.cpp" />
     <ClCompile Include="src\UnitTestSample.cpp" />
     <ClCompile Include="src\MeshGenerator.cpp" />
+    <ClCompile Include="src\WorldGenerator.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{523EAB39-AA76-4ECF-B8DF-836843209AF4}</ProjectGuid>
@@ -130,6 +132,7 @@
       <AdditionalLibraryDirectories>$(OGRE_HOME)\lib\$(Configuration);$(OGRE_HOME)\boost\lib;$(SolutionDir)$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OgreMain_d.lib;OIS_d.lib;OgreOverlay_d.lib;OgreTerrain_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <TargetMachine>MachineX86</TargetMachine>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(OutDir)\$(TargetFileName)" "$(OGRE_HOME)\Bin\$(Configuration)"</Command>
@@ -151,6 +154,7 @@
       <AdditionalLibraryDirectories>$(OGRE_HOME)\lib\$(Configuration);$(OGRE_HOME)\boost\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OgreMain_d.lib;OIS_d.lib;OgreOverlay_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <TargetMachine>MachineX64</TargetMachine>
+      <Profile>true</Profile>
     </Link>
     <PostBuildEvent>
       <Command>copy "$(OutDir)\$(TargetFileName)" "$(OGRE_HOME)\Bin\$(Configuration)"</Command>

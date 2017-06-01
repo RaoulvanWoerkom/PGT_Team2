@@ -72,6 +72,12 @@
     <ClInclude Include="src\Building.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\MeshGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WorldGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BaseApplication.cpp">
@@ -112,6 +118,12 @@
     </ClCompile>
     <ClCompile Include="src\Building.cpp">
       <Filter>Source Files\PhysicsEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MeshGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WorldGenerator.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

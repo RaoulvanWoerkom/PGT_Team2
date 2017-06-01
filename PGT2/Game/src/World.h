@@ -76,6 +76,7 @@ public:
 	CustomCamera camera;
 	Ball* ballBody;
 	RigidBody* groundBody;
+	RigidBody* groundBody1;
 	static Ogre::SceneManager* mSceneMgr;
 	RigidBody* houseBody;
 

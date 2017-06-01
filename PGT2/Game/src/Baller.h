@@ -15,6 +15,7 @@
 #include "Helper.h"
 #include "Highscore.h"
 #include "Contact.h"
+#include "WorldGenerator.h"
 
 class Baller : public BaseApplication 
 {
@@ -26,6 +27,7 @@ public:
 	World world;
 	CustomTimer timer;
 	bool isGameOver;
+	
 
 
 protected:

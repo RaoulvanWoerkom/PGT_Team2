@@ -76,6 +76,14 @@ void Baller::restartGame()
 
 void Baller::createScene()
 {
+	WorldGenerator wg;
+	wg.Generate();
+	wg.Seed(2);
+	wg.Generate();
+	wg.Seed(5);
+	wg.Generate();
+	wg.Seed(2);
+
 	init();
 	world.createLight();
 	world.createTerrain();
