@@ -140,6 +140,10 @@ public:
 		const CollisionBox &two,
 		CollisionData *data
 		);
+	static unsigned boxAndPoint(
+		const CollisionBox & box, 
+		const Ogre::Vector3 & point, 
+		CollisionData * data);
 };
 
 #endif // #ifndef __CollisionDetector_h_

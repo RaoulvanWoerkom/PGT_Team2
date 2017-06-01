@@ -358,3 +358,51 @@ unsigned CollisionDetector::boxAndBox(
 }
 #undef CHECK_OVERLAP
 
+unsigned CollisionDetector::boxAndPoint(
+	const CollisionBox &box,
+	const Ogre::Vector3 &point,
+	CollisionData *data
+	)
+{
+	// Transform the point into box coordinates
+	Ogre::Vector3 relPt = box.transform * (point);
+
+	Ogre::Vector3 normal;
+
+	// Check each axis, looking for the axis on which the
+	// penetration is least deep.
+	Ogre::Real min_depth = box.halfSize.x - relPt.x;
+	if (min_depth < 0) return 0;
+	normal = box.getAxis(0) * ((relPt.x < 0) ? -1 : 1);
+
+	Ogre::Real depth = box.halfSize.y - relPt.y;
+	if (depth < 0) return 0;
+	else if (depth < min_depth)
+	{
+		min_depth = depth;
+		normal = box.getAxis(1) * ((relPt.y < 0) ? -1 : 1);
+	}
+
+	depth = box.halfSize.z - relPt.z;
+	if (depth < 0) return 0;
+	else if (depth < min_depth)
+	{
+		min_depth = depth;
+		normal = box.getAxis(2) * ((relPt.z < 0) ? -1 : 1);
+	}
+
+	// Compile the contact
+	Contact* contact = data->contacts;
+	contact->contactNormal = normal;
+	contact->contactPoint = point;
+	contact->penetration = min_depth;
+
+	// Note that we don't know what rigid body the point
+	// belongs to, so we just use NULL. Where this is called
+	// this value can be left, or filled in.
+	contact->setBodyData(box.body, NULL,
+		data->friction, data->restitution);
+
+	data->addContacts(1);
+	return 1;
+}
