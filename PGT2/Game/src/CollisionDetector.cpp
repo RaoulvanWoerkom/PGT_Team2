@@ -406,3 +406,61 @@ unsigned CollisionDetector::boxAndPoint(
 	data->addContacts(1);
 	return 1;
 }
+
+#define BALL_SIZE 100
+unsigned CollisionDetector::boxAndSphere(
+	const CollisionBox &box,
+	Ball &sphere,
+	CollisionData *data
+)
+{
+	// Transform the centre of the sphere into box coordinates
+	Ogre::Vector3 centre = sphere.getPosition();
+	Ogre::Vector3 relCentre = box.getTransform().inverse() * (centre);
+
+	// Early out check to see if we can exclude the contact
+	if ((relCentre.x) - BALL_SIZE > box.halfSize.x ||
+		(relCentre.y) - BALL_SIZE > box.halfSize.y ||
+		(relCentre.z) - BALL_SIZE > box.halfSize.z)
+	{
+		return 0;
+	}
+
+	Ogre::Vector3 closestPt(0, 0, 0);
+	Ogre::Real dist;
+
+	// Clamp each coordinate to the box.
+	dist = relCentre.x;
+	if (dist > box.halfSize.x) dist = box.halfSize.x;
+	if (dist < -box.halfSize.x) dist = -box.halfSize.x;
+	closestPt.x = dist;
+
+	dist = relCentre.y;
+	if (dist > box.halfSize.y) dist = box.halfSize.y;
+	if (dist < -box.halfSize.y) dist = -box.halfSize.y;
+	closestPt.y = dist;
+
+	dist = relCentre.z;
+	if (dist > box.halfSize.z) dist = box.halfSize.z;
+	if (dist < -box.halfSize.z) dist = -box.halfSize.z;
+	closestPt.z = dist;
+
+	// Check we're in contact
+	dist = (closestPt - relCentre).squaredLength();
+	if (dist > BALL_SIZE * BALL_SIZE) return 0;
+
+	// Compile the contact
+	Ogre::Vector3 closestPtWorld = box.getTransform() * (closestPt);
+
+	Contact* contact = data->contacts;
+	contact->contactNormal = (closestPtWorld - centre);
+	contact->contactNormal.normalise();
+	contact->contactPoint = closestPtWorld;
+	contact->penetration = BALL_SIZE - Ogre::Math::Sqrt(dist);
+	contact->setBodyData(box.body, &sphere,
+		data->friction, data->restitution);
+
+	data->addContacts(1);
+	return 1;
+}
+#undef BALL_SIZE

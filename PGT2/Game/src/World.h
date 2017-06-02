@@ -10,6 +10,7 @@
 #include "Building.h"
 #include "Contact.h"
 #include "MeshGenerator.h"
+#include "CollisionDetector.h"
 
 
 
@@ -17,7 +18,7 @@ typedef struct
 {
 	Ogre::Vector2 minPoint;
 	Ogre::Vector2 maxPoint;
-	std::vector<RigidBody*> objects;
+	std::vector<CollisionBox*> objects;
 	size_t objectCount;
 	std::vector<Face> terrainFaces;
 } VerticeSection;
@@ -34,36 +35,6 @@ struct ContactGenRegistration
 	ContactGenRegistration* next;
 };
 
-struct CollisionData
-{
-	Contact *contactArray;
-	Contact *contacts;
-	int contactsLeft;
-	unsigned contactCount;
-	Ogre::Real friction;
-	Ogre::Real restitution;
-	Ogre::Real tolerance;
-
-	bool hasMoreContacts()
-	{
-		return contactsLeft > 0;
-	}
-
-	void reset(unsigned maxContacts)
-	{
-		contactsLeft = maxContacts;
-		contactCount = 0;
-		contacts = contactArray;
-	}
-
-	void addContacts(unsigned count)
-	{
-		contactsLeft -= count;
-		contactCount += count;
-
-		contacts += count;
-	}
-};
 
 class World
 {
@@ -81,20 +52,20 @@ public:
 
 	float jumpPower;
 
-	static std::vector<RigidBody*> worldObjects;
+	static std::vector<CollisionBox*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
 	VerticeSection vertexSections[10][10];
-	static size_t bodyCount;
+	static size_t boxCount;
 
 	size_t terrainVertexCount, terrainIndexCount;
 	Ogre::Vector3* terrainVertices;
 	uint32_t* terrainIndices;
 
 	void splitTerrainVertices();
-	static void addRigidBody(RigidBody* body);
-	void removeRigidBody(RigidBody* body);
-	void addObjectVertices(RigidBody* body);
+	static void addCollisionBox(CollisionBox* box);
+	void removeCollisionBox(CollisionBox* box);
+	void addObjectVertices(CollisionBox* box);
 	virtual void createTerrain();
 	virtual void createSphere();
 	virtual void createLight();
@@ -140,7 +111,7 @@ private:
 	
 	void checkBallCollision();
 	void checkWorldCollision();
-	void addContact(CollisionData * data, Ogre::Vector3 contactNormal, Ogre::Vector3 contactPoint, Ogre::Real penetration, RigidBody * sphere);
+	void addBallContact(CollisionData * data, Ogre::Vector3 contactNormal, Ogre::Vector3 contactPoint, Ogre::Real penetration, RigidBody* sphere);
 	std::vector<Ogre::Vector2> getSections(Ogre::Vector3 pos, bool surround = false);
 	std::vector<Ogre::Vector2> getSections(Ogre::Vector3* positions, int size);
 	std::vector<Ogre::Vector2> getSections(std::vector<Ogre::Vector3> positions);

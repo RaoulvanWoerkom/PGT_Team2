@@ -14,8 +14,8 @@ const int SECTION_AMOUNT = 10;
 const int JUMP_CHARGE = 5;
 const int JUMP_MAX = 500;
 
-size_t World::bodyCount = 0;
-std::vector<RigidBody*> World::worldObjects;
+size_t World::boxCount = 0;
+std::vector<CollisionBox*> World::worldObjects;
 
 Ogre::SceneManager* World::mSceneMgr = NULL;
 
@@ -23,8 +23,8 @@ World::World() :
 	resolver(maxContacts * 8)
 {
 	cData.contactArray = contacts;
-	worldObjects = std::vector<RigidBody*>();
-	bodyCount = 0;
+	worldObjects = std::vector<CollisionBox*>();
+	boxCount = 0;
 	jumpPower = 0;
 }
 
@@ -111,7 +111,15 @@ void World::createHouse(Ogre::SceneManager* mSceneMgr) {
 	thisEntity->setMaterialName("Ogre/Skin");
 
 	houseBody = new RigidBody(thisSceneNode, thisEntity);
-	addRigidBody(houseBody);
+
+	CollisionBox* houseBox = new CollisionBox();
+
+	houseBox->body = houseBody;
+	houseBox->halfSize = houseBody->node->getScale() / 2;
+	houseBox->body->calculateDerivedData();
+	houseBox->calculateInternals();
+
+	addCollisionBox(houseBox);
 }
 
 
@@ -130,8 +138,15 @@ void World::createBuilding(Ogre::Vector3 pos)
 	buildingBody->entity->setMaterialName("Building/Wall");
 	//buildingBody.setIsAwake(false);
 
-	addRigidBody(buildingBody);
-	addObjectVertices(buildingBody);
+	CollisionBox* buildingBox = new CollisionBox();
+
+	buildingBox->body = buildingBody;
+	buildingBox->halfSize = buildingBody->node->getScale() / 2;
+	buildingBox->body->calculateDerivedData();
+	buildingBox->calculateInternals();
+
+	addCollisionBox(buildingBox);
+	addObjectVertices(buildingBox);
 
 	Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("Skin", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	
@@ -332,20 +347,20 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, int* _indic
 }
 
 
-void World::addRigidBody(RigidBody* body)
+void World::addCollisionBox(CollisionBox* box)
 {
-	worldObjects.push_back(body);
-	bodyCount++;
+	worldObjects.push_back(box);
+	boxCount++;
 }
 
-void World::addObjectVertices(RigidBody* body)
+void World::addObjectVertices(CollisionBox* box)
 {
-	Ogre::Vector3 pos = body->getPosition();
+	Ogre::Vector3 pos = box->body->getPosition();
 	std::vector<Ogre::Vector2> sectionList = getSections(pos, false);
 	Ogre::Vector2 coordinates = sectionList.at(0);
 
 	VerticeSection newSection = vertexSections[(int)coordinates.x][(int)coordinates.y];
-	newSection.objects.push_back(body);
+	newSection.objects.push_back(box);
 	newSection.objectCount++;
 	vertexSections[(int)coordinates.x][(int)coordinates.y] = newSection;
 }
@@ -616,10 +631,11 @@ void World::updateObjects(Ogre::Real duration)
 {
 	for (int i = 0; i < worldObjects.size(); i++)
 	{
-		RigidBody* currRigidBody = worldObjects[i];
-		if (currRigidBody->isDestroyed)
+		CollisionBox* currCollisionBox = worldObjects[i];
+		if (currCollisionBox->body->isDestroyed)
 			continue;
-		currRigidBody->integrate(duration);
+		currCollisionBox->body->integrate(duration);
+		currCollisionBox->calculateInternals();
 	}
 
 	//ballBody is not in worldObjects because it has unique collision detection
@@ -647,28 +663,28 @@ void World::populateSections()
 {
 
 	//loop trough all objects
-	std::vector<RigidBody*>::iterator i = worldObjects.begin();
+	std::vector<CollisionBox*>::iterator i = worldObjects.begin();
 	while (i != worldObjects.end())
 	{
-		RigidBody* currBody = (*i);
-		bool isDestroyed = currBody->isDestroyed;
+		CollisionBox* currBox = (*i);
+		bool isDestroyed = currBox->body->isDestroyed;
 		if (isDestroyed)
 		{
-			delete currBody;
+			delete currBox;
 			i = worldObjects.erase(i);
 			
 		}
 		else
 		{
-			Ogre::Vector3 currPos = currBody->getPosition();
-			Ogre::Vector3* boundingBox = currBody->getBoundingBox(false); //bounding box is already in world space coordinates
+			Ogre::Vector3 currPos = currBox->body->getPosition();
+			Ogre::Vector3* boundingBox = currBox->body->getBoundingBox(false); //bounding box is already in world space coordinates
 			std::vector<Ogre::Vector2> sectionList = getSections(boundingBox, 8); //holds the sections... i think
 
 			for (size_t i = 0; i < sectionList.size(); i++)
 			{
 				Ogre::Vector2 currSectionCoor = sectionList.at(i);
 				VerticeSection currSection = vertexSections[(int)currSectionCoor.x][(int)currSectionCoor.y];
-				currSection.objects.push_back(currBody);
+				currSection.objects.push_back(currBox);
 				currSection.objectCount++;
 			}
 			++i;
@@ -713,11 +729,11 @@ void World::checkBallCollision()
 
 		for (size_t j = 0; j < currSection.objectCount; j++)
 		{
-			RigidBody* currBody = currSection.objects.at(j);
-			if (!currBody->isDestroyed && currBody->canCollide)
+			CollisionBox* currBox = currSection.objects.at(j);
+			if (!currBox->body->isDestroyed && currBox->body->canCollide)
 			{
-				std::vector<Face> bodyFaceList = currBody->faces;
-				for (size_t k = 0; k < currBody->faces.size(); k++)
+				std::vector<Face> bodyFaceList = currBox->body->faces;
+				for (size_t k = 0; k < currBox->body->faces.size(); k++)
 				{
 					Face currFace = bodyFaceList.at(k);
 					Ogre::Vector3 collPoint = closestPointOnTriangle(currFace.point1, currFace.point2, currFace.point3, ballPos);
@@ -728,12 +744,12 @@ void World::checkBallCollision()
 					if (dist < BALL_SIZE && dist < shortestLength)
 					{
 
-						if (currBody->hitBoxContainsPoint(ballPos))
+						if (currBox->body->hitBoxContainsPoint(ballPos))
 						{
 							Helper::log("test", ballPos);
 						}
 
-						if (currBody->isBreakable)
+						if (currBox->body->isBreakable)
 						{
 							//Building* building = dynamic_cast<Building*>(currBody);
 							//building->fracture();
@@ -749,7 +765,8 @@ void World::checkBallCollision()
 	if (chosenIndex >= 0)
 	{
 		double diffDist = BALL_SIZE - shortestLength;
-		addContact(&cData, normalVec, closestHitCoordinates, diffDist, ballBody);
+		if (!cData.hasMoreContacts()) return;
+		addBallContact(&cData, normalVec, closestHitCoordinates, diffDist, ballBody);
 	}
 }
 
@@ -757,25 +774,32 @@ void World::checkWorldCollision()
 {
 	for (size_t i = 0; i < worldObjects.size(); i++)
 	{
-		RigidBody* currBody = worldObjects[i];
-		Ogre::Vector3 currPos = currBody->node->getPosition();
+		CollisionBox* currBox = worldObjects[i];
+		Ogre::Vector3 currPos = currBox->body->node->getPosition();
 		std::vector<Ogre::Vector2> sectionList = getSections(currPos);
 		VerticeSection currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
 
 
+		//CollisionDetector::boxAndPoint(*currBody, ALLPOINTSOFSECTION, &cData) geen idee hoe anders....
+
+		if (!cData.hasMoreContacts()) return;
+		CollisionDetector::boxAndSphere(*currBox, *ballBody, &cData); //hier zou je meer kunnen breken door fracture_contact = cData.contactCount-1;
 
 		for (size_t j = 0; j < currSection.objectCount; j++)
 		{
-			RigidBody* otherBody = currSection.objects[j];
-			if (otherBody != currBody)
+			CollisionBox* otherBox = currSection.objects[j];
+			if (otherBox != currBox)
 			{
+				
 
+				if (!cData.hasMoreContacts()) return;
+				CollisionDetector::boxAndBox(*currBox, *otherBox, &cData);
 			}
 		}
 	}
 }
 
-void World::addContact(CollisionData *data, Ogre::Vector3 contactNormal, Ogre::Vector3 contactPoint, Ogre::Real penetration, RigidBody *sphere)
+void World::addBallContact(CollisionData *data, Ogre::Vector3 contactNormal, Ogre::Vector3 contactPoint, Ogre::Real penetration, RigidBody *sphere)
 {
 	Contact* contact = data->contacts;
 	contact->contactNormal = contactNormal;

@@ -940,13 +940,27 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	leftBody->canCollide = false;
 	leftBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
 	leftBody->addRotation(Ogre::Vector3(1, -0.4f, 0));
-	World::addRigidBody(leftBody);
+
+	CollisionBox *leftBox = new CollisionBox();
+	leftBox->body = leftBody;
+	leftBox->halfSize = leftNode->getScale();
+	leftBox->body->calculateDerivedData();
+	leftBox->calculateInternals();
+
+	World::addRigidBody(leftBox);
 
 	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
 	rightBody->canCollide = false;
 	rightBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
 	rightBody->addRotation(Ogre::Vector3(-1, 0.4f, 0));
-	World::addRigidBody(rightBody);
+
+	CollisionBox *rightBox = new CollisionBox();
+	rightBox->body = rightBody;
+	rightBox->halfSize = rightNode->getScale();
+	rightBox->body->calculateDerivedData();
+	rightBox->calculateInternals();
+
+	World::addRigidBody(rightBox);
 
 	delete newVertices;
 	delete newNormals;

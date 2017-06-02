@@ -2,6 +2,7 @@
 #define __CollisionDetector_h_
 
 #include "Contact.h"
+#include "Ball.h"
 
 class IntersectionTests;
 class CollisionDetector;
@@ -142,6 +143,10 @@ public:
 	static unsigned boxAndPoint(
 		const CollisionBox & box, 
 		const Ogre::Vector3 & point, 
+		CollisionData * data);
+	static unsigned boxAndSphere(
+		const CollisionBox & box, 
+		Ball & sphere, 
 		CollisionData * data);
 };
 
