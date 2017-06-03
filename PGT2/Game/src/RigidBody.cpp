@@ -947,7 +947,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	leftBox->body->calculateDerivedData();
 	leftBox->calculateInternals();
 
-	World::addRigidBody(leftBox);
+	World::addCollisionBox(leftBox);
 
 	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
 	rightBody->canCollide = false;
@@ -960,7 +960,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	rightBox->body->calculateDerivedData();
 	rightBox->calculateInternals();
 
-	World::addRigidBody(rightBox);
+	World::addCollisionBox(rightBox);
 
 	delete newVertices;
 	delete newNormals;

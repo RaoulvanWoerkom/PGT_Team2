@@ -21,75 +21,13 @@ static inline Ogre::Real transformToAxis(
 		box.halfSize.z * (axis * box.getAxis(2)).length();
 }
 
-/**
-* This function checks if the two boxes overlap
-* along the given axis. The final parameter toCentre
-* is used to pass in the vector between the boxes centre
-* points, to avoid having to recalculate it each time.
-*/
-static inline bool overlapOnAxis(
-	const CollisionBox &one,
-	const CollisionBox &two,
-	const Ogre::Vector3 &axis,
-	const Ogre::Vector3 &toCentre
-	)
-{
-	// Project the half-size of one onto axis
-	Ogre::Real oneProject = transformToAxis(one, axis);
-	Ogre::Real twoProject = transformToAxis(two, axis);
-
-	// Project this onto the axis
-	Ogre::Real distance = (toCentre * axis).length();
-
-	// Check for overlap
-	return (distance < oneProject + twoProject);
-}
-
-// This preprocessor definition is only used as a convenience
-// in the boxAndBox intersection  method.
-#define TEST_OVERLAP(axis) overlapOnAxis(one, two, (axis), toCentre)
-
-bool IntersectionTests::boxAndBox(
-	const CollisionBox &one,
-	const CollisionBox &two
-	)
-{
-	// Find the vector between the two centres
-	Ogre::Vector3 toCentre = two.getAxis(3) - one.getAxis(3);
-
-	return (
-		// Check on box one's axes first
-		TEST_OVERLAP(one.getAxis(0)) &&
-		TEST_OVERLAP(one.getAxis(1)) &&
-		TEST_OVERLAP(one.getAxis(2)) &&
-
-		// And on two's
-		TEST_OVERLAP(two.getAxis(0)) &&
-		TEST_OVERLAP(two.getAxis(1)) &&
-		TEST_OVERLAP(two.getAxis(2)) &&
-
-		// Now on the cross products
-		TEST_OVERLAP(one.getAxis(0).crossProduct(two.getAxis(0))) &&
-		TEST_OVERLAP(one.getAxis(0).crossProduct(two.getAxis(1))) &&
-		TEST_OVERLAP(one.getAxis(0).crossProduct(two.getAxis(2))) &&
-		TEST_OVERLAP(one.getAxis(1).crossProduct(two.getAxis(0))) &&
-		TEST_OVERLAP(one.getAxis(1).crossProduct(two.getAxis(1))) &&
-		TEST_OVERLAP(one.getAxis(1).crossProduct(two.getAxis(2))) &&
-		TEST_OVERLAP(one.getAxis(2).crossProduct(two.getAxis(0))) &&
-		TEST_OVERLAP(one.getAxis(2).crossProduct(two.getAxis(1))) &&
-		TEST_OVERLAP(one.getAxis(2).crossProduct(two.getAxis(2)))
-		);
-}
-#undef TEST_OVERLAP
 
 
-/*
-* This function checks if the two boxes overlap
-* along the given axis, returning the ammount of overlap.
-* The final parameter toCentre
-* is used to pass in the vector between the boxes centre
-* points, to avoid having to recalculate it each time.
-*/
+///This function checks if the two boxes overlap
+///along the given axis, returning the ammount of overlap.
+///The final parameter toCentre
+///is used to pass in the vector between the boxes centre points
+
 static inline Ogre::Real penetrationOnAxis(
 	const CollisionBox &one,
 	const CollisionBox &two,
@@ -136,6 +74,8 @@ static inline bool tryAxis(
 	return true;
 }
 
+/// This method is called when we know that a vertex from
+/// box two is in contact with box one.
 void fillPointFaceBoxBox(
 	const CollisionBox &one,
 	const CollisionBox &two,
@@ -145,8 +85,7 @@ void fillPointFaceBoxBox(
 	Ogre::Real pen
 	)
 {
-	// This method is called when we know that a vertex from
-	// box two is in contact with box one.
+	
 
 	Contact* contact = data->contacts;
 
@@ -229,8 +168,8 @@ static inline Ogre::Vector3 contactPoint(
 	}
 }
 
-// This preprocessor definition is only used as a convenience
-// in the boxAndBox contact generation method.
+/// This preprocessor definition is only used as a convenience
+/// in the boxAndBox contact generation method.
 #define CHECK_OVERLAP(axis, index) \
     if (!tryAxis(one, two, (axis), toCentre, (index), pen, best)) return 0;
 
