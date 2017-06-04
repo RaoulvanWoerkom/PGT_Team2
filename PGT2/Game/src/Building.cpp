@@ -34,13 +34,7 @@ void Building::fracture()
 {
 	if (!Building::isDestroyed)
 	{
-		srand(time(NULL));
-		int randNum1 = rand() % (100);
-		int randNum2 = rand() % (100);
-		int randNum3 = rand() % (100);
-		Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
-		ranDir.normalise();
-		cut(Ogre::Vector3(2,4,2));
+		split(Ogre::Vector3(2,2,2));
 	}
 	
 
