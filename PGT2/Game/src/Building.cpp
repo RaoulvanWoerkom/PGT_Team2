@@ -36,6 +36,4 @@ void Building::fracture()
 	{
 		split(Ogre::Vector3(2,2,2));
 	}
-	
-
 }

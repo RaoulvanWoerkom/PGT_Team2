@@ -103,6 +103,8 @@ void RigidBody::createBoundingBox()
 	boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.z));
 	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.z));
 	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.z));
+
+	halfSize = maxSize / 2;
 }
 
 void RigidBody::setPosition(Ogre::Vector3 position)
@@ -113,6 +115,11 @@ void RigidBody::setPosition(Ogre::Vector3 position)
 void RigidBody::setVelocity(Ogre::Vector3 velocity)
 {
 	RigidBody::velocity = velocity;
+}
+
+Ogre::Vector3 RigidBody::getHalfsize()
+{
+	return RigidBody::halfSize;
 }
 
 Ogre::Vector3 RigidBody::getVelocity()
@@ -979,11 +986,16 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 	RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
 	leftBody->canCollide = false;
-	//leftBody->acceleration = Ogre::Vector3(0, 0, 0);
 	leftBody->addForce(ranDir * 40);
 	leftBody->addRotation(-ranDir);
-	World::addRigidBody(leftBody);
 
+	CollisionBox *leftBox = new CollisionBox();
+	leftBox->body = leftBody;
+	leftBox->halfSize = leftBody->getHalfsize();
+	leftBox->body->calculateDerivedData();
+	leftBox->calculateInternals();
+
+	World::addCollisionBox(leftBox);
 
 	randNum1 = (rand() % (1000) - 500);
 	randNum2 = (rand() % (1000) - 500);
@@ -993,10 +1005,16 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
 	rightBody->canCollide = false;
-	//rightBody->acceleration = Ogre::Vector3(0, 0, 0);
 	rightBody->addForce(-ranDir * 40);
 	rightBody->addRotation(ranDir);
-	World::addRigidBody(rightBody);
+
+	CollisionBox *rightBox = new CollisionBox();
+	rightBox->body = rightBody;
+	rightBox->halfSize = rightBody->getHalfsize();
+	rightBox->body->calculateDerivedData();
+	rightBox->calculateInternals();
+
+	World::addCollisionBox(rightBox);
 
 	delete newVertices;
 	delete newNormals;

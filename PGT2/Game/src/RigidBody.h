@@ -51,6 +51,7 @@ public:
 	bool isDestroyed = false;
 	bool isBreakable;
 	bool canCollide;
+	Ogre::Vector3 halfSize;
 
 	//bool* cutList;
 	//int cutListCount;
@@ -60,6 +61,7 @@ public:
 	RigidBody(void);
 	void setPosition(Ogre::Vector3 _position);
 	void setVelocity(Ogre::Vector3 _velocity);
+	Ogre::Vector3 getHalfsize();
 	Ogre::Vector3 getVelocity();
 	Ogre::Vector3 getRotation();
 	Ogre::Vector3 getPosition();
