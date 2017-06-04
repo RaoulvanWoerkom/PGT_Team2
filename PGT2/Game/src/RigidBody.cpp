@@ -947,21 +947,27 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 
 	leftIndices = fillIntersectionFaces(leftIndices, intersectionsArray, middlePointIndex);
-	rightIndices = fillIntersectionFaces(leftIndices, intersectionsArray, middlePointIndex);
+	rightIndices = fillIntersectionFaces(rightIndices, intersectionsArray, middlePointIndex);
 
 	memcpy(leftVertices2, newVertices, newVertexCount * sizeof(Ogre::Vector3));
 	memcpy(rightVertices2, newVertices, newVertexCount * sizeof(Ogre::Vector3));
+
+	for (size_t i = 0; i < newVertexCount; i++)
+	{
+		leftVertices2[i] -= getPosition();
+		rightVertices2[i] -= getPosition();
+	}
 
 	Ogre::Entity* leftEntity = World::createCustomEntity(leftVertices2, leftIndices, newVertexCount, entity->getSubEntity(0)->getMaterialName());
 	Ogre::Entity* rightEntity = World::createCustomEntity(rightVertices2, rightIndices, newVertexCount, entity->getSubEntity(0)->getMaterialName());
 
 
 	Ogre::SceneNode *leftNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	leftNode->setPosition(Ogre::Vector3(0, 0, 0));
+	leftNode->setPosition(getPosition());
 	leftNode->attachObject(leftEntity);
 
 	Ogre::SceneNode *rightNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	rightNode->setPosition(Ogre::Vector3(0, 0, 0));
+	rightNode->setPosition(getPosition());
 	rightNode->attachObject(rightEntity);
 
 
@@ -973,7 +979,8 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 	RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
 	leftBody->canCollide = false;
-	leftBody->addForce(ranDir * 10);
+	//leftBody->acceleration = Ogre::Vector3(0, 0, 0);
+	leftBody->addForce(ranDir * 40);
 	leftBody->addRotation(-ranDir);
 	World::addRigidBody(leftBody);
 
@@ -986,7 +993,8 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
 	rightBody->canCollide = false;
-	rightBody->addForce(-ranDir * 10);
+	//rightBody->acceleration = Ogre::Vector3(0, 0, 0);
+	rightBody->addForce(-ranDir * 40);
 	rightBody->addRotation(ranDir);
 	World::addRigidBody(rightBody);
 
