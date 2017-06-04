@@ -42,8 +42,8 @@ RigidBody::RigidBody(void)
 void RigidBody::loadMeshInfo()
 {
 	Helper::getMeshInformation(entity->getMesh(), vertexCount, vertices, indexCount, indices, getPosition(), getOrientation(), node->getScale());
-	cutList = new bool[vertexCount] {0};
-	cutListCount = vertexCount;
+	//cutList = new bool[vertexCount] {0};
+	//cutListCount = vertexCount;
 	int max = indexCount - 3;
 	normals = new Ogre::Vector3[indexCount / 3];
 	for (int i = 0; i < max; i += 3)
@@ -61,15 +61,48 @@ void RigidBody::loadMeshInfo()
 			face.point1 = point1;
 			face.point2 = point2;
 			face.point3 = point3;
+			face.midPoint = middlePoint;
 			face.normal = Helper::normalVector(point1, point2, point3);
 			faces.push_back(face);
 			normals[faceCount] = face.normal;
 
 			faceCount++;
 		}
+	}
+}
 
+
+void RigidBody::createBoundingBox()
+{
+	Ogre::Vector3 maxSize = Ogre::Vector3(10000000, 10000000, 10000000);
+	Ogre::Vector3 minSize = Ogre::Vector3(-10000000, -10000000, -10000000);
+
+	for (int i = 0; i < faces.size(); i++)
+	{
+		if (faces[i].midPoint.x < maxSize.x)
+			maxSize.x = faces[i].midPoint.x;
+		if (faces[i].midPoint.x > minSize.x)
+			minSize.x = faces[i].midPoint.x;
+
+		if (faces[i].midPoint.y < maxSize.y)
+			maxSize.y = faces[i].midPoint.y;
+		if (faces[i].midPoint.y > minSize.y)
+			minSize.y = faces[i].midPoint.y;
+
+		if (faces[i].midPoint.z < maxSize.z)
+			maxSize.z = faces[i].midPoint.z;
+		if (faces[i].midPoint.z > minSize.z)
+			minSize.z = faces[i].midPoint.z;
 	}
 
+	boundingBox.push_back(maxSize);
+	boundingBox.push_back(minSize);
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, maxSize.y, minSize.z));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, maxSize.z));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, maxSize.z));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.z));
+	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.z));
+	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.z));
 }
 
 void RigidBody::setPosition(Ogre::Vector3 position)
@@ -264,8 +297,13 @@ bool RigidBody::hitBoxContainsPoint(Ogre::Vector3 point)
 
 void RigidBody::integrate(Ogre::Real delta)
 {
+
+
 	if (RigidBody::isAwake)
 	{
+
+
+
 		//calculate acceleration with mass and force
 		//TODO calculate angular acceleration with Tensor and Torque
 		RigidBody::lastFrameAcceleration = RigidBody::acceleration;
@@ -329,38 +367,6 @@ Ogre::Real RigidBody::getInverseMass()
 	return RigidBody::inverseMass;
 }
 
-void RigidBody::createBoundingBox()
-{
-	Ogre::Vector3 maxSize = Ogre::Vector3(10000000, 10000000, 10000000);
-	Ogre::Vector3 minSize = Ogre::Vector3(-10000000, -10000000, -10000000);
-
-	for (int i = 0; i < vertexCount; i++)
-	{
-		if (vertices[i].x < maxSize.x)
-			maxSize.x = vertices[i].x;
-		if (vertices[i].x > minSize.x)
-			minSize.x = vertices[i].x;
-
-		if (vertices[i].y < maxSize.y)
-			maxSize.y = vertices[i].y;
-		if (vertices[i].y > minSize.y)
-			minSize.y = vertices[i].y;
-
-		if (vertices[i].z < maxSize.z)
-			maxSize.z = vertices[i].z;
-		if (vertices[i].z > minSize.z)
-			minSize.z = vertices[i].z;
-	}
-
-	boundingBox.push_back(maxSize);
-	boundingBox.push_back(minSize);
-	boundingBox.push_back(Ogre::Vector3(maxSize.x, maxSize.y, minSize.y));
-	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, maxSize.y));
-	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, maxSize.y));
-	boundingBox.push_back(Ogre::Vector3(minSize.x, minSize.y, maxSize.y));
-	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.y));
-	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.y));
-}
 
 
 /**
@@ -452,572 +458,49 @@ float linePlaneCoefficient(const Ogre::Vector3* linePoint, const Ogre::Vector3* 
 ///
 /// Using the slicing plane, each intersection vertex can be found. Using those, the mesh is seperated at
 /// these points, and new indices + faces are created for the missing parts of the two new meshes.
-void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
+void RigidBody::cut(Ogre::Vector3 amount)
 {
-	
-	int faceCount = indexCount / 3;
-
-	// The maximum number of vertices for the new meshes is vertexCount + faceCount * 2
-	// (two points of intersection for each face)
-	int newVertexCount = vertexCount;
-	int newVertexMax = vertexCount + faceCount * 2;
-
-	Ogre::Vector3* newVertices = new Ogre::Vector3[newVertexMax];
-	Ogre::Vector3* newNormals = new Ogre::Vector3[newVertexMax];
-
-	memcpy(newVertices, vertices, vertexCount * sizeof(Ogre::Vector3));
-	memcpy(newNormals, normals, vertexCount * sizeof(Ogre::Vector3));
-
-	// The maximum number of indices for the new meshes is indexCount + faceCount * 9
-	// (each face could be split up into three faces)
-	int newIndexCount = indexCount;
-	int newIndexMax = indexCount + faceCount * 9;
-
-	//int leftIndexCount = 0;
-	std::vector<int> leftIndices = std::vector<int>();
-
-	std::vector<int> rightIndices = std::vector<int>();
-	
-	bool* leftCutList = new bool[newVertexMax - 1]{ 0 };
-	bool* rightCutList = new bool[newVertexMax - 1]{ 0 };
-	for (size_t i = 0; i < cutListCount; i++)
+	srand(time(NULL));
+	Ogre::Vector3 scale = node->getScale();
+	Ogre::Vector3 cubeScale = scale / amount;
+	for (size_t x = 0; x < amount.x; x++)
 	{
-		leftCutList[i] = cutList[i];
-		rightCutList[i] = cutList[i];
-	}
-	// Array to store the array index of the new intersection vertices, so we can loop through them.
-	//int intersectionMax = faceCount * 2;
-
-	std::vector<int> intersectionsArray = std::vector<int>();
-	
-	// Iterate through each face and decide which list to put it in and whether to divide it
-	for (int i = 0; i < faceCount; ++i)
-	{
-		int i1 = indices[i * 3 + 0];
-		int i2 = indices[i * 3 + 1];
-		int i3 = indices[i * 3 + 2];
-
-		Ogre::Vector3* v1 = &vertices[i1];
-		Ogre::Vector3* v2 = &vertices[i2];
-		Ogre::Vector3* v3 = &vertices[i3];
-
-		// Check if each vertex is to the left of the plane
-		Ogre::Vector3 v1ToPlane;
-		Ogre::Vector3 v2ToPlane;
-		Ogre::Vector3 v3ToPlane;
-
-		sub3(&planePoint, v1, &v1ToPlane);
-		sub3(&planePoint, v2, &v2ToPlane);
-		sub3(&planePoint, v3, &v3ToPlane);
-
-		bool v1Left = dot3(&v1ToPlane, &planeNormal) < 0;
-		bool v2Left = dot3(&v2ToPlane, &planeNormal) < 0;
-		bool v3Left = dot3(&v3ToPlane, &planeNormal) < 0;
-
-		int pointsToLeft = (v1Left ? 1 : 0) + (v2Left ? 1 : 0) + (v3Left ? 1 : 0);
-
-		// All terrainVertices to left
-		if (pointsToLeft == 3)
+		for (size_t y = 0; y < amount.y; y++)
 		{
-			rightCutList[i1] = true;
-			rightCutList[i2] = true;
-			rightCutList[i3] = true;
-			// Add all terrainVertices to left
-			if (!cutList[i1] && !cutList[i2] && !cutList[i3])
+			for (size_t z = 0; z < amount.z; z++)
 			{
-				leftIndices.push_back(i1);
-				leftIndices.push_back(i2);
-				leftIndices.push_back(i3);
+				Ogre::Vector3 pos = getPosition() + Ogre::Vector3(x, y, z) * cubeScale * 100 - scale*50 + cubeScale * 50;
+
+
+				Ogre::SceneNode* debrisNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
+				debrisNode->setPosition(pos);
+				debrisNode->setScale(cubeScale);
+				int randNum = rand() % (1000000000);
+				std::string meshName = "Cube" + std::to_string(randNum);
+				Ogre::Entity* debrisEntity = World::mSceneMgr->createEntity("cube.mesh");
+
+				debrisNode->attachObject(debrisEntity);
+				RigidBody* debrisBody = new RigidBody(debrisNode, debrisEntity);
+				debrisBody->entity->setMaterialName("Building/Wall");
+
+				
+				int randNum1 = rand() % (1000);
+				int randNum2 = rand() % (1000);
+				int randNum3 = rand() % (1000);
+				Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
+				ranDir.normalise();
+				debrisBody->addForce(ranDir * 200);
+				debrisBody->addRotation(-ranDir);
+
+
+
+				//leftBody->canCollide = false;
+				World::addRigidBody(debrisBody);
+
 			}
-		}
-		// All terrainVertices to right
-		else if (pointsToLeft == 0)
-		{
-			leftCutList[i1] = true;
-			leftCutList[i2] = true;
-			leftCutList[i3] = true;
-			// Add all terrainVertices to right
-			if (!cutList[i1] && !cutList[i2] && !cutList[i3])
-			{
-				rightIndices.push_back(i1);
-				rightIndices.push_back(i2);
-				rightIndices.push_back(i3);
-			}
-			
-		}
-		// One vertex to left
-		else if (pointsToLeft == 1)
-		{
-			if (v1Left)
-			{
-				Ogre::Vector3 line1, line2;
-				Ogre::Vector3 intersect1, intersect2;
-
-				int intersect1index, intersect2index;
-				float intersect1coeff, intersect2coeff;
-
-				int ia = i1;
-				int ib = i2;
-				int ic = i3;
-
-				const Ogre::Vector3* a = &newVertices[ia];
-				const Ogre::Vector3* b = &newVertices[ib];
-				const Ogre::Vector3* c = &newVertices[ic];
-
-				sub3(b, a, &line1);
-				sub3(c, a, &line2);
-
-				// Calculate lerp coefficient for intersections
-				intersect1coeff = linePlaneCoefficient(a, &line1, &planeNormal, &planePoint);
-				intersect2coeff = linePlaneCoefficient(a, &line2, &planeNormal, &planePoint);
-
-				// Calculate intersections
-				lerp3(a, b, intersect1coeff, &intersect1);
-				lerp3(a, c, intersect2coeff, &intersect2);
-
-				intersect1index = newVertexCount++;
-				intersect2index = newVertexCount++;
-
-				// Store intersection index in the intersection array
-				intersectionsArray.push_back(intersect1index);
-				intersectionsArray.push_back(intersect2index);
-
-				// Save intersections as new terrainVertices
-				newVertices[intersect1index] = intersect1;
-				newVertices[intersect2index] = intersect2;
-
-				lerp3(&normals[ia], &normals[ib], intersect1coeff, &newNormals[intersect1index]);
-				lerp3(&normals[ia], &normals[ic], intersect2coeff, &newNormals[intersect2index]);
-
-				// Add triangles
-				// Left
-				rightCutList[i1] = true;
-				if (!cutList[i1])
-				{
-					leftIndices.push_back(i1);
-					leftIndices.push_back(intersect1index);
-					leftIndices.push_back(intersect2index);
-				}
-				
-
-				// Right
-				leftCutList[i2] = true;
-				leftCutList[i3] = true;
-				if (!cutList[i2] && !cutList[i3])
-				{
-					rightIndices.push_back(intersect1index);
-					rightIndices.push_back(i2);
-					rightIndices.push_back(i3);
-
-					rightIndices.push_back(intersect1index);
-					rightIndices.push_back(i3);
-					rightIndices.push_back(intersect2index);
-				}
-				
-			}
-			else if (v2Left)
-			{
-				Ogre::Vector3 line1, line2;
-				Ogre::Vector3 intersect1, intersect2;
-				int intersect1index, intersect2index;
-				float intersect1coeff, intersect2coeff;
-
-				int ia = i2;
-				int ib = i1;
-				int ic = i3;
-
-				const Ogre::Vector3* a = &newVertices[ia];
-				const Ogre::Vector3* b = &newVertices[ib];
-				const Ogre::Vector3* c = &newVertices[ic];
-
-				sub3(b, a, &line1);
-				sub3(c, a, &line2);
-
-				// Calculate lerp coefficient for intersections
-				intersect1coeff = linePlaneCoefficient(a, &line1, &planeNormal, &planePoint);
-				intersect2coeff = linePlaneCoefficient(a, &line2, &planeNormal, &planePoint);
-
-				// Calculate intersections
-				lerp3(a, b, intersect1coeff, &intersect1);
-				lerp3(a, c, intersect2coeff, &intersect2);
-
-				intersect1index = newVertexCount++;
-				intersect2index = newVertexCount++;
-
-				// Store intersection index in the intersection array
-				intersectionsArray.push_back(intersect1index);
-				intersectionsArray.push_back(intersect2index);
-
-				// Save intersections as new terrainVertices
-				newVertices[intersect1index] = intersect1;
-				newVertices[intersect2index] = intersect2;
-
-				lerp3(&normals[ia], &normals[ib], intersect1coeff, &newNormals[intersect1index]);
-				lerp3(&normals[ia], &normals[ic], intersect2coeff, &newNormals[intersect2index]);
-
-				// Add triangles
-				// Left
-				rightCutList[i2] = true;
-				if (!cutList[i2])
-				{
-					leftIndices.push_back(i2);
-					leftIndices.push_back(intersect2index);
-					leftIndices.push_back(intersect1index);
-				}
-
-				// Right
-				leftCutList[i1] = true;
-				leftCutList[i3] = true;
-				if (!cutList[i1] && !cutList[i3])
-				{
-					rightIndices.push_back(intersect1index);
-					rightIndices.push_back(intersect2index);
-					rightIndices.push_back(i3);
-
-					rightIndices.push_back(intersect1index);
-					rightIndices.push_back(i3);
-					rightIndices.push_back(i1);
-				}
-				
-			}
-			else
-			{
-				Ogre::Vector3 line1, line2;
-				Ogre::Vector3 intersect1, intersect2;
-				int intersect1index, intersect2index;
-				float intersect1coeff, intersect2coeff;
-
-				int ia = i3;
-				int ib = i1;
-				int ic = i2;
-
-				const Ogre::Vector3* a = &newVertices[ia];
-				const Ogre::Vector3* b = &newVertices[ib];
-				const Ogre::Vector3* c = &newVertices[ic];
-
-				sub3(b, a, &line1);
-				sub3(c, a, &line2);
-
-				// Calculate lerp coefficient for intersections
-				intersect1coeff = linePlaneCoefficient(a, &line1, &planeNormal, &planePoint);
-				intersect2coeff = linePlaneCoefficient(a, &line2, &planeNormal, &planePoint);
-
-				// Calculate intersections
-				lerp3(a, b, intersect1coeff, &intersect1);
-				lerp3(a, c, intersect2coeff, &intersect2);
-
-				intersect1index = newVertexCount++;
-				intersect2index = newVertexCount++;
-
-				// Store intersection index in the intersection array
-				intersectionsArray.push_back(intersect1index);
-				intersectionsArray.push_back(intersect2index);
-
-				// Save intersections as new terrainVertices
-				newVertices[intersect1index] = intersect1;
-				newVertices[intersect2index] = intersect2;
-
-				lerp3(&normals[ia], &normals[ib], intersect1coeff, &newNormals[intersect1index]);
-				lerp3(&normals[ia], &normals[ic], intersect2coeff, &newNormals[intersect2index]);
-
-				// Add triangles
-				// Left
-				rightCutList[i3] = true;
-				if (!cutList[i3])
-				{
-					leftIndices.push_back(intersect1index);
-					leftIndices.push_back(intersect2index);
-					leftIndices.push_back(i3);
-				}
-
-				// Right
-				leftCutList[i1] = true;
-				leftCutList[i2] = true;
-				if (!cutList[i1] && !cutList[i2])
-				{
-					rightIndices.push_back(i2);
-					rightIndices.push_back(intersect2index);
-					rightIndices.push_back(intersect1index);
-
-					rightIndices.push_back(i2);
-					rightIndices.push_back(intersect1index);
-					rightIndices.push_back(i1);
-				}
-				
-			}
-		}
-		// Two terrainVertices to left
-		else if (pointsToLeft == 2)
-		{
-			if (!v1Left)
-			{
-				Ogre::Vector3 line1, line2;
-				Ogre::Vector3 intersect1, intersect2;
-				int intersect1index, intersect2index;
-				float intersect1coeff, intersect2coeff;
-
-				int ia = i1;
-				int ib = i2;
-				int ic = i3;
-
-				const Ogre::Vector3* a = &newVertices[ia];
-				const Ogre::Vector3* b = &newVertices[ib];
-				const Ogre::Vector3* c = &newVertices[ic];
-
-				sub3(b, a, &line1);
-				sub3(c, a, &line2);
-
-				// Calculate lerp coefficient for intersections
-				intersect1coeff = linePlaneCoefficient(a, &line1, &planeNormal, &planePoint);
-				intersect2coeff = linePlaneCoefficient(a, &line2, &planeNormal, &planePoint);
-
-				// Calculate intersections
-				lerp3(a, b, intersect1coeff, &intersect1);
-				lerp3(a, c, intersect2coeff, &intersect2);
-
-				intersect1index = newVertexCount++;
-				intersect2index = newVertexCount++;
-
-				// Store intersection index in the intersection array
-				intersectionsArray.push_back(intersect1index);
-				intersectionsArray.push_back(intersect2index);
-
-				// Save intersections as new terrainVertices
-				newVertices[intersect1index] = intersect1;
-				newVertices[intersect2index] = intersect2;
-
-				lerp3(&normals[ia], &normals[ib], intersect1coeff, &newNormals[intersect1index]);
-				lerp3(&normals[ia], &normals[ic], intersect2coeff, &newNormals[intersect2index]);
-
-				// Add triangles
-				// Right
-				leftCutList[i1] = true;
-				if (!cutList[i1])
-				{
-					rightIndices.push_back(i1);
-					rightIndices.push_back(intersect1index);
-					rightIndices.push_back(intersect2index);
-				}
-				
-
-				// Left
-				rightCutList[i2] = true;
-				rightCutList[i3] = true;
-				if (!cutList[i2] && !cutList[i3])
-				{
-					leftIndices.push_back(intersect1index);
-					leftIndices.push_back(i2);
-					leftIndices.push_back(i3);
-
-					leftIndices.push_back(intersect1index);
-					leftIndices.push_back(i3);
-					leftIndices.push_back(intersect2index);
-				}
-				
-			}
-			else if (!v2Left)
-			{
-				Ogre::Vector3 line1, line2;
-				Ogre::Vector3 intersect1, intersect2;
-				int intersect1index, intersect2index;
-				float intersect1coeff, intersect2coeff;
-
-				int ia = i2;
-				int ib = i1;
-				int ic = i3;
-
-				const Ogre::Vector3* a = &newVertices[ia];
-				const Ogre::Vector3* b = &newVertices[ib];
-				const Ogre::Vector3* c = &newVertices[ic];
-
-				sub3(b, a, &line1);
-				sub3(c, a, &line2);
-
-				// Calculate lerp coefficient for intersections
-				intersect1coeff = linePlaneCoefficient(a, &line1, &planeNormal, &planePoint);
-				intersect2coeff = linePlaneCoefficient(a, &line2, &planeNormal, &planePoint);
-
-				// Calculate intersections
-				lerp3(a, b, intersect1coeff, &intersect1);
-				lerp3(a, c, intersect2coeff, &intersect2);
-
-				intersect1index = newVertexCount++;
-				intersect2index = newVertexCount++;
-
-				// Store intersection index in the intersection array
-				intersectionsArray.push_back(intersect1index);
-				intersectionsArray.push_back(intersect2index);
-
-				// Save intersections as new terrainVertices
-				newVertices[intersect1index] = intersect1;
-				newVertices[intersect2index] = intersect2;
-
-				lerp3(&normals[ia], &normals[ib], intersect1coeff, &newNormals[intersect1index]);
-				lerp3(&normals[ia], &normals[ic], intersect2coeff, &newNormals[intersect2index]);
-
-				// Add triangles
-				// Right
-				leftCutList[i2] = true;
-				if (!cutList[i2])
-				{
-					rightIndices.push_back(i2);
-					rightIndices.push_back(intersect2index);
-					rightIndices.push_back(intersect1index);
-				}
-				
-
-				// Left
-				rightCutList[i1] = true;
-				rightCutList[i3] = true;
-				if (!cutList[i1] && !cutList[i3])
-				{
-					leftIndices.push_back(intersect1index);
-					leftIndices.push_back(intersect2index);
-					leftIndices.push_back(i3);
-
-					leftIndices.push_back(intersect1index);
-					leftIndices.push_back(i3);
-					leftIndices.push_back(i1);
-				}
-				
-			}
-			else if (!v3Left)
-			{
-				Ogre::Vector3 line1, line2;
-				Ogre::Vector3 intersect1, intersect2;
-				int intersect1index, intersect2index;
-				float intersect1coeff, intersect2coeff;
-
-				int ia = i3;
-				int ib = i1;
-				int ic = i2;
-
-				const Ogre::Vector3* a = &newVertices[ia];
-				const Ogre::Vector3* b = &newVertices[ib];
-				const Ogre::Vector3* c = &newVertices[ic];
-
-				sub3(b, a, &line1);
-				sub3(c, a, &line2);
-
-				// Calculate lerp coefficient for intersections
-				intersect1coeff = linePlaneCoefficient(a, &line1, &planeNormal, &planePoint);
-				intersect2coeff = linePlaneCoefficient(a, &line2, &planeNormal, &planePoint);
-
-				// Calculate intersections
-				lerp3(a, b, intersect1coeff, &intersect1);
-				lerp3(a, c, intersect2coeff, &intersect2);
-
-				intersect1index = newVertexCount++;
-				intersect2index = newVertexCount++;
-
-				// Store intersection index in the intersection array
-				intersectionsArray.push_back(intersect1index);
-				intersectionsArray.push_back(intersect2index);
-
-				// Save intersections as new terrainVertices
-				newVertices[intersect1index] = intersect1;
-				newVertices[intersect2index] = intersect2;
-
-				lerp3(&normals[ia], &normals[ib], intersect1coeff, &newNormals[intersect1index]);
-				lerp3(&normals[ia], &normals[ic], intersect2coeff, &newNormals[intersect2index]);
-
-				// Add triangles
-				// Right
-				leftCutList[i3] = true;
-				if (!cutList[i3])
-				{
-					rightIndices.push_back(intersect1index);
-					rightIndices.push_back(intersect2index);
-					rightIndices.push_back(i3);
-				}
-
-				// Left
-				rightCutList[i1] = true;
-				rightCutList[i2] = true;
-				if (!cutList[i1] && !cutList[i2])
-				{
-					leftIndices.push_back(i2);
-					leftIndices.push_back(intersect2index);
-					leftIndices.push_back(intersect1index);
-
-					leftIndices.push_back(i2);
-					leftIndices.push_back(intersect1index);
-					leftIndices.push_back(i1);
-				}
-				
-			}
-		}
-		else
-		{
-			int j = 0;
 		}
 	}
-
-	// updating newVertices, leftIndices and rightIndices arrays with new array sizes because of soon to be added data for the missing faces.
-
-	// Adding new middle point for filling in the missing faces
-	newVertexMax++;
-	Ogre::Vector3* newArr = new Ogre::Vector3[newVertexMax];
-	std::copy(newVertices, newVertices + std::min(newVertexMax - 1, newVertexMax), newArr);
-	delete[] newVertices;
-	newVertices = newArr;
-	int middlePointIndex = newVertexCount++;
-	newVertices[middlePointIndex] = planePoint;
-
-
-	// Todo: Refactor into function so we can reuse it for left and right
-	Ogre::Vector3* leftVertices2 = new Ogre::Vector3[newVertexCount];
-	Ogre::Vector3* rightVertices2 = new Ogre::Vector3[newVertexCount];
-
-
-	leftIndices = fillIntersectionFaces(leftIndices, intersectionsArray, middlePointIndex);
-	rightIndices = fillIntersectionFaces(leftIndices, intersectionsArray, middlePointIndex);
-
-	memcpy(leftVertices2, newVertices, newVertexCount * sizeof(Ogre::Vector3));
-	memcpy(rightVertices2, newVertices, newVertexCount * sizeof(Ogre::Vector3));
-
-	Ogre::Entity* leftEntity = World::createCustomEntity(leftVertices2, leftIndices, newVertexCount, entity->getSubEntity(0)->getMaterialName());
-	Ogre::Entity* rightEntity = World::createCustomEntity(rightVertices2, rightIndices, newVertexCount, entity->getSubEntity(0)->getMaterialName());
-
-
-	Ogre::SceneNode *leftNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	leftNode->setPosition(Ogre::Vector3(0, 0, 0));
-	leftNode->attachObject(leftEntity);
 	
-	Ogre::SceneNode *rightNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	rightNode->setPosition(Ogre::Vector3(0, 0, 0));
-	rightNode->attachObject(rightEntity);
-	
-
-	RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
-	leftBody->canCollide = false;
-	leftBody->addForce(Ogre::Vector3(5, 0, 0) * 10);
-	leftBody->addRotation(Ogre::Vector3(1, 0.4f, 0));
-	World::addRigidBody(leftBody);
-	leftBody->cutList = leftCutList;
-
-
-	
-	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
-	rightBody->canCollide = false;
-	rightBody->addForce(Ogre::Vector3(-5, 0, 0) * 10);
-	rightBody->addRotation(Ogre::Vector3(-1, 0.4f, 0));
-	World::addRigidBody(rightBody);
-	rightBody->cutList = rightCutList;
-
-	delete newVertices;
-	delete newNormals;
-	//delete leftIndices;
-	//delete rightIndices;
-
-
-	delete leftVertices2;
-	//delete leftNormals2;
-	//delete leftIndices2;
-
-	delete rightVertices2;
-	//delete rightNormals2;
-	//delete rightIndices2;
 }
 
 /// \brief Fill in the missing faces on the intersection plane after slicing a mesh.

@@ -272,6 +272,8 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, std::vector
 	Ogre::VertexBufferBinding* bind = mesh->sharedVertexData->vertexBufferBinding;
 	bind->setBinding(0, vertexBuffer);
 
+
+	
 	/* create the index buffer */
 	Ogre::HardwareIndexBufferSharedPtr indexBuffer = Ogre::HardwareBufferManager::getSingleton().
 		createIndexBuffer(
@@ -388,7 +390,6 @@ void World::splitTerrainVertices()
 			newSection.maxPoint = Ogre::Vector2(lowestX + sectionSize.x * (x + 1), lowestZ + sectionSize.y * (y + 1));
 			newSection.terrainFaces = std::vector<Face>();
 			vertexSections[x][y] = newSection;
-			//vertexSections[x][y] 
 
 		}
 	}

@@ -40,7 +40,7 @@ void Building::fracture()
 		int randNum3 = rand() % (100);
 		Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
 		ranDir.normalise();
-		RigidBody::cut(RigidBody::getPosition(), ranDir);
+		cut(Ogre::Vector3(2,4,2));
 	}
 	
 

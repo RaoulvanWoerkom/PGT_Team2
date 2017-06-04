@@ -9,6 +9,7 @@ struct Face
 	Ogre::Vector3 point1;
 	Ogre::Vector3 point2;
 	Ogre::Vector3 point3;
+	Ogre::Vector3 midPoint;
 
 	Ogre::Vector3 normal;
 
@@ -42,6 +43,8 @@ protected:
 	void loadMeshInfo();
 
 public:
+
+
 	Ogre::SceneNode* node; //contains Position & Orientation
 	Ogre::Entity* entity;
 	std::string name;
@@ -49,8 +52,8 @@ public:
 	bool isBreakable;
 	bool canCollide;
 
-	bool* cutList;
-	int cutListCount;
+	//bool* cutList;
+	//int cutListCount;
 
 
 	RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity);
@@ -84,7 +87,7 @@ public:
 	bool hitBoxContainsPoint(Ogre::Vector3 point);
 	bool setAndCheckIsAwake();
 
-	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
+	void cut(Ogre::Vector3 amount);
 	bool IsClockwise(Ogre::Vector3* newVertices, int index1, int index2, int index3);
 	std::vector<int> fillIntersectionFaces(std::vector<int> _indices, std::vector<int> intersections, int middlePointIndex);
 	

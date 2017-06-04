@@ -240,3 +240,6 @@ Ogre::Vector3 Helper::normalVector(Ogre::Vector3 point1, Ogre::Vector3 point2, O
 
 }
 
+
+
+
