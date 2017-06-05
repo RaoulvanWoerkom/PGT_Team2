@@ -24,15 +24,6 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::loadMeshInfo();
 	RigidBody::createBoundingBox();
 
-	/*
-	
-	if (cut)
-	{
-		//<----hier vult hij alle data van de mesh van de ball---->
-		
-	}
-
-	*/
 }
 
 RigidBody::RigidBody(void)
@@ -285,6 +276,10 @@ void RigidBody::calculateDerivedData()
 
 }
 
+
+/// \brief returns true if a point is contained inside the hitbox of the rigidbody
+///
+/// This function takes position and rotation in account when calculating whether the point is inside the hitbox
 bool RigidBody::hitBoxContainsPoint(Ogre::Vector3 point)
 {
 	Ogre::Vector3* boundingBox = RigidBody::getBoundingBox(false);
@@ -352,7 +347,7 @@ void RigidBody::integrate(Ogre::Real delta)
 	}
 }
 
-/// Returns true if this object is moveable.
+/// \brief Returns true if this object is moveable.
 bool RigidBody::hasFiniteMass()
 {
 	if (RigidBody::inverseMass == 0)
@@ -362,13 +357,13 @@ bool RigidBody::hasFiniteMass()
 	return true;
 }
 
-/// Get the mass.
+/// \brief Get the mass.
 Ogre::Real RigidBody::getMass()
 {
 	return 1 / RigidBody::inverseMass;
 }
 
-/// Get the inverse Mass.
+/// \brief Get the inverse Mass.
 Ogre::Real RigidBody::getInverseMass()
 {
 	return RigidBody::inverseMass;
@@ -376,9 +371,7 @@ Ogre::Real RigidBody::getInverseMass()
 
 
 
-/**
-gets boundingbox coordinates in either world space or local(???) space
-*/
+/// \brief gets boundingbox coordinates in either world space or local(???) space
 Ogre::Vector3* RigidBody::getBoundingBox(bool worldPosition)
 {
 	Ogre::Vector3 retBoundingBox[8];
@@ -435,6 +428,9 @@ float dot3(const Ogre::Vector3* first, const Ogre::Vector3* second)
 	return dot;
 }
 
+
+/// \brief linear interpolation between two Vector3s
+///
 void lerp3(const Ogre::Vector3* from, const Ogre::Vector3* to, float t, Ogre::Vector3* result)
 {
 	result->x = from->x + t * (to->x - from->x);
@@ -457,7 +453,7 @@ float linePlaneCoefficient(const Ogre::Vector3* linePoint, const Ogre::Vector3* 
 	return result;
 }
 
-/// \brief Slice a mesh into two new meshes.
+/// \brief splits rigidbody in equal parts based on amount vector3
 ///
 /// This function will be called when the wrecking ball hits a building or other destroyable mesh.
 /// What should happen is the mesh being cut according to the force of the ball. Right now, a random plane
@@ -486,7 +482,6 @@ void RigidBody::split(Ogre::Vector3 amount)
 				std::string meshName = "Cube" + std::to_string(randNum);
 				Ogre::Entity* debrisEntity = World::mSceneMgr->createEntity("cube.mesh");
 
-				//debrisNode->attachObject(debrisEntity);
 				RigidBody* debrisBody = new RigidBody(debrisNode, debrisEntity);
 				debrisBody->entity->setMaterialName("Building/Wall");
 
@@ -496,13 +491,7 @@ void RigidBody::split(Ogre::Vector3 amount)
 				int randNum3 = (rand() % (1000) - 500);
 				Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
 				ranDir.normalise();
-				//debrisBody->addForce(ranDir * 200);
-				//debrisBody->addRotation(-ranDir);
-
 				debrisBody->cut(debrisBody->getPosition(), ranDir);
-
-				//leftBody->canCollide = false;
-				//World::addRigidBody(debrisBody);
 
 			}
 		}
@@ -510,6 +499,14 @@ void RigidBody::split(Ogre::Vector3 amount)
 	
 }
 
+/// \brief Slice a mesh into two new meshes.
+///
+/// This function will be called when the wrecking ball hits a building or other destroyable mesh.
+/// What should happen is the mesh being cut according to the force of the ball. Right now, a random plane
+/// is used to indicute the cutting edge, but the of cutting the mesh with a slicing plane still applies.
+///
+/// Using the slicing plane, each intersection vertex can be found. Using those, the mesh is seperated at
+/// these points, and new indices + faces are created for the missing parts of the two new meshes.
 void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 {
 
