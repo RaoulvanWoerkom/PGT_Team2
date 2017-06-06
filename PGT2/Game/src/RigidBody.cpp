@@ -29,7 +29,8 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 RigidBody::RigidBody(void)
 {
 }
-
+/// \brief loads all relevant data of the mesh. this includes vertices, indices. With the data it creates faceslist
+///
 void RigidBody::loadMeshInfo()
 {
 	Helper::getMeshInformation(entity->getMesh(), vertexCount, vertices, indexCount, indices, getPosition(), getOrientation(), node->getScale());
@@ -62,7 +63,9 @@ void RigidBody::loadMeshInfo()
 	}
 }
 
-
+/// \brief loops through all the faces and creates a boundingbox
+/// call this function only when the mesh is either created or changes.
+/// the getBoundingBox() function does take rotation in account.
 void RigidBody::createBoundingBox()
 {
 	Ogre::Vector3 maxSize = Ogre::Vector3(10000000, 10000000, 10000000);
@@ -263,6 +266,7 @@ void RigidBody::clearAccumulators()
 	RigidBody::torqueAccum = Ogre::Vector3::ZERO;
 }
 
+
 void RigidBody::calculateDerivedData()
 {
 	// Calculate the transform matrix for the body.
@@ -280,6 +284,7 @@ void RigidBody::calculateDerivedData()
 /// \brief returns true if a point is contained inside the hitbox of the rigidbody
 ///
 /// This function takes position and rotation in account when calculating whether the point is inside the hitbox
+
 bool RigidBody::hitBoxContainsPoint(Ogre::Vector3 point)
 {
 	Ogre::Vector3* boundingBox = RigidBody::getBoundingBox(false);
@@ -454,13 +459,6 @@ float linePlaneCoefficient(const Ogre::Vector3* linePoint, const Ogre::Vector3* 
 }
 
 /// \brief splits rigidbody in equal parts based on amount vector3
-///
-/// This function will be called when the wrecking ball hits a building or other destroyable mesh.
-/// What should happen is the mesh being cut according to the force of the ball. Right now, a random plane
-/// is used to indicute the cutting edge, but the of cutting the mesh with a slicing plane still applies.
-///
-/// Using the slicing plane, each intersection vertex can be found. Using those, the mesh is seperated at
-/// these points, and new indices + faces are created for the missing parts of the two new meshes.
 void RigidBody::split(Ogre::Vector3 amount)
 {
 	srand(time(NULL));
@@ -502,8 +500,8 @@ void RigidBody::split(Ogre::Vector3 amount)
 /// \brief Slice a mesh into two new meshes.
 ///
 /// This function will be called when the wrecking ball hits a building or other destroyable mesh.
-/// What should happen is the mesh being cut according to the force of the ball. Right now, a random plane
-/// is used to indicute the cutting edge, but the of cutting the mesh with a slicing plane still applies.
+/// What should happen is the mesh being cut. Right now, a random plane
+/// is used to indicate the cutting edge, but the of cutting the mesh with a slicing plane still applies.
 ///
 /// Using the slicing plane, each intersection vertex can be found. Using those, the mesh is seperated at
 /// these points, and new indices + faces are created for the missing parts of the two new meshes.
