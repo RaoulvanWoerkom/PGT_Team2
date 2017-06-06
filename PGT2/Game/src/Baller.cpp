@@ -39,7 +39,7 @@ void Baller::createCamera()
 
 void Baller::createViewports()
 {
-	world.createViewports();
+	/*world.createViewports();*/
 }
 
 void Baller::init()

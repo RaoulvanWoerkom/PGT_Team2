@@ -16,8 +16,10 @@ public:
 	Ogre::RenderWindow* window;
 
 	void setCameraTarget(Ogre::SceneNode* node);
-	void createViewports();
 	void zoomCamera(float zoomAmount);
+
+private:
+	void createViewports();
 };
 
 #endif // #ifndef __CustomCamera_h_

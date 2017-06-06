@@ -537,10 +537,10 @@ void World::setCameraFollow()
 }
 
 
-void World::createViewports()
-{
-	camera.createViewports();
-}
+//void World::createViewports()
+//{
+//	/*camera.createViewports();*/
+//}
 
 void World::restartWorld()
 {
