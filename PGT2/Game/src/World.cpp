@@ -10,7 +10,7 @@
 const Ogre::Real MOVE_SPEED = 10;
 
 const int BALL_SIZE = 100;
-const int SECTION_AMOUNT = 10;
+const int SECTION_AMOUNT = 15;
 const int JUMP_CHARGE = 5;
 const int JUMP_MAX = 500;
 
@@ -351,14 +351,14 @@ void World::addObjectVertices(CollisionBox* box)
 	std::vector<Ogre::Vector2> sectionList = getSections(pos, false);
 	Ogre::Vector2 coordinates = sectionList.at(0);
 
-	VerticeSection newSection = vertexSections[(int)coordinates.x][(int)coordinates.y];
-	newSection.objects.push_back(box);
-	newSection.objectCount++;
-	vertexSections[(int)coordinates.x][(int)coordinates.y] = newSection;
+	VerticeSection* newSection = vertexSections[(int)coordinates.x][(int)coordinates.y];
+	newSection->objects->push_back(box);
 }
 
 void World::splitTerrainVertices()
 {
+
+
 	Helper::getMeshInformation(groundBody->entity->getMesh(), terrainVertexCount, terrainVertices, terrainIndexCount, terrainIndices, groundBody->getPosition(), groundBody->getOrientation(), groundBody->node->getScale());
 
 	int max = terrainIndexCount - 3;
@@ -402,12 +402,12 @@ void World::splitTerrainVertices()
 	{
 		for (int x = 0; x < SECTION_AMOUNT; x++)
 		{
-			VerticeSection newSection = VerticeSection();
-			newSection.minPoint = Ogre::Vector2(lowestX + sectionSize.x * x, lowestZ + sectionSize.y * y);
-			newSection.maxPoint = Ogre::Vector2(lowestX + sectionSize.x * (x + 1), lowestZ + sectionSize.y * (y + 1));
-			newSection.terrainFaces = std::vector<Face>();
+			VerticeSection* newSection = new VerticeSection();
+			newSection->minPoint = Ogre::Vector2(lowestX + sectionSize.x * x, lowestZ + sectionSize.y * y);
+			newSection->maxPoint = Ogre::Vector2(lowestX + sectionSize.x * (x + 1), lowestZ + sectionSize.y * (y + 1));
+			newSection->terrainFaces = std::vector<Face>();
+			newSection->objects = new std::vector<CollisionBox*>();
 			vertexSections[x][y] = newSection;
-
 		}
 	}
 
@@ -430,7 +430,7 @@ void World::splitTerrainVertices()
 		for (size_t i = 0; i < sectionList.size(); i++)
 		{
 			Ogre::Vector2 currSection = sectionList.at(i);
-			vertexSections[(int)currSection.x][(int)currSection.y].terrainFaces.push_back(face);
+			vertexSections[(int)currSection.x][(int)currSection.y]->terrainFaces.push_back(face);
 		}
 
 	}
@@ -635,9 +635,12 @@ void World::emptySectionObjects()
 	{
 		for (int x = 0; x < SECTION_AMOUNT; x++)
 		{
-			VerticeSection currSection = vertexSections[(int)x][(int)y];
-			currSection.objects.empty();
-			currSection.objectCount = 0;
+			if (x == 8 && y == 7)
+			{
+				Helper::log("123213", Ogre::Vector3(0, 0, 0));
+			}
+			VerticeSection* currSection = vertexSections[(int)x][(int)y];
+			currSection->objects->clear();
 		}
 	}
 }
@@ -664,13 +667,11 @@ void World::populateSections()
 			Ogre::Vector3 currPos = currBox->body->getPosition();
 			Ogre::Vector3* boundingBox = currBox->body->getBoundingBox(false); //bounding box is already in world space coordinates
 			std::vector<Ogre::Vector2> sectionList = getSections(boundingBox, 8); //holds the sections... i think
-
 			for (size_t i = 0; i < sectionList.size(); i++)
 			{
 				Ogre::Vector2 currSectionCoor = sectionList.at(i);
-				VerticeSection currSection = vertexSections[(int)currSectionCoor.x][(int)currSectionCoor.y];
-				currSection.objects.push_back(currBox);
-				currSection.objectCount++;
+				VerticeSection* currSection = vertexSections[(int)currSectionCoor.x][(int)currSectionCoor.y];
+				currSection->objects->push_back(currBox);
 			}
 			++i;
 		}
@@ -693,9 +694,9 @@ void World::checkBallCollision()
 	{
 
 		Ogre::Vector2 currSectionCoor = sectionList.at(i);
-		VerticeSection currSection = vertexSections[(int)currSectionCoor.x][(int)currSectionCoor.y]; //get section object
+		VerticeSection* currSection = vertexSections[(int)currSectionCoor.x][(int)currSectionCoor.y]; //get section object
 
-		std::vector<Face> terrainFaceList = currSection.terrainFaces;
+		std::vector<Face> terrainFaceList = currSection->terrainFaces;
 		for (size_t j = 0; j < terrainFaceList.size(); j++) //loop through all the terrain vertices inside the section object
 		{
 			Face currFace = terrainFaceList.at(j);
@@ -727,22 +728,25 @@ void World::checkWorldCollision()
 		CollisionBox* currBox = worldObjects[i];
 		Ogre::Vector3 currPos = currBox->body->node->getPosition();
 		std::vector<Ogre::Vector2> sectionList = getSections(currPos);
-		VerticeSection currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
+		VerticeSection* currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
 
 		//CollisionDetector::boxAndPoint(*currBox, collPoint, &cData); als je het laagste punt van de box kan vinden en in collpoint stoppen zou het moeten werken.
 
 		if (!cData.hasMoreContacts()) return;
 		if (CollisionDetector::boxAndSphere(*currBox, *ballBody, &cData))
 		{
-			Building* building = dynamic_cast<Building*>(currBox->body);
-			building->fracture();
-			building->isDestroyed = true;
-			mSceneMgr->destroyEntity(building->entity);
+			if (currBox->body->isBreakable)
+			{
+				Building* building = dynamic_cast<Building*>(currBox->body);
+				building->fracture();
+				building->isDestroyed = true;
+				mSceneMgr->destroyEntity(building->entity);
+			}
 		}
 
-		for (size_t j = 0; j < currSection.objectCount; j++)
+		for (size_t j = 0; j < currSection->objects->size(); j++)
 		{
-			CollisionBox* otherBox = currSection.objects[j];
+			CollisionBox* otherBox = currSection->objects->at(j);
 			if (otherBox != currBox)
 			{
 				if (!cData.hasMoreContacts()) return;

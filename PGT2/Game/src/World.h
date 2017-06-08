@@ -14,14 +14,13 @@
 
 
 
-typedef struct
+struct VerticeSection
 {
 	Ogre::Vector2 minPoint;
 	Ogre::Vector2 maxPoint;
-	std::vector<CollisionBox*> objects;
-	size_t objectCount;
+	std::vector<CollisionBox*>* objects;
 	std::vector<Face> terrainFaces;
-} VerticeSection;
+};
 
 struct BodyRegistration
 {
@@ -55,7 +54,7 @@ public:
 	static std::vector<CollisionBox*> worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
-	VerticeSection vertexSections[10][10];
+	VerticeSection* vertexSections[15][15];
 	static size_t boxCount;
 
 	size_t terrainVertexCount, terrainIndexCount;
@@ -83,6 +82,7 @@ public:
 	void restartWorld();
 	void update(const Ogre::FrameEvent evt);
 	void setCameraFollow();
+	void initializeSections();
 	void emptySectionObjects();
 	void populateSections();
 	

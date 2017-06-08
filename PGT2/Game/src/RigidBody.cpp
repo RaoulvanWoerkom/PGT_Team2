@@ -98,7 +98,10 @@ void RigidBody::createBoundingBox()
 	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.z));
 	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.z));
 
-	halfSize = maxSize / 2;
+
+	Ogre::Vector3 size = minSize - maxSize;
+
+	halfSize = size / 2;
 }
 
 void RigidBody::setPosition(Ogre::Vector3 position)
@@ -379,19 +382,12 @@ Ogre::Real RigidBody::getInverseMass()
 /// \brief gets boundingbox coordinates in either world space or local(???) space
 Ogre::Vector3* RigidBody::getBoundingBox(bool worldPosition)
 {
-	Ogre::Vector3 retBoundingBox[8];
-	Ogre::Matrix3 rotMatrix;
-	getOrientation().ToRotationMatrix(rotMatrix);
+	Ogre::Vector3* retBoundingBox = new Ogre::Vector3[8];
 	for (int i = 0; i < boundingBox.size(); i++)
 	{
-		retBoundingBox[i] = boundingBox[i];
-		if (worldPosition)
-		{
-			retBoundingBox[i] += RigidBody::getPosition() * rotMatrix;
-		}
+		retBoundingBox[i] = boundingBox.at(i);
 	}
-	Ogre::Vector3* a = retBoundingBox;
-	return a;
+	return retBoundingBox;
 }
 
 bool RigidBody::setAndCheckIsAwake()
@@ -1013,10 +1009,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 
 	delete newVertices;
 	delete newNormals;
-
-
 	delete leftVertices2;
-
 	delete rightVertices2;
 }
 
