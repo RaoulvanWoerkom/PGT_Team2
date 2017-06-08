@@ -297,55 +297,6 @@ unsigned CollisionDetector::boxAndBox(
 }
 #undef CHECK_OVERLAP
 
-unsigned CollisionDetector::boxAndPoint(
-	const CollisionBox &box,
-	const Ogre::Vector3 &point,
-	CollisionData *data
-	)
-{
-	// Transform the point into box coordinates
-	Ogre::Vector3 relPt = box.transform * (point);
-
-	Ogre::Vector3 normal;
-
-	// Check each axis, looking for the axis on which the
-	// penetration is least deep.
-	Ogre::Real min_depth = box.halfSize.x - relPt.x;
-	if (min_depth < 0) return 0;
-	normal = box.getAxis(0) * ((relPt.x < 0) ? -1 : 1);
-
-	Ogre::Real depth = box.halfSize.y - relPt.y;
-	if (depth < 0) return 0;
-	else if (depth < min_depth)
-	{
-		min_depth = depth;
-		normal = box.getAxis(1) * ((relPt.y < 0) ? -1 : 1);
-	}
-
-	depth = box.halfSize.z - relPt.z;
-	if (depth < 0) return 0;
-	else if (depth < min_depth)
-	{
-		min_depth = depth;
-		normal = box.getAxis(2) * ((relPt.z < 0) ? -1 : 1);
-	}
-
-	// Compile the contact
-	Contact* contact = data->contacts;
-	contact->contactNormal = normal;
-	contact->contactPoint = point;
-	contact->penetration = min_depth;
-
-	// Note that we don't know what rigid body the point
-	// belongs to, so we just use NULL. Where this is called
-	// this value can be left, or filled in.
-	contact->setBodyData(box.body, NULL,
-		data->friction, data->restitution);
-
-	data->addContacts(1);
-	return 1;
-}
-
 #define BALL_SIZE 100
 unsigned CollisionDetector::boxAndSphere(
 	const CollisionBox &box,
@@ -403,3 +354,90 @@ unsigned CollisionDetector::boxAndSphere(
 	return 1;
 }
 #undef BALL_SIZE
+
+
+bool IntersectionTests::boxAndHalfSpace(
+	const CollisionBox &box,
+	Ogre::Vector3 direction,
+	Ogre::Real offset
+)
+{
+	// Work out the projected radius of the box onto the plane direction
+	Ogre::Real projectedRadius = transformToAxis(box, direction);
+
+	// Work out how far the box is from the origin
+	Ogre::Real boxDistance =
+		direction.dotProduct(
+		box.getAxis(3)) -
+		projectedRadius;
+
+	// Check for the intersection
+	return boxDistance <= offset;
+}
+
+unsigned CollisionDetector::boxAndHalfSpace(
+	const CollisionBox &box,
+	Ogre::Vector3 direction,
+	Ogre::Real offset,
+	CollisionData *data
+)
+{
+	// Make sure we have contacts
+	if (data->contactsLeft <= 0) return 0;
+
+	// Check for intersection
+	if (!IntersectionTests::boxAndHalfSpace(box, direction, offset))
+	{
+		return 0;
+	}
+
+	// We have an intersection, so find the intersection points. We can make
+	// do with only checking vertices. If the box is resting on a plane
+	// or on an edge, it will be reported as four or two contact points.
+
+	// Go through each combination of + and - for each half-size
+	static Ogre::Real mults[8][3] = { { 1,1,1 },{ -1,1,1 },{ 1,-1,1 },{ -1,-1,1 },
+	{ 1,1,-1 },{ -1,1,-1 },{ 1,-1,-1 },{ -1,-1,-1 } };
+
+	Contact* contact = data->contacts;
+	unsigned contactsUsed = 0;
+	for (unsigned i = 0; i < 8; i++) {
+
+		// Calculate the position of each vertex
+		Ogre::Vector3 vertexPos(mults[i][0], mults[i][1], mults[i][2]);
+		vertexPos *= box.halfSize;
+		vertexPos = box.transform * vertexPos;
+
+		// Calculate the distance from the plane
+		Ogre::Real vertexDistance = vertexPos.dotProduct(direction);
+
+		// Compare this to the plane's distance
+		if (vertexDistance <= offset)
+		{
+			// Create the contact data.
+
+			// The contact point is halfway between the vertex and the
+			// plane - we multiply the direction by half the separation
+			// distance and add the vertex location.
+			Ogre::Vector3 temp = direction;
+			temp *= (vertexDistance - offset);
+			temp += vertexPos;
+		
+			contact->contactPoint = temp;
+			contact->contactNormal = direction;
+			contact->penetration = (offset - vertexDistance);
+
+			// Write the appropriate data
+			contact->setBodyData(box.body, NULL,
+				data->friction, data->restitution);
+
+			// Move onto the next contact
+			contact++;
+			contactsUsed++;
+			if (contactsUsed == (unsigned)data->contactsLeft) return contactsUsed;
+		}
+	}
+
+	data->addContacts(contactsUsed);
+	return contactsUsed;
+}

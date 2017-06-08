@@ -725,8 +725,19 @@ void World::checkWorldCollision()
 		Ogre::Vector3 currPos = currBox->body->node->getPosition();
 		std::vector<Ogre::Vector2> sectionList = getSections(currPos);
 		VerticeSection* currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
+		std::vector<Face> terrainFaceList = currSection->terrainFaces;
 
-		//CollisionDetector::boxAndPoint(*currBox, collPoint, &cData); als je het laagste punt van de box kan vinden en in collpoint stoppen zou het moeten werken.
+		CollisionDetector::boxAndHalfSpace(*currBox, Ogre::Vector3(0 , 1, 0), -150, &cData);
+
+
+		//for (size_t j = 0; j < terrainFaceList.size(); j++) //loop through all the terrain vertices inside the section object // creeert teveel contacts, dus crashed. pak gwn random face van section
+		//{
+		//	Face currFace = terrainFaceList.at(j);
+
+		//	if (!cData.hasMoreContacts()) return;
+		//	CollisionDetector::boxAndHalfSpace(*currBox, currFace.normal,currFace.midPoint.length(), &cData);
+		//}
+
 
 		if (!cData.hasMoreContacts()) return;
 		if (CollisionDetector::boxAndSphere(*currBox, *ballBody, &cData))
