@@ -15,7 +15,6 @@
 #include "Helper.h"
 #include "Highscore.h"
 #include "Contact.h"
-#include "Sound.h"
 
 class Baller : public BaseApplication 
 {
@@ -25,7 +24,6 @@ public:
 	
 	InputManager inputManager;
 	World world;
-	Sound sound;
 	CustomTimer timer;
 	bool isGameOver;
 

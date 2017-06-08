@@ -3,6 +3,13 @@
 #include "Helper.h"
 #include <stdio.h>
 
+std::string Helper::to_string(int value)
+{
+	std::ostringstream os;
+	os << value;
+	return os.str();
+}
+
 void Helper::log(std::string name, int number)
 { 
 	char charAr[1024];
@@ -12,6 +19,8 @@ void Helper::log(std::string name, int number)
 
 	sprintf(buffer, "%s: %d\n", charAr, number);
 }
+
+
 
 void Helper::log(std::string name, Ogre::Real fl)
 {

@@ -1,4 +1,5 @@
 #include "Highscore.h"
+#include "Helper.h"
 #include <time.h>
 #include <iostream>
 #include <fstream>
@@ -56,7 +57,7 @@ double Highscore::getHighscore()
 
 	bool Highscore::checkIfExceedsPreviousHighscore(double score)
 {
-	if(std::to_string(score) > getHighscoreFromFile())
+	if(Helper::to_string(score) > getHighscoreFromFile())
 	{
 		return true;
 	}

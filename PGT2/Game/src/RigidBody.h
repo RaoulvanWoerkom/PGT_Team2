@@ -48,7 +48,7 @@ public:
 	Ogre::SceneNode* node; //contains Position & Orientation
 	Ogre::Entity* entity;
 	std::string name;
-	bool isDestroyed = false;
+	bool isDestroyed;
 	bool isBreakable;
 	bool canCollide;
 	Ogre::Vector3 halfSize;

@@ -9,6 +9,7 @@ Building::Building(Ogre::SceneNode* _node, Ogre::Entity* _entity) : RigidBody(_n
 	Building::inverseMass = 1;
 	Building::dampening = 0.995;
 	Building::isAwake = true;
+	Building::isDestroyed = false;
 	Building::canSleep = false;
 	Building::velocity = Ogre::Vector3().ZERO;
 	Building::acceleration = Ogre::Vector3(0.0f, -9.81f, 0.0f);

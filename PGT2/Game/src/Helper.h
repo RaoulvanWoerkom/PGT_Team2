@@ -8,6 +8,7 @@ class Helper
 
 
 public:
+	static std::string to_string(int value);
 	static void log(std::string name, int number);
 	static void log(std::string name, Ogre::Real fl);
 	static void log(std::string name, long l);

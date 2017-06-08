@@ -44,8 +44,6 @@ void Baller::createViewports()
 
 void Baller::init()
 {
-	sound = Sound();
-	sound.loopingSound();
 	inputManager = InputManager();
 	isGameOver = false;
 	timer = CustomTimer();

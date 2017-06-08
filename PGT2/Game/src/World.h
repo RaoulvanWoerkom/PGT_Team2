@@ -51,7 +51,7 @@ public:
 
 	float jumpPower;
 
-	static std::vector<CollisionBox*> worldObjects;
+	static std::vector<CollisionBox*> World::worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
 	VerticeSection* vertexSections[15][15];
@@ -60,6 +60,8 @@ public:
 	size_t terrainVertexCount, terrainIndexCount;
 	Ogre::Vector3* terrainVertices;
 	uint32_t* terrainIndices;
+
+
 
 	void splitTerrainVertices();
 	static void addCollisionBox(CollisionBox* box);

@@ -11,6 +11,8 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::inverseMass = 1;
 	RigidBody::dampening = 0.995;
 	RigidBody::isAwake = true;
+	RigidBody::isDestroyed = false;
+	RigidBody::isBreakable = false;
 	RigidBody::canSleep = false;
 	RigidBody::canCollide = true;
 	RigidBody::velocity = Ogre::Vector3().ZERO;
@@ -33,6 +35,7 @@ RigidBody::RigidBody(void)
 ///
 void RigidBody::loadMeshInfo()
 {
+	faceCount = 0;
 	Helper::getMeshInformation(entity->getMesh(), vertexCount, vertices, indexCount, indices, getPosition(), getOrientation(), node->getScale());
 	//cutList = new bool[vertexCount] {0};
 	//cutListCount = vertexCount;
@@ -479,7 +482,7 @@ void RigidBody::split(Ogre::Vector3 amount)
 				debrisNode->setPosition(pos);
 				debrisNode->setScale(cubeScale);
 				int randNum = rand() % (1000000000);
-				std::string meshName = "Cube" + std::to_string(randNum);
+				std::string meshName = "Cube" + Helper::to_string(randNum);
 				Ogre::Entity* debrisEntity = World::mSceneMgr->createEntity("cube.mesh");
 
 				RigidBody* debrisBody = new RigidBody(debrisNode, debrisEntity);

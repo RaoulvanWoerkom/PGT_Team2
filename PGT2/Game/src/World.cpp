@@ -15,7 +15,7 @@ const int JUMP_CHARGE = 5;
 const int JUMP_MAX = 500;
 
 size_t World::boxCount = 0;
-std::vector<CollisionBox*> World::worldObjects;
+std::vector<CollisionBox*> World::worldObjects = std::vector<CollisionBox*>();
 
 Ogre::SceneManager* World::mSceneMgr = NULL;
 
@@ -23,7 +23,6 @@ World::World() :
 	resolver(maxContacts * 8)
 {
 	cData.contactArray = contacts;
-	worldObjects = std::vector<CollisionBox*>();
 	boxCount = 0;
 	jumpPower = 0;
 }
@@ -32,14 +31,8 @@ World::~World()
 {
 }
 
-// TODO FIX FOR TRAVIS ERROR (error: ‘to_string’ is not a member of ‘std’)
-template <typename T>
-std::string to_string(T value)
-{
-	std::ostringstream os;
-	os << value;
-	return os.str();
-}
+
+
 
 void World::createLight()
 {
@@ -131,7 +124,7 @@ void World::createBuilding(Ogre::Vector3 pos)
 	buildingNode->setPosition(pos);
 	buildingNode->setScale(4, 10, 4);
 	int randNum = rand() % (1000000000);
-	std::string meshName = "Cube" + to_string(randNum);
+	std::string meshName = "Cube" + Helper::to_string(randNum);
 	Ogre::Entity* buildingEntity = mSceneMgr->createEntity(meshName, "cube.mesh");
 
 
@@ -249,7 +242,7 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, std::vector
 	//gebasseerd op: https://www.grahamedgecombe.com/blog/2011/08/05/custom-meshes-in-ogre3d en http://www.ogre3d.org/tikiwiki/Generating+A+Mesh
 
 	int randNum = rand() % (1000000000);
-	std::string meshName = "CustomMesh" + to_string(randNum);
+	std::string meshName = "CustomMesh" + Helper::to_string(randNum);
 	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().createManual(meshName, "General");
 	Ogre::SubMesh *subMesh = mesh->createSubMesh();
 
