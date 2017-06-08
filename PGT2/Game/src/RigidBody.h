@@ -18,7 +18,7 @@ struct Face
 class RigidBody 
 {
 protected:
-	Ogre::Real inverseMass;
+	
 	Ogre::Real dampening;
 	Ogre::Vector3 forceAccum;
 	Ogre::Vector3 torqueAccum;
@@ -44,7 +44,7 @@ protected:
 
 public:
 
-
+	Ogre::Real inverseMass;
 	Ogre::SceneNode* node; //contains Position & Orientation
 	Ogre::Entity* entity;
 	std::string name;
@@ -84,7 +84,7 @@ public:
 	bool hasFiniteMass();
 	Ogre::Real getMass();
 	Ogre::Real getInverseMass();
-	void createBoundingBox();
+	void createBoundingBox(float perc);
 	Ogre::Vector3* getBoundingBox(bool worldPosition = true);
 	bool hitBoxContainsPoint(Ogre::Vector3 point);
 	bool setAndCheckIsAwake();

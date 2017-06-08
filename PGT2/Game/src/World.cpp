@@ -635,10 +635,6 @@ void World::emptySectionObjects()
 	{
 		for (int x = 0; x < SECTION_AMOUNT; x++)
 		{
-			if (x == 8 && y == 7)
-			{
-				Helper::log("123213", Ogre::Vector3(0, 0, 0));
-			}
 			VerticeSection* currSection = vertexSections[(int)x][(int)y];
 			currSection->objects->clear();
 		}
