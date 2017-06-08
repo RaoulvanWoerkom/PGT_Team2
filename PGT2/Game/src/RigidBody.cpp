@@ -986,7 +986,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
 	leftBody->createBoundingBox(0.6f);
 	leftBody->canCollide = false;
-	leftBody->inverseMass = 200;
+	leftBody->inverseMass = 50;
 	leftBody->addForce(ranDir * 60);
 	leftBody->addRotation(-ranDir);
 
@@ -1007,7 +1007,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
 	rightBody->createBoundingBox(0.6f);
 	rightBody->canCollide = false;
-	rightBody->inverseMass = 200;
+	rightBody->inverseMass = 50;
 	rightBody->addForce(-ranDir * 60);
 	rightBody->addRotation(ranDir);
 

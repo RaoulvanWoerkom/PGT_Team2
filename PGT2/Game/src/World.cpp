@@ -726,8 +726,10 @@ void World::checkWorldCollision()
 		std::vector<Ogre::Vector2> sectionList = getSections(currPos);
 		VerticeSection* currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
 		std::vector<Face> terrainFaceList = currSection->terrainFaces;
-
-		CollisionDetector::boxAndHalfSpace(*currBox, Ogre::Vector3(0 , 1, 0), -150, &cData);
+		Face currFace = terrainFaceList.at(0);
+		Ogre::Real temp = currFace.point1.dotProduct(currFace.normal);
+		CollisionDetector::boxAndHalfSpace(*currBox, currFace.normal, temp, &cData);
+		//CollisionDetector::boxAndHalfSpace(*currBox, Ogre::Vector3(0 , 1, 0), -150, &cData);
 
 
 		//for (size_t j = 0; j < terrainFaceList.size(); j++) //loop through all the terrain vertices inside the section object // creeert teveel contacts, dus crashed. pak gwn random face van section
