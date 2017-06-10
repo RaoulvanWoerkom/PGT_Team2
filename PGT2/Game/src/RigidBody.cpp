@@ -19,7 +19,6 @@ RigidBody::RigidBody(Ogre::SceneNode* _node, Ogre::Entity* _entity)
 	RigidBody::torqueAccum = Ogre::Vector3().ZERO;
 	RigidBody::rotation = Ogre::Vector3().ZERO;
 	RigidBody::lastFrameAcceleration = Ogre::Vector3().ZERO;
-	RigidBody::inertiaTensor = Ogre::Matrix3().ZERO;
 	RigidBody::inertiaTensor.Inverse(RigidBody::inverseInertiaTensor);
 	RigidBody::loadMeshInfo();
 	RigidBody::createBoundingBox(1);
@@ -106,8 +105,13 @@ void RigidBody::createBoundingBox(float perc)
 	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.z));
 
 	
-
 	halfSize = size / 2;
+
+	inertiaTensor = Ogre::Matrix3((1.0f / 12.0f) * (1 / inverseMass) * (Ogre::Math::Pow(halfSize.y, 2) + Ogre::Math::Pow(halfSize.z, 2)), 0, 0,
+		0, (1.0f / 12.0f) * (1 / inverseMass) * (Ogre::Math::Pow(halfSize.x, 2) + Ogre::Math::Pow(halfSize.z, 2)), 0,
+		0, 0, (1.0f / 12.0f) * (1 / inverseMass) * (Ogre::Math::Pow(halfSize.x, 2) + Ogre::Math::Pow(halfSize.y, 2))
+	);
+	 inertiaTensor.Inverse(inverseInertiaTensor);
 }
 
 void RigidBody::setPosition(Ogre::Vector3 position)
@@ -986,7 +990,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
 	leftBody->createBoundingBox(0.6f);
 	leftBody->canCollide = false;
-	leftBody->inverseMass = 50;
+	leftBody->inverseMass = 1;
 	leftBody->addForce(ranDir * 60);
 	leftBody->addRotation(-ranDir);
 
@@ -1007,7 +1011,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
 	rightBody->createBoundingBox(0.6f);
 	rightBody->canCollide = false;
-	rightBody->inverseMass = 50;
+	rightBody->inverseMass = 1;
 	rightBody->addForce(-ranDir * 60);
 	rightBody->addRotation(ranDir);
 

@@ -89,9 +89,9 @@ public:
 class IntersectionTests
 {
 public:
-	static bool boxAndHalfSpace(const CollisionBox & box,
-		Ogre::Vector3 direction,
-		Ogre::Real offset);
+	static bool boxAndHalfSpace(const CollisionBox & box, Ogre::Vector3 direction, Ogre::Real offset, Face face);
+	static bool pointAndFace(Ogre::Vector3 point, Face face);
+
 };
 
 struct CollisionData
@@ -146,9 +146,9 @@ public:
 		Ball & sphere, 
 		CollisionData * data);
 	static unsigned boxAndHalfSpace(const CollisionBox & box,
-		Ogre::Vector3 direction,
-		Ogre::Real offset,
-		CollisionData* data);
+		CollisionData* data,
+		Face face);
 };
 
 #endif // #ifndef __CollisionDetector_h_
+

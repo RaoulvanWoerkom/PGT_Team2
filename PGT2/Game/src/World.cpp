@@ -118,10 +118,6 @@ void World::createHouse(Ogre::SceneManager* mSceneMgr) {
 	houseBox->halfSize = houseBody->node->getScale() / 2;
 	houseBox->body->calculateDerivedData();
 	houseBox->calculateInternals();
-
-	addCollisionBox(houseBox);
-	addObjectVertices(houseBox);
-
 }
 
 
@@ -129,7 +125,7 @@ void World::createBuilding(Ogre::Vector3 pos)
 {
 	Ogre::SceneNode* buildingNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	buildingNode->setPosition(pos);
-	buildingNode->setScale(4, 10, 4);
+	buildingNode->setScale(1, 2, 1);
 	int randNum = rand() % (1000000000);
 	std::string meshName = "Cube" + to_string(randNum);
 	Ogre::Entity* buildingEntity = mSceneMgr->createEntity(meshName, "cube.mesh");
@@ -148,7 +144,6 @@ void World::createBuilding(Ogre::Vector3 pos)
 	buildingBox->calculateInternals();
 
 	addCollisionBox(buildingBox);
-	addObjectVertices(buildingBox);
 
 	Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("Skin", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	
@@ -726,19 +721,13 @@ void World::checkWorldCollision()
 		std::vector<Ogre::Vector2> sectionList = getSections(currPos);
 		VerticeSection* currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
 		std::vector<Face> terrainFaceList = currSection->terrainFaces;
-		Face currFace = terrainFaceList.at(0);
-		Ogre::Real temp = currFace.point1.dotProduct(currFace.normal);
-		CollisionDetector::boxAndHalfSpace(*currBox, currFace.normal, temp, &cData);
-		//CollisionDetector::boxAndHalfSpace(*currBox, Ogre::Vector3(0 , 1, 0), -150, &cData);
 
-
-		//for (size_t j = 0; j < terrainFaceList.size(); j++) //loop through all the terrain vertices inside the section object // creeert teveel contacts, dus crashed. pak gwn random face van section
-		//{
-		//	Face currFace = terrainFaceList.at(j);
-
-		//	if (!cData.hasMoreContacts()) return;
-		//	CollisionDetector::boxAndHalfSpace(*currBox, currFace.normal,currFace.midPoint.length(), &cData);
-		//}
+		for (size_t j = 0; j < terrainFaceList.size(); j++)
+		{
+			Face currFace = terrainFaceList.at(j);
+			if (!cData.hasMoreContacts()) return;
+			CollisionDetector::boxAndHalfSpace(*currBox, &cData, currFace);
+		}
 
 
 		if (!cData.hasMoreContacts()) return;
