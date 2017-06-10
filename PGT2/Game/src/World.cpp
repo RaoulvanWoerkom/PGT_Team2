@@ -10,7 +10,7 @@
 const Ogre::Real MOVE_SPEED = 10;
 
 const int BALL_SIZE = 100;
-const int SECTION_AMOUNT = 15;
+const int SECTION_AMOUNT = 25;
 const int JUMP_CHARGE = 5;
 const int JUMP_MAX = 500;
 
@@ -699,18 +699,23 @@ void World::checkWorldCollision()
 
 
 		Ogre::Vector3 currPos = currBox->body->node->getPosition();
-		std::vector<Ogre::Vector2> sectionList = getSections(currPos);
-		VerticeSection* currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
-		std::vector<Face> terrainFaceList = currSection->terrainFaces;
-		for (size_t j = 0; j < terrainFaceList.size(); j++)
+		std::vector<Ogre::Vector2> sectionList = getSections(currBox->body->boundingBox);
+		VerticeSection* currSection;
+		for (size_t j = 0; j < sectionList.size(); j++)
 		{
-			Face currFace = terrainFaceList.at(j);
-			Ogre::Real temp = currFace.point1.dotProduct(currFace.normal);
-			if (!cData.hasMoreContacts()) return;
-			CollisionDetector::boxAndHalfSpace(*currBox, &cData, currFace);
+			currSection = vertexSections[(int)sectionList[j].x][(int)sectionList[j].y];
+			std::vector<Face> terrainFaceList = currSection->terrainFaces;
+			for (size_t k = 0; k < terrainFaceList.size(); k++)
+			{
+				Face currFace = terrainFaceList.at(k);
+				Ogre::Real temp = currFace.point1.dotProduct(currFace.normal);
+				if (!cData.hasMoreContacts()) return;
+				CollisionDetector::boxAndHalfSpace(*currBox, &cData, currFace);
+			}
 
-
+			
 		}
+		
 
 
 		if (!cData.hasMoreContacts()) return;
@@ -724,18 +729,20 @@ void World::checkWorldCollision()
 				mSceneMgr->destroyEntity(building->entity);
 			}
 		}
-
-		for (size_t j = 0; j < currSection->objects->size(); j++)
+		currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
+		for (size_t l = 0; l <  currSection->objects->size(); l++)
 		{
-			CollisionBox* otherBox = currSection->objects->at(j);
+			CollisionBox* otherBox = currSection->objects->at(l);
 			if (otherBox != currBox)
 			{
 				if (otherBox->body->isDestroyed) return;
 				if (!cData.hasMoreContacts()) return;
-				
+
 				CollisionDetector::boxAndBox(*currBox, *otherBox, &cData);
 			}
 		}
+
+		
 	}
 }
 

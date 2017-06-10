@@ -54,7 +54,7 @@ public:
 	static std::vector<CollisionBox*> World::worldObjects;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
-	VerticeSection* vertexSections[15][15];
+	VerticeSection* vertexSections[25][25];
 	static size_t boxCount;
 
 	size_t terrainVertexCount, terrainIndexCount;

@@ -36,7 +36,7 @@ protected:
 	bool isAwake;
 	bool canSleep;
 
-	std::vector<Ogre::Vector3> boundingBox;
+	
 
 	
 
@@ -52,7 +52,7 @@ public:
 	bool isBreakable;
 	bool canCollide;
 	Ogre::Vector3 halfSize;
-
+	std::vector<Ogre::Vector3> boundingBox;
 	//bool* cutList;
 	//int cutListCount;
 
