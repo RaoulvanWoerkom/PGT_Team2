@@ -65,8 +65,6 @@ public:
 
 	void splitTerrainVertices();
 	static void addCollisionBox(CollisionBox* box);
-	void removeCollisionBox(CollisionBox* box);
-	void addObjectVertices(CollisionBox* box);
 	virtual void createTerrain();
 	virtual void createSphere();
 	virtual void createLight();

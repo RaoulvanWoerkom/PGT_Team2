@@ -113,7 +113,6 @@ void World::createHouse(Ogre::SceneManager* mSceneMgr) {
 	houseBox->calculateInternals();
 
 	addCollisionBox(houseBox);
-	addObjectVertices(houseBox);
 
 }
 
@@ -141,7 +140,6 @@ void World::createBuilding(Ogre::Vector3 pos)
 	buildingBox->calculateInternals();
 
 	addCollisionBox(buildingBox);
-	addObjectVertices(buildingBox);
 
 	Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("Skin", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	
@@ -319,14 +317,7 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, std::vector
 	/* you can now create an entity/scene node based on your mesh, e.g. */
 	Ogre::Entity *entity = mSceneMgr->createEntity(meshName);
 	entity->setMaterialName(matName);
-	//Ogre::SceneNode *node2 = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	//node2->setPosition(Ogre::Vector3(0,0,0));
-	//node2->attachObject(entity);
-	
 
-	
-	//RigidBody *newBody = new RigidBody(node2, entity);
-	//addRigidBody(newBody);
 
 	return entity;
 }
@@ -338,20 +329,8 @@ void World::addCollisionBox(CollisionBox* box)
 	boxCount++;
 }
 
-void World::addObjectVertices(CollisionBox* box)
-{
-	Ogre::Vector3 pos = box->body->getPosition();
-	std::vector<Ogre::Vector2> sectionList = getSections(pos, false);
-	Ogre::Vector2 coordinates = sectionList.at(0);
-
-	VerticeSection* newSection = vertexSections[(int)coordinates.x][(int)coordinates.y];
-	newSection->objects->push_back(box);
-}
-
 void World::splitTerrainVertices()
 {
-
-
 	Helper::getMeshInformation(groundBody->entity->getMesh(), terrainVertexCount, terrainVertices, terrainIndexCount, terrainIndices, groundBody->getPosition(), groundBody->getOrientation(), groundBody->node->getScale());
 
 	int max = terrainIndexCount - 3;
@@ -649,6 +628,7 @@ void World::populateSections()
 		if (isDestroyed)
 		{
 			delete currBox;
+			currBox = NULL;
 			i = worldObjects.erase(i);
 		}
 		else
@@ -715,23 +695,22 @@ void World::checkWorldCollision()
 	for (size_t i = 0; i < worldObjects.size(); i++)
 	{
 		CollisionBox* currBox = worldObjects[i];
+		if (currBox->body->isDestroyed) return;
+
+
 		Ogre::Vector3 currPos = currBox->body->node->getPosition();
 		std::vector<Ogre::Vector2> sectionList = getSections(currPos);
 		VerticeSection* currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
 		std::vector<Face> terrainFaceList = currSection->terrainFaces;
-		Face currFace = terrainFaceList.at(0);
-		Ogre::Real temp = currFace.point1.dotProduct(currFace.normal);
-		CollisionDetector::boxAndHalfSpace(*currBox, currFace.normal, temp, &cData);
-		//CollisionDetector::boxAndHalfSpace(*currBox, Ogre::Vector3(0 , 1, 0), -150, &cData);
+		for (size_t j = 0; j < terrainFaceList.size(); j++)
+		{
+			Face currFace = terrainFaceList.at(j);
+			Ogre::Real temp = currFace.point1.dotProduct(currFace.normal);
+			if (!cData.hasMoreContacts()) return;
+			CollisionDetector::boxAndHalfSpace(*currBox, &cData, currFace);
 
 
-		//for (size_t j = 0; j < terrainFaceList.size(); j++) //loop through all the terrain vertices inside the section object // creeert teveel contacts, dus crashed. pak gwn random face van section
-		//{
-		//	Face currFace = terrainFaceList.at(j);
-
-		//	if (!cData.hasMoreContacts()) return;
-		//	CollisionDetector::boxAndHalfSpace(*currBox, currFace.normal,currFace.midPoint.length(), &cData);
-		//}
+		}
 
 
 		if (!cData.hasMoreContacts()) return;
@@ -751,7 +730,9 @@ void World::checkWorldCollision()
 			CollisionBox* otherBox = currSection->objects->at(j);
 			if (otherBox != currBox)
 			{
+				if (otherBox->body->isDestroyed) return;
 				if (!cData.hasMoreContacts()) return;
+				
 				CollisionDetector::boxAndBox(*currBox, *otherBox, &cData);
 			}
 		}

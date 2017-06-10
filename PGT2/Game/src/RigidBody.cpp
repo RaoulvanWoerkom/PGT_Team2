@@ -108,7 +108,11 @@ void RigidBody::createBoundingBox(float perc)
 	boundingBox.push_back(Ogre::Vector3(minSize.x, maxSize.y, minSize.z));
 	boundingBox.push_back(Ogre::Vector3(maxSize.x, minSize.y, minSize.z));
 
-	
+	inertiaTensor = Ogre::Matrix3((1.0f / 12.0f) * (1 / inverseMass) * (Ogre::Math::Pow(halfSize.y, 2) + Ogre::Math::Pow(halfSize.z, 2)), 0, 0,
+		0, (1.0f / 12.0f) * (1 / inverseMass) * (Ogre::Math::Pow(halfSize.x, 2) + Ogre::Math::Pow(halfSize.z, 2)), 0,
+		0, 0, (1.0f / 12.0f) * (1 / inverseMass) * (Ogre::Math::Pow(halfSize.x, 2) + Ogre::Math::Pow(halfSize.y, 2))
+	);
+	inertiaTensor.Inverse(inverseInertiaTensor);
 
 	halfSize = size / 2;
 }
@@ -989,9 +993,9 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
 	leftBody->createBoundingBox(0.6f);
 	leftBody->canCollide = false;
-	leftBody->inverseMass = 50;
-	leftBody->addForce(ranDir * 60);
-	leftBody->addRotation(-ranDir);
+	leftBody->inverseMass = 1;
+	//leftBody->addForce(ranDir * 60);
+	//leftBody->addRotation(-ranDir);
 
 	CollisionBox *leftBox = new CollisionBox();
 	leftBox->body = leftBody;
@@ -1010,9 +1014,9 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
 	rightBody->createBoundingBox(0.6f);
 	rightBody->canCollide = false;
-	rightBody->inverseMass = 50;
-	rightBody->addForce(-ranDir * 60);
-	rightBody->addRotation(ranDir);
+	rightBody->inverseMass = 1;
+	//rightBody->addForce(-ranDir * 60);
+	//rightBody->addRotation(ranDir);
 
 	CollisionBox *rightBox = new CollisionBox();
 	rightBox->body = rightBody;

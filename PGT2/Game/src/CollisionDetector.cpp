@@ -356,11 +356,7 @@ unsigned CollisionDetector::boxAndSphere(
 #undef BALL_SIZE
 
 
-bool IntersectionTests::boxAndHalfSpace(
-	const CollisionBox &box,
-	Ogre::Vector3 direction,
-	Ogre::Real offset
-)
+bool IntersectionTests::boxAndHalfSpace(const CollisionBox & box, Ogre::Vector3 direction, Ogre::Real offset, Face face)
 {
 	// Work out the projected radius of the box onto the plane direction
 	Ogre::Real projectedRadius = transformToAxis(box, direction);
@@ -371,22 +367,58 @@ bool IntersectionTests::boxAndHalfSpace(
 		box.getAxis(3)) -
 		projectedRadius;
 
+
+	Ogre::Vector3* boundingBox = box.body->getBoundingBox(true);
+
+	bool pointIsInTriangle = false;
+
+	for (int i = 0; i < 8; i++)
+	{
+		if (pointAndFace(boundingBox[i], face))
+		{
+			pointIsInTriangle = true;
+			break;
+		}
+	}
 	// Check for the intersection
-	return boxDistance <= offset;
+
+	return boxDistance <= offset && pointIsInTriangle;
+
+}
+
+bool IntersectionTests::pointAndFace(Ogre::Vector3 point, Face face)
+{
+	Ogre::Vector3 p1 = face.point1;
+	Ogre::Vector3 p2 = face.point2;
+	Ogre::Vector3 p3 = face.point3;
+
+
+	Ogre::Real alpha = ((p2.z - p3.z)*(point.x - p3.x) + (p3.x - p2.x)*(point.z - p3.z)) /
+		((p2.z - p3.z)*(p1.x - p3.x) + (p3.x - p2.x)*(p1.z - p3.z));
+	Ogre::Real beta = ((p3.z - p1.z)*(point.x - p3.x) + (p1.x - p3.x)*(point.z - p3.z)) /
+		((p2.z - p3.z)*(p1.x - p3.x) + (p3.x - p2.x)*(p1.z - p3.z));
+	Ogre::Real gamma = 1.0f - alpha - beta;
+
+	if (alpha > 0 && beta > 0 && gamma > 0)
+		return true;
+	else
+		return false;
 }
 
 unsigned CollisionDetector::boxAndHalfSpace(
-	const CollisionBox &box,
-	Ogre::Vector3 direction,
-	Ogre::Real offset,
-	CollisionData *data
+	const CollisionBox & box,
+	CollisionData* data,
+	Face face
 )
 {
+	Ogre::Vector3 direction = face.normal;
+	Ogre::Real offset = face.point1.dotProduct(direction);
+
 	// Make sure we have contacts
 	if (data->contactsLeft <= 0) return 0;
 
 	// Check for intersection
-	if (!IntersectionTests::boxAndHalfSpace(box, direction, offset))
+	if (!IntersectionTests::boxAndHalfSpace(box, direction, offset, face))
 	{
 		return 0;
 	}
