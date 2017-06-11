@@ -6,7 +6,6 @@ OgreText *loseText;
 const int START_GAME_TIME = 60;
 
 double currentHighscore;
-double currentScore;
 
 Baller::Baller() 
 {
@@ -56,8 +55,7 @@ void Baller::init()
 	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
 
 	// Retrieve current Highscore from File
-	Highscore * highscore = new Highscore();
-	currentHighscore = highscore->getHighscore();
+	currentHighscore = Highscore::getHighscore();
 
 	// Set current Score to zero
 	currentScore = 0;
@@ -74,12 +72,14 @@ void Baller::initGameOver()
 	loseText->setCol(1.0f, 1.0f, 1.0f, 1.0f);
 
 	// Dummy add some score
-	currentScore = currentHighscore + 100;
+	//currentScore = currentHighscore + 100;
 
 	// Add current Score to ScoreBoard
-	Highscore * highscore = new Highscore();
-	highscore->addToScoreboard(currentScore);	
+	Highscore::addToScoreboard(currentScore);
 }
+
+
+
 
 void Baller::restartGame()
 {
@@ -97,6 +97,7 @@ void Baller::createScene()
 	world.createLight();
 	world.createTerrain();
 	world.createSphere();
+	world.currentScore = &currentScore;
 	//world.createHouse(mSceneMgr);
 
 	for (size_t x = 0; x < 5; x++)

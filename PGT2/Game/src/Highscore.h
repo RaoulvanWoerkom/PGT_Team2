@@ -6,8 +6,10 @@ class Highscore
 public:
 	Highscore();
 	~Highscore();
-	void addToScoreboard(double score);
-	static double getHighscore();
-	bool checkIfExceedsPreviousHighscore(double score);
+	static void Highscore::addToScoreboard(int score);
+	static int Highscore::getHighscore();
+	static bool Highscore::checkIfExceedsPreviousHighscore(int score);
+	static int Highscore::getHighscoreFromFile();
+
 };
 

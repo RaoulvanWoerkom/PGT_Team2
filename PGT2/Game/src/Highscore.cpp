@@ -39,7 +39,7 @@ Highscore::~Highscore()
 
 	
 
-string getHighscoreFromFile()
+int Highscore::getHighscoreFromFile()
 {
 	std::ifstream fileRead("scoreboard.txt");
 
@@ -47,17 +47,18 @@ string getHighscoreFromFile()
 	getline(fileRead, highscore);
 
 	fileRead.close();
-	return highscore;
+	int score = std::stoi(highscore);
+	return score;
 }
 
-double Highscore::getHighscore()
+int Highscore::getHighscore()
 {	
-	return atof(getHighscoreFromFile().c_str());
+	return getHighscoreFromFile();
 }
 
-	bool Highscore::checkIfExceedsPreviousHighscore(double score)
+bool Highscore::checkIfExceedsPreviousHighscore(int score)
 {
-	if(Helper::to_string(score) > getHighscoreFromFile())
+	if(score > getHighscoreFromFile())
 	{
 		return true;
 	}
@@ -66,7 +67,7 @@ double Highscore::getHighscore()
 
 // https://cboard.cprogramming.com/c-programming/135750-scoreboard-saved-txt-file.html
 // https://stackoverflow.com/questions/15388041/how-to-write-stdstring-to-file
-void Highscore::addToScoreboard(double score)
+void Highscore::addToScoreboard(int score)
 {	
 	if(checkIfExceedsPreviousHighscore(score))
 	{

@@ -561,7 +561,7 @@ void ContactResolver::adjustVelocities(Contact *c,
 		if (index == numContacts) break;
 
 		// Match the awake state at the contact!!
-
+		if (c[index].body[0] == NULL && c[index].body[1] == NULL) continue;
 		// Do the resolution on the contact that came out top.
 		c[index].applyVelocityChange(velocityChange, rotationChange);
 

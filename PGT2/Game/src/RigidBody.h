@@ -90,8 +90,8 @@ public:
 	bool hitBoxContainsPoint(Ogre::Vector3 point);
 	bool setAndCheckIsAwake();
 
-	void split(Ogre::Vector3 amount);
-	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal);
+	void split(Ogre::Vector3 amount, RigidBody *ballBody);
+	void cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, RigidBody *ballBody);
 
 	bool IsClockwise(Ogre::Vector3* newVertices, int index1, int index2, int index3);
 	std::vector<int> fillIntersectionFaces(std::vector<int> _indices, std::vector<int> intersections, int middlePointIndex);

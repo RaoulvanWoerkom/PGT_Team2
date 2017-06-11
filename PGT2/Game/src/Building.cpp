@@ -31,10 +31,10 @@ void Building::integrate(Ogre::Real delta)
 	//RigidBody::integrate(delta);
 }
 
-void Building::fracture()
+void Building::fracture(RigidBody *ballBody)
 {
 	if (!Building::isDestroyed)
 	{
-		split(Ogre::Vector3(2,3,3));
+		split(Ogre::Vector3(3,4,3), ballBody);
 	}
 }

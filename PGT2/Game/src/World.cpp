@@ -74,7 +74,7 @@ void World::createSphere()
 	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 
 
-	ballNode->setPosition(7500, 300, 7500);
+	ballNode->setPosition(8000, 600, 8000);
 
 
 	createSphereMesh("mySphereMesh", 100, 64, 64);
@@ -730,18 +730,21 @@ void World::checkWorldCollision()
 		}
 		
 
-
+		
 		if (!cData.hasMoreContacts()) return;
 		if (CollisionDetector::boxAndSphere(*currBox, *ballBody, &cData))
 		{
 			if (currBox->body->isBreakable)
 			{
+				*currentScore += 100;
 				Building* building = dynamic_cast<Building*>(currBox->body);
-				building->fracture();
+				building->fracture(ballBody);
 				building->isDestroyed = true;
 				mSceneMgr->destroyEntity(building->entity);
 			}
 		}
+		
+
 		currSection = vertexSections[(int)sectionList[0].x][(int)sectionList[0].y];
 		for (size_t l = 0; l <  currSection->objects->size(); l++)
 		{

@@ -12,6 +12,6 @@ public:
 	void integrate(Ogre::Real delta);
 
 
-	void fracture();
+	void fracture(RigidBody *ballBody);
 
 };

@@ -21,12 +21,15 @@ class Baller : public BaseApplication
 public:
 	Baller();
 	virtual ~Baller();
-	
+
 	InputManager inputManager;
+	int currentScore;
 	World world;
+	
+	
 	CustomTimer timer;
 	bool isGameOver;
-
+	
 
 protected:
 	virtual void createScene();

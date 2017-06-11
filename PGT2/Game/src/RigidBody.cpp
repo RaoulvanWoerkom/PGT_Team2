@@ -468,7 +468,7 @@ float linePlaneCoefficient(const Ogre::Vector3* linePoint, const Ogre::Vector3* 
 }
 
 /// \brief splits rigidbody in equal parts based on amount vector3
-void RigidBody::split(Ogre::Vector3 amount)
+void RigidBody::split(Ogre::Vector3 amount, RigidBody *ballBody)
 {
 	srand(time(NULL));
 	Ogre::Vector3 scale = node->getScale();
@@ -498,7 +498,7 @@ void RigidBody::split(Ogre::Vector3 amount)
 				int randNum3 = (rand() % (1000) - 500);
 				Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
 				ranDir.normalise();
-				debrisBody->cut(debrisBody->getPosition(), ranDir);
+				debrisBody->cut(debrisBody->getPosition(), ranDir, ballBody);
 
 			}
 		}
@@ -514,7 +514,7 @@ void RigidBody::split(Ogre::Vector3 amount)
 ///
 /// Using the slicing plane, each intersection vertex can be found. Using those, the mesh is seperated at
 /// these points, and new indices + faces are created for the missing parts of the two new meshes.
-void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
+void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, RigidBody *ballBody)
 {
 
 	int faceCount = indexCount / 3;
@@ -968,7 +968,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 		leftVertices2[i] -= getPosition();
 		rightVertices2[i] -= getPosition();
 	}
-
+	RigidBody *body;
 	int randSide = rand() % 1000;
 	if (randSide < 500)
 	{
@@ -984,21 +984,21 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 		Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
 		ranDir.normalise();
 
-		RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
-		leftBody->createBoundingBox(0.8f);
-		leftBody->canCollide = false;
-		leftBody->inverseMass = 4;
-		leftBody->addForce(ranDir * 50);
-		leftBody->addRotation(-ranDir);
+		body = new RigidBody(leftNode, leftEntity);
+		body->createBoundingBox(0.8f);
+		body->canCollide = false;
+		body->inverseMass = 4;
+		body->addForce(ranDir * 50);
+		body->addRotation(-ranDir);
 
 		CollisionBox *leftBox = new CollisionBox();
-		leftBox->body = leftBody;
-		leftBox->halfSize = leftBody->getHalfsize();
+		leftBox->body = body;
+		leftBox->halfSize = body->getHalfsize();
 		leftBox->body->calculateDerivedData();
 		leftBox->calculateInternals();
 
 		World::addCollisionBox(leftBox);
-		World::addDebris(leftBody);
+		World::addDebris(body);
 	}
 	else
 	{
@@ -1014,26 +1014,34 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 		Ogre::Vector3  ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
 		ranDir.normalise();
 
-		RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
-		rightBody->createBoundingBox(0.8f);
-		rightBody->canCollide = false;
-		rightBody->inverseMass = 4;
-		rightBody->addForce(-ranDir * 50);
-		rightBody->addRotation(ranDir);
+		body = new RigidBody(rightNode, rightEntity);
+		body->createBoundingBox(0.8f);
+		body->canCollide = false;
+		body->inverseMass = 4;
+		body->addForce(-ranDir * 50);
+		body->addRotation(ranDir);
 
 		CollisionBox *rightBox = new CollisionBox();
-		rightBox->body = rightBody;
-		rightBox->halfSize = rightBody->getHalfsize();
+		rightBox->body = body;
+		rightBox->halfSize = body->getHalfsize();
 		rightBox->body->calculateDerivedData();
 		rightBox->calculateInternals();
 
 		World::addCollisionBox(rightBox);
-		World::addDebris(rightBody);
+		World::addDebris(body);
 	}
 
+	Ogre::Vector3 ballPos = ballBody->node->getPosition();
+	Ogre::Vector3 debrisPos = body->node->getPosition();
+	float accLength = pow(ballBody->acceleration.squaredLength(), 2.0f);
+	float dist = sqrt(pow((ballPos.x - debrisPos.x), 2) + pow((ballPos.y - debrisPos.y), 2) + pow((ballPos.z - debrisPos.z), 2));
+	Ogre::Vector3 diffPos = ballPos - debrisPos;
+	diffPos.normalise();
+	Ogre::Vector3 newVel = -diffPos * accLength / pow(dist, 1.5f);
+	body->addForce(newVel*(float)145);
 	
 
-
+	
 	
 
 	delete newVertices;

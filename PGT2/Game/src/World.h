@@ -1,7 +1,9 @@
 #ifndef __World_h_
 #define __World_h_
 
+
 #include "BaseApplication.h"
+
 #include "RigidBody.h"
 #include "CustomCamera.h"
 #include "InputManager.h"
@@ -42,7 +44,7 @@ public:
 	World();
 	~World();
 	
-
+	int* currentScore;
 
 	Ogre::Light* directionalLight;
 	CustomCamera camera;
@@ -53,7 +55,7 @@ public:
 
 	float jumpPower;
 
-	static const int maxDebris = 36;
+	static const int maxDebris = 55;
 
 	static std::vector<CollisionBox*> World::worldObjects;
 	static std::queue<RigidBody*> World::debrisQueue;
@@ -98,7 +100,7 @@ public:
 	
 
 	/** Holds the maximum number of contacts. */
-	const static unsigned maxContacts = 400;
+	const static unsigned maxContacts = 700;
 
 	/** Holds the array of contacts. */
 	Contact contacts[maxContacts];
