@@ -42,6 +42,8 @@ public:
 	World();
 	~World();
 	
+
+
 	Ogre::Light* directionalLight;
 	CustomCamera camera;
 	Ball* ballBody;

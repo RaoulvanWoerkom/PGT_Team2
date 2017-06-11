@@ -14,7 +14,7 @@ public:
 	Ball(void);
 
 	void integrate(Ogre::Real delta);
-
+	bool isGrounded;
 
 	
 	

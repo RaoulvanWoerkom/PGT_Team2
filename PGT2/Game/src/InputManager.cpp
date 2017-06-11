@@ -1,9 +1,9 @@
 #include "InputManager.h"
 
-bool InputManager::iDown = false;
-bool InputManager::jDown = false;
-bool InputManager::kDown = false;
-bool InputManager::lDown = false;
+bool InputManager::wDown = false;
+bool InputManager::aDown = false;
+bool InputManager::sDown = false;
+bool InputManager::dDown = false;
 bool InputManager::yDown = false;
 bool InputManager::spaceDown = false;
 
@@ -16,17 +16,17 @@ void InputManager::keyPressed(const OIS::KeyEvent& ke)
 {
 	switch (ke.key)
 	{
-		case OIS::KC_I:
-			InputManager::iDown = true;
+		case OIS::KC_W:
+			InputManager::wDown = true;
 			break;
-		case OIS::KC_J:
-			InputManager::jDown = true;
+		case OIS::KC_A:
+			InputManager::aDown = true;
 			break;
-		case OIS::KC_K:
-			InputManager::kDown = true;
+		case OIS::KC_S:
+			InputManager::sDown = true;
 			break;
-		case OIS::KC_L:
-			InputManager::lDown = true;
+		case OIS::KC_D:
+			InputManager::dDown = true;
 			break;
 		case OIS::KC_Y:
 			InputManager::yDown = true;
@@ -43,17 +43,17 @@ void InputManager::keyReleased(const OIS::KeyEvent& ke)
 {
 	switch (ke.key)
 	{
-		case OIS::KC_I:
-			InputManager::iDown = false;
+		case OIS::KC_W:
+			InputManager::wDown = false;
 			break;
-		case OIS::KC_J:
-			InputManager::jDown = false;
+		case OIS::KC_A:
+			InputManager::aDown = false;
 			break;
-		case OIS::KC_K:
-			InputManager::kDown = false;
+		case OIS::KC_S:
+			InputManager::sDown = false;
 			break;
-		case OIS::KC_L:
-			InputManager::lDown = false;
+		case OIS::KC_D:
+			InputManager::dDown = false;
 			break;
 		case OIS::KC_Y:
 			InputManager::yDown = false;

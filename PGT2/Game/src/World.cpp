@@ -7,12 +7,12 @@
 #include <sstream>
 #include <string>
 
-const Ogre::Real MOVE_SPEED = 10;
 
+const Ogre::Real MOVE_SPEED = 12;
 const int BALL_SIZE = 100;
 const int SECTION_AMOUNT = 25;
-const int JUMP_CHARGE = 5;
-const int JUMP_MAX = 500;
+const int JUMP_CHARGE = 50;
+const int JUMP_MAX = 1000;
 
 size_t World::boxCount = 0;
 std::vector<CollisionBox*> World::worldObjects = std::vector<CollisionBox*>();
@@ -58,7 +58,7 @@ void World::createTerrain()
 	m_pMat->getTechnique(0)->getPass(0)->setDiffuse(3, 20, 5, 20);
 	groundEntity->setMaterialName(m_pMat->getName());
 
-	Ogre::SceneNode* groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0, -200, 0));
+	Ogre::SceneNode* groundNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(7500, -200, 7500));
 	groundNode->scale(Ogre::Vector3(500, 850, 500));
 	groundNode->attachObject(groundEntity);
 	groundBody = new RigidBody(groundNode, groundEntity);
@@ -72,7 +72,9 @@ void World::createSphere()
 {
 	Ogre::SceneNode* ballNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	ballNode->setPosition(0, 300, 0);
+
+
+	ballNode->setPosition(7500, 300, 7500);
 
 
 	createSphereMesh("mySphereMesh", 100, 64, 64);
@@ -82,6 +84,7 @@ void World::createSphere()
 
 	ballBody = new Ball(ballNode, ballCameraNode, sphereEntity);
 	ballBody->entity->setMaterialName("Ball/Skin");
+	
 
 }
 
@@ -499,7 +502,7 @@ bool World::mouseMoved(const OIS::MouseEvent &arg)
 {
 	camera.camNode->pitch(Ogre::Degree(-arg.state.Y.rel * 0.25f));
 	camera.camNode->yaw(Ogre::Degree(-arg.state.X.rel * 0.25f));
-	camera.zoomCamera(-arg.state.Z.rel * 0.25f);
+	camera.zoomCamera(-arg.state.Z.rel * 0.3f);
 	return true;
 }
 
@@ -515,6 +518,7 @@ void World::createCamera(Ogre::Camera* mCamera, Ogre::SceneManager* mSceneMgr, O
 void World::setCameraFollow()
 {
 	camera.setCameraTarget(ballBody->cameraNode);
+	camera.zoomCamera(-5);
 }
 
 
@@ -531,7 +535,7 @@ void World::restartWorld()
 void World::update(const Ogre::FrameEvent evt)
 {
 	Ogre::Vector3 movePos = Ogre::Vector3(0, 0, 0);
-	if (InputManager::iDown)
+	if (InputManager::wDown)
 	{
 		Ogre::Vector3 direction = camera.camNode->_getDerivedOrientation() * Ogre::Vector3::NEGATIVE_UNIT_Z;
 		direction.y = 0;
@@ -540,7 +544,7 @@ void World::update(const Ogre::FrameEvent evt)
 		ballBody->addForce(direction);
 
 	}
-	if (InputManager::jDown)
+	if (InputManager::aDown)
 	{
 		Ogre::Vector3 direction = camera.camNode->_getDerivedOrientation() * Ogre::Vector3::NEGATIVE_UNIT_X;
 		direction.y = 0;
@@ -548,7 +552,7 @@ void World::update(const Ogre::FrameEvent evt)
 		direction = direction * MOVE_SPEED; // * speed
 		ballBody->addForce(direction);
 	}
-	if (InputManager::kDown)
+	if (InputManager::sDown)
 	{
 		Ogre::Vector3 direction = camera.camNode->_getDerivedOrientation() * -Ogre::Vector3::NEGATIVE_UNIT_Z;
 		direction.y = 0;
@@ -556,7 +560,7 @@ void World::update(const Ogre::FrameEvent evt)
 		direction = direction * MOVE_SPEED; // * speed
 		ballBody->addForce(direction);
 	}
-	if (InputManager::lDown)
+	if (InputManager::dDown)
 	{
 		Ogre::Vector3 direction = camera.camNode->_getDerivedOrientation() * -Ogre::Vector3::NEGATIVE_UNIT_X;
 		direction.y = 0;
@@ -564,7 +568,7 @@ void World::update(const Ogre::FrameEvent evt)
 		direction = direction * MOVE_SPEED; // * speed
 		ballBody->addForce(direction);
 	}
-	if (InputManager::spaceDown && jumpPower < JUMP_MAX)
+	if (InputManager::spaceDown && jumpPower < JUMP_MAX && ballBody->isGrounded)
 	{
    		jumpPower += JUMP_CHARGE;
 		if (jumpPower > JUMP_MAX)
@@ -637,7 +641,7 @@ void World::populateSections()
 		if (isDestroyed)
 		{
 			delete currBox;
-			currBox = NULL;
+			//currBox = NULL;
 			i = worldObjects.erase(i);
 		}
 		else
@@ -662,6 +666,7 @@ Checks whether the ball hits an object
 */
 void World::checkBallCollision()
 {
+	ballBody->isGrounded = false;
 	Ogre::Vector3 ballPos = ballBody->node->getPosition();
 	std::vector<Ogre::Vector2> sectionList = getSections(ballPos, true); //gets all sections surrounding the ball
 	double shortestLength = 100000000000;
@@ -693,6 +698,7 @@ void World::checkBallCollision()
 	}
 	if (chosenIndex >= 0)
 	{
+		ballBody->isGrounded = true;
 		double diffDist = BALL_SIZE - shortestLength;
 		if (!cData.hasMoreContacts()) return;
 		addBallContact(&cData, normalVec, closestHitCoordinates, diffDist, ballBody);

@@ -98,10 +98,15 @@ void Baller::createScene()
 	world.createTerrain();
 	world.createSphere();
 	//world.createHouse(mSceneMgr);
-	world.createBuilding(Ogre::Vector3(350, 300, -720));
-	world.createBuilding(Ogre::Vector3(1350, 300, -720));
-	world.createBuilding(Ogre::Vector3(350, 300, 320));
-	world.createBuilding(Ogre::Vector3(1350, 300, -1720));
+
+	for (size_t x = 0; x < 5; x++)
+	{
+		for (size_t z = 0; z < 5; z++)
+		{
+			world.createBuilding(Ogre::Vector3(2500 + x * 2500, 300, 2500 + z * 2500));
+		}
+	}
+	
 	world.setCameraFollow();
 
 	//world.splitVertices();

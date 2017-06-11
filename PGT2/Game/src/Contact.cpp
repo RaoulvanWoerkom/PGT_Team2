@@ -123,7 +123,7 @@ void Contact::calculateInternals(Ogre::Real duration)
 	// Check if the first object is NULL, and swap if it is.
 	if (!body[0]) swapBodies();
 	assert(body[0]);
-
+	
 	// Calculate an set of axis at the contact point.
 	calculateContactBasis();
 
@@ -531,7 +531,6 @@ void ContactResolver::prepareContacts(Contact* contacts,
 	for (Contact* contact = contacts; contact < lastContact; contact++)
 	{
 		// Calculate the internal contact data (inertia, basis, etc
-		
 		contact->calculateInternals(duration);
 		
 	}

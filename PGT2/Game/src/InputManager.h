@@ -5,10 +5,10 @@
 class InputManager
 {
 public:
-	static bool iDown;
-	static bool jDown;
-	static bool kDown;
-	static bool lDown;
+	static bool wDown;
+	static bool aDown;
+	static bool sDown;
+	static bool dDown;
 	static bool yDown;
 	static bool spaceDown;
 
