@@ -55,7 +55,7 @@ public:
 
 	float jumpPower;
 
-	static const int maxDebris = 55;
+	static const int maxDebris = 70;
 
 	static std::vector<CollisionBox*> World::worldObjects;
 	static std::queue<RigidBody*> World::debrisQueue;
@@ -100,7 +100,7 @@ public:
 	
 
 	/** Holds the maximum number of contacts. */
-	const static unsigned maxContacts = 700;
+	const static unsigned maxContacts = 900;
 
 	/** Holds the array of contacts. */
 	Contact contacts[maxContacts];

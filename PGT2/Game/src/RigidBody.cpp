@@ -985,7 +985,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, RigidBo
 		ranDir.normalise();
 
 		body = new RigidBody(leftNode, leftEntity);
-		body->createBoundingBox(0.8f);
+		body->createBoundingBox(1.0f);
 		body->canCollide = false;
 		body->inverseMass = 4;
 		body->addForce(ranDir * 50);
@@ -1015,7 +1015,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, RigidBo
 		ranDir.normalise();
 
 		body = new RigidBody(rightNode, rightEntity);
-		body->createBoundingBox(0.8f);
+		body->createBoundingBox(1.0f);
 		body->canCollide = false;
 		body->inverseMass = 4;
 		body->addForce(-ranDir * 50);
@@ -1038,7 +1038,7 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal, RigidBo
 	Ogre::Vector3 diffPos = ballPos - debrisPos;
 	diffPos.normalise();
 	Ogre::Vector3 newVel = -diffPos * accLength / pow(dist, 1.5f);
-	body->addForce(newVel*(float)145);
+	body->addForce(newVel*(float)195);
 	
 
 	

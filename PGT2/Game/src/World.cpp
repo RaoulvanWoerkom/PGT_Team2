@@ -74,7 +74,7 @@ void World::createSphere()
 	Ogre::SceneNode* ballCameraNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 
 
-	ballNode->setPosition(8000, 600, 8000);
+	
 
 
 	createSphereMesh("mySphereMesh", 100, 64, 64);
@@ -86,6 +86,8 @@ void World::createSphere()
 	ballBody->entity->setMaterialName("Ball/Skin");
 	
 
+	ballNode->setPosition(8000, 2800, 20000);
+	ballBody->addForce(Ogre::Vector3(0, 0, -3000));
 }
 
 void World::createHouse(Ogre::SceneManager* mSceneMgr) {
@@ -516,7 +518,7 @@ void World::createCamera(Ogre::Camera* mCamera, Ogre::SceneManager* mSceneMgr, O
 void World::setCameraFollow()
 {
 	camera.setCameraTarget(ballBody->cameraNode);
-	camera.zoomCamera(-5);
+	camera.zoomCamera(800);
 }
 
 
@@ -527,7 +529,8 @@ void World::createViewports()
 
 void World::restartWorld()
 {
-	ballBody->setPosition(Ogre::Vector3(0, 200, 0));
+	ballBody->setPosition(Ogre::Vector3(8000, 2800, 20000));
+	ballBody->addForce(Ogre::Vector3(0, 0, -3000));
 }
 
 void World::update(const Ogre::FrameEvent evt)
