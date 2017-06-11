@@ -35,6 +35,6 @@ void Building::fracture()
 {
 	if (!Building::isDestroyed)
 	{
-		split(Ogre::Vector3(2,2,2));
+		split(Ogre::Vector3(2,3,3));
 	}
 }

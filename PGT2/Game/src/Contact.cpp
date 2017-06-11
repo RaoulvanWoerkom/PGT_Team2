@@ -530,8 +530,10 @@ void ContactResolver::prepareContacts(Contact* contacts,
 	Contact* lastContact = contacts + numContacts;
 	for (Contact* contact = contacts; contact < lastContact; contact++)
 	{
-		// Calculate the internal contact data (inertia, basis, etc).
+		// Calculate the internal contact data (inertia, basis, etc
+		
 		contact->calculateInternals(duration);
+		
 	}
 }
 

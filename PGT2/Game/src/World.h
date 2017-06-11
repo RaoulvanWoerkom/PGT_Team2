@@ -51,11 +51,16 @@ public:
 
 	float jumpPower;
 
+	static const int maxDebris = 36;
+
 	static std::vector<CollisionBox*> World::worldObjects;
+	static std::queue<RigidBody*> World::debrisQueue;
 	Ogre::Vector2 lowestMapPos;
 	Ogre::Vector2 sectionSize;
 	VerticeSection* vertexSections[25][25];
 	static size_t boxCount;
+
+
 
 	size_t terrainVertexCount, terrainIndexCount;
 	Ogre::Vector3* terrainVertices;
@@ -74,6 +79,8 @@ public:
 	void createBuilding(Ogre::Vector3 pos);
 
 	static Ogre::Entity* createCustomEntity(Ogre::Vector3* _verticesArr, std::vector<int> _indiceList, int _vertexCount, Ogre::String matName);
+	static void addDebris(RigidBody * body);
+
 	virtual void createHouse(Ogre::SceneManager* mSceneMgr);
 
 	bool mouseMoved(const OIS::MouseEvent &arg);
@@ -85,6 +92,7 @@ public:
 	void initializeSections();
 	void emptySectionObjects();
 	void populateSections();
+	
 	
 
 	/** Holds the maximum number of contacts. */

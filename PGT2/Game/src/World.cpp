@@ -16,6 +16,7 @@ const int JUMP_MAX = 500;
 
 size_t World::boxCount = 0;
 std::vector<CollisionBox*> World::worldObjects = std::vector<CollisionBox*>();
+std::queue<RigidBody*> World::debrisQueue = std::queue<RigidBody*>();
 
 Ogre::SceneManager* World::mSceneMgr = NULL;
 
@@ -257,6 +258,9 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, std::vector
 	decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
 	offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
 
+	decl->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+	offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
+
 
 	/* create the vertex buffer */
 	Ogre::HardwareVertexBufferSharedPtr vertexBuffer =
@@ -265,18 +269,23 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, std::vector
 
 	/* lock the buffer so we can get exclusive access to its data */
 
-	float* _vertices = new float[_vertexCount * 3];
+	float* _vertices = new float[_vertexCount * 5];
+
 
 	/* populate the buffer with some data */
 	for (size_t i = 0; i < _vertexCount; i++)
 	{
 		Ogre::Vector3 currVertex = _verticesArr[i];
-		_vertices[i * 3] = currVertex.x;
-		_vertices[i * 3 + 1] = currVertex.y;
-		_vertices[i * 3 + 2] = currVertex.z;
+		_vertices[i * 5] = currVertex.x;
+		_vertices[i * 5 + 1] = currVertex.y;
+		_vertices[i * 5 + 2] = currVertex.z;
+
+		_vertices[i * 5 + 3] = currVertex.x + currVertex.z;
+		_vertices[i * 5 + 4] = currVertex.y;
+		
 	}
 
-	vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), _verticesArr, true);
+	vertexBuffer->writeData(0, vertexBuffer->getSizeInBytes(), _vertices, true);
 	Ogre::VertexBufferBinding* bind = mesh->sharedVertexData->vertexBufferBinding;
 	bind->setBinding(0, vertexBuffer);
 
@@ -756,6 +765,18 @@ void World::addBallContact(CollisionData *data, Ogre::Vector3 contactNormal, Ogr
 		data->friction, data->restitution);
 
 	data->addContacts(1);
+}
+
+void World::addDebris(RigidBody * body)
+{
+	debrisQueue.push(body);
+	if (debrisQueue.size() > maxDebris)
+	{
+		RigidBody *currBody = debrisQueue.front();
+		mSceneMgr->destroyEntity(currBody->entity);
+		currBody->isDestroyed = true;
+		debrisQueue.pop();
+	}
 }
 
 Ogre::Vector3 World::closestPointOnTriangle(Ogre::Vector3 point1, Ogre::Vector3 point2, Ogre::Vector3 point3, const Ogre::Vector3 &sourcePosition)

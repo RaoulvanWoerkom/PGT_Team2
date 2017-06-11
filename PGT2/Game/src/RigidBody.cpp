@@ -969,62 +969,72 @@ void RigidBody::cut(Ogre::Vector3 planePoint, Ogre::Vector3 planeNormal)
 		rightVertices2[i] -= getPosition();
 	}
 
-	Ogre::Entity* leftEntity = World::createCustomEntity(leftVertices2, leftIndices, newVertexCount, entity->getSubEntity(0)->getMaterialName());
-	Ogre::Entity* rightEntity = World::createCustomEntity(rightVertices2, rightIndices, newVertexCount, entity->getSubEntity(0)->getMaterialName());
+	int randSide = rand() % 1000;
+	if (randSide < 500)
+	{
+		Ogre::Entity* leftEntity = World::createCustomEntity(leftVertices2, leftIndices, newVertexCount, entity->getSubEntity(0)->getMaterialName());
+		Ogre::SceneNode *leftNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
+		leftNode->setPosition(getPosition());
+		leftNode->scale(Ogre::Vector3(0.8f, 0.8f, 0.8f));
+		leftNode->attachObject(leftEntity);
+
+		int randNum1 = (rand() % (1000) - 500);
+		int randNum2 = (rand() % (1000) - 500);
+		int randNum3 = (rand() % (1000) - 500);
+		Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
+		ranDir.normalise();
+
+		RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
+		leftBody->createBoundingBox(0.8f);
+		leftBody->canCollide = false;
+		leftBody->inverseMass = 4;
+		leftBody->addForce(ranDir * 50);
+		leftBody->addRotation(-ranDir);
+
+		CollisionBox *leftBox = new CollisionBox();
+		leftBox->body = leftBody;
+		leftBox->halfSize = leftBody->getHalfsize();
+		leftBox->body->calculateDerivedData();
+		leftBox->calculateInternals();
+
+		World::addCollisionBox(leftBox);
+		World::addDebris(leftBody);
+	}
+	else
+	{
+		Ogre::Entity* rightEntity = World::createCustomEntity(rightVertices2, rightIndices, newVertexCount, entity->getSubEntity(0)->getMaterialName());
+		Ogre::SceneNode *rightNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
+		rightNode->setPosition(getPosition());
+		rightNode->scale(Ogre::Vector3(0.8f, 0.8f, 0.8f));
+		rightNode->attachObject(rightEntity);
+
+		int randNum1 = (rand() % (1000) - 500);
+		int randNum2 = (rand() % (1000) - 500);
+		int randNum3 = (rand() % (1000) - 500);
+		Ogre::Vector3  ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
+		ranDir.normalise();
+
+		RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
+		rightBody->createBoundingBox(0.8f);
+		rightBody->canCollide = false;
+		rightBody->inverseMass = 4;
+		rightBody->addForce(-ranDir * 50);
+		rightBody->addRotation(ranDir);
+
+		CollisionBox *rightBox = new CollisionBox();
+		rightBox->body = rightBody;
+		rightBox->halfSize = rightBody->getHalfsize();
+		rightBox->body->calculateDerivedData();
+		rightBox->calculateInternals();
+
+		World::addCollisionBox(rightBox);
+		World::addDebris(rightBody);
+	}
+
+	
 
 
-	Ogre::SceneNode *leftNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	leftNode->setPosition(getPosition());
-	leftNode->scale(Ogre::Vector3(0.8f, 0.8f, 0.8f));
-	leftNode->attachObject(leftEntity);
-
-	Ogre::SceneNode *rightNode = World::mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	rightNode->setPosition(getPosition());
-	rightNode->scale(Ogre::Vector3(0.8f, 0.8f, 0.8f));
-	rightNode->attachObject(rightEntity);
-
-
-	int randNum1 = (rand() % (1000) - 500);
-	int randNum2 = (rand() % (1000) - 500);
-	int randNum3 = (rand() % (1000) - 500);
-	Ogre::Vector3 ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
-	ranDir.normalise();
-
-	RigidBody *leftBody = new RigidBody(leftNode, leftEntity);
-	leftBody->createBoundingBox(0.4f);
-	leftBody->canCollide = false;
-	leftBody->inverseMass = 1;
-	leftBody->addForce(ranDir * 20);
-	leftBody->addRotation(-ranDir);
-
-	CollisionBox *leftBox = new CollisionBox();
-	leftBox->body = leftBody;
-	leftBox->halfSize = leftBody->getHalfsize();
-	leftBox->body->calculateDerivedData();
-	leftBox->calculateInternals();
-
-	World::addCollisionBox(leftBox);
-
-	randNum1 = (rand() % (1000) - 500);
-	randNum2 = (rand() % (1000) - 500);
-	randNum3 = (rand() % (1000) - 500);
-	ranDir = Ogre::Vector3(randNum1, randNum2, randNum3);
-	ranDir.normalise();
-
-	RigidBody *rightBody = new RigidBody(rightNode, rightEntity);
-	rightBody->createBoundingBox(0.4f);
-	rightBody->canCollide = false;
-	rightBody->inverseMass = 1;
-	rightBody->addForce(-ranDir * 20);
-	rightBody->addRotation(ranDir);
-
-	CollisionBox *rightBox = new CollisionBox();
-	rightBox->body = rightBody;
-	rightBox->halfSize = rightBody->getHalfsize();
-	rightBox->body->calculateDerivedData();
-	rightBox->calculateInternals();
-
-	World::addCollisionBox(rightBox);
+	
 
 	delete newVertices;
 	delete newNormals;
