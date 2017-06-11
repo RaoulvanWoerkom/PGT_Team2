@@ -130,7 +130,6 @@ void World::createBuilding(Ogre::Vector3 pos)
 	std::string meshName = "Cube" + Helper::to_string(randNum);
 	Ogre::Entity* buildingEntity = mSceneMgr->createEntity(meshName, "cube.mesh");
 
-
 	buildingNode->attachObject(buildingEntity);
 	Building* buildingBody = new Building(buildingNode, buildingEntity);
 	buildingBody->entity->setMaterialName("Building/Wall");
@@ -329,8 +328,7 @@ Ogre::Entity* World::createCustomEntity(Ogre::Vector3* _verticesArr, std::vector
 	/* you can now create an entity/scene node based on your mesh, e.g. */
 	Ogre::Entity *entity = mSceneMgr->createEntity(meshName);
 	entity->setMaterialName(matName);
-
-
+	entity->setCastShadows(false);
 	return entity;
 }
 

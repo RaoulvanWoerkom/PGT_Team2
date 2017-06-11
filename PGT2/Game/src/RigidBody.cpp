@@ -71,6 +71,7 @@ void RigidBody::loadMeshInfo()
 /// the getBoundingBox() function does take rotation in account.
 void RigidBody::createBoundingBox(float perc)
 {
+	boundingBoxArray = new Ogre::Vector3[8];
 	boundingBox.clear();
 	Ogre::Vector3 minSize = Ogre::Vector3(10000000, 10000000, 10000000);
 	Ogre::Vector3 maxSize = Ogre::Vector3(-10000000, -10000000, -10000000);
@@ -395,12 +396,11 @@ Ogre::Real RigidBody::getInverseMass()
 /// \brief gets boundingbox coordinates in either world space or local(???) space
 Ogre::Vector3* RigidBody::getBoundingBox(bool worldPosition)
 {
-	Ogre::Vector3* retBoundingBox = new Ogre::Vector3[8];
 	for (int i = 0; i < boundingBox.size(); i++)
 	{
-		retBoundingBox[i] = boundingBox.at(i);
+		boundingBoxArray[i] = boundingBox.at(i);
 	}
-	return retBoundingBox;
+	return boundingBoxArray;
 }
 
 bool RigidBody::setAndCheckIsAwake()

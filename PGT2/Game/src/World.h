@@ -98,7 +98,7 @@ public:
 	
 
 	/** Holds the maximum number of contacts. */
-	const static unsigned maxContacts = 256;
+	const static unsigned maxContacts = 400;
 
 	/** Holds the array of contacts. */
 	Contact contacts[maxContacts];

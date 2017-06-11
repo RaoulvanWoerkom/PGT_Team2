@@ -53,6 +53,7 @@ public:
 	bool canCollide;
 	Ogre::Vector3 halfSize;
 	std::vector<Ogre::Vector3> boundingBox;
+	Ogre::Vector3* boundingBoxArray;
 	//bool* cutList;
 	//int cutListCount;
 
