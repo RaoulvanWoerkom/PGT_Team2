@@ -13,6 +13,8 @@
 #include "Contact.h"
 #include "MeshGenerator.h"
 #include "CollisionDetector.h"
+#include "ParticleSystemBase.h"
+#include "SingleParticle.h"
 
 
 
@@ -96,7 +98,10 @@ public:
 	void initializeSections();
 	void emptySectionObjects();
 	void populateSections();
-	
+	void createParticleSystem(Ogre::SceneNode* node);
+
+	Ogre::SceneNode* particleNode;
+	ParticleSystemBase particleSystem;
 	
 
 	/** Holds the maximum number of contacts. */

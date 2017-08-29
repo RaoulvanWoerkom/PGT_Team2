@@ -28,6 +28,9 @@
     <Filter Include="Source Files\Camera">
       <UniqueIdentifier>{03342cc9-2c79-4e9b-a4f6-4215b2dedda8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Particles">
+      <UniqueIdentifier>{15148601-5f11-471b-8b63-1b9a012d7ca1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BaseApplication.h">
@@ -81,6 +84,12 @@
     <ClInclude Include="src\CollisionDetector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\SingleParticle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ParticleSystemBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BaseApplication.cpp">
@@ -130,6 +139,12 @@
     </ClCompile>
     <ClCompile Include="src\CollisionDetector.cpp">
       <Filter>Source Files\PhysicsEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SingleParticle.cpp">
+      <Filter>Source Files\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ParticleSystemBase.cpp">
+      <Filter>Source Files\Particles</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

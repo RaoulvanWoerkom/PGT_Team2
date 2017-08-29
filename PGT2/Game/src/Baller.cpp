@@ -55,7 +55,7 @@ void Baller::init()
 	timerText->setCol(1.0f, 1.0f, 1.0f, 0.8f);    // Text colour (Red, Green, Blue, Alpha)
 
 	// Retrieve current Highscore from File
-	currentHighscore = Highscore::getHighscore();
+	/*currentHighscore = Highscore::getHighscore();*/
 
 	// Set current Score to zero
 	currentScore = 0;
@@ -75,7 +75,7 @@ void Baller::initGameOver()
 	//currentScore = currentHighscore + 100;
 
 	// Add current Score to ScoreBoard
-	Highscore::addToScoreboard(currentScore);
+	/*Highscore::addToScoreboard(currentScore);*/
 }
 
 
@@ -116,8 +116,8 @@ void Baller::createScene()
 void Baller::showScore()
 {
 	// Text to be displayed
-	scoreText->setText("Score: " + static_cast<std::ostringstream*>(&(std::ostringstream() << currentScore))->str() + " Highscore: " + static_cast<std::ostringstream*>(&(std::ostringstream() << currentHighscore)
-		)->str());    
+	/*scoreText->setText("Score: " + static_cast<std::ostringstream*>(&(std::ostringstream() << currentScore))->str() + " Highscore: " + static_cast<std::ostringstream*>(&(std::ostringstream() << currentHighscore)
+		)->str());    */
 	// Now it is possible to use the Ogre::String as parameter too
 }
 

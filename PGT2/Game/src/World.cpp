@@ -32,7 +32,13 @@ World::~World()
 {
 }
 
-
+void World::createParticleSystem(Ogre::SceneNode* node)
+{
+	//blijkbaar mag je de scenemanager niet doorgeven in de constructor :S
+	SingleParticle::mSceneManager = mSceneMgr;
+	particleNode = node->createChildSceneNode();
+	particleSystem = ParticleSystemBase(particleNode);
+}
 
 
 void World::createLight()
@@ -743,6 +749,7 @@ void World::checkWorldCollision()
 				Building* building = dynamic_cast<Building*>(currBox->body);
 				building->fracture(ballBody);
 				building->isDestroyed = true;
+				
 				mSceneMgr->destroyEntity(building->entity);
 			}
 		}

@@ -1,6 +1,7 @@
 
 #include "BaseApplication.h"
 #include "RigidBody.h"
+#include "ParticleSystemBase.h"
 
 class Building : public RigidBody
 {
@@ -13,5 +14,5 @@ public:
 
 
 	void fracture(RigidBody *ballBody);
-
+	Ogre::SceneNode* getNode();
 };

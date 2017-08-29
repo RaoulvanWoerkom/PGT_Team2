@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ParticleSystemBase.h" />
+    <ClInclude Include="src\SingleParticle.h" />
     <ClInclude Include="src\Ball.h" />
     <ClInclude Include="src\Building.h" />
     <ClInclude Include="src\CollisionDetector.h" />
@@ -38,6 +40,8 @@
     <ClInclude Include="src\MeshGenerator.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ParticleSystemBase.cpp" />
+    <ClCompile Include="src\SingleParticle.cpp" />
     <ClCompile Include="src\Ball.cpp" />
     <ClCompile Include="src\Building.cpp" />
     <ClCompile Include="src\CollisionDetector.cpp" />
@@ -71,7 +75,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v100</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>

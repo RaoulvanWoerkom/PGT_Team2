@@ -35,6 +35,11 @@ void Building::fracture(RigidBody *ballBody)
 {
 	if (!Building::isDestroyed)
 	{
+		//World::createParticleSystem(node);
 		split(Ogre::Vector3(3,4,3), ballBody);
 	}
+}
+Ogre::SceneNode* Building::getNode()
+{
+	return node;
 }
