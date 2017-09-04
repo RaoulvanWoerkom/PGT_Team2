@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2010
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxproj", "{523EAB39-AA76-4ECF-B8DF-836843209AF4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3E309DDA-3A19-499B-B11B-4ED514053427}"
@@ -10,15 +12,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleTest", "ParticleTest\ParticleTest.vcxproj", "{CB41BDCB-0577-4CF6-9EB4-E3143A4D5474}"
-	ProjectSection(ProjectDependencies) = postProject
-		{523EAB39-AA76-4ECF-B8DF-836843209AF4} = {523EAB39-AA76-4ECF-B8DF-836843209AF4}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ParticleTest", "ParticleTest\ParticleTest.vcxproj", "{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}"
 EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = PGT2.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
@@ -40,16 +36,23 @@ Global
 		{523EAB39-AA76-4ECF-B8DF-836843209AF4}.Release|x64.Build.0 = Release|x64
 		{523EAB39-AA76-4ECF-B8DF-836843209AF4}.Release|x86.ActiveCfg = Release|Win32
 		{523EAB39-AA76-4ECF-B8DF-836843209AF4}.Release|x86.Build.0 = Release|Win32
-		{CB41BDCB-0577-4CF6-9EB4-E3143A4D5474}.Debug|Win32.ActiveCfg = Debug|Win32
-		{CB41BDCB-0577-4CF6-9EB4-E3143A4D5474}.Debug|Win32.Build.0 = Debug|Win32
-		{CB41BDCB-0577-4CF6-9EB4-E3143A4D5474}.Debug|x64.ActiveCfg = Debug|Win32
-		{CB41BDCB-0577-4CF6-9EB4-E3143A4D5474}.Debug|x86.ActiveCfg = Debug|Win32
-		{CB41BDCB-0577-4CF6-9EB4-E3143A4D5474}.Release|Win32.ActiveCfg = Release|Win32
-		{CB41BDCB-0577-4CF6-9EB4-E3143A4D5474}.Release|Win32.Build.0 = Release|Win32
-		{CB41BDCB-0577-4CF6-9EB4-E3143A4D5474}.Release|x64.ActiveCfg = Release|Win32
-		{CB41BDCB-0577-4CF6-9EB4-E3143A4D5474}.Release|x86.ActiveCfg = Release|Win32
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Debug|Win32.Build.0 = Debug|Win32
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Debug|x64.ActiveCfg = Debug|x64
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Debug|x64.Build.0 = Debug|x64
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Debug|x86.ActiveCfg = Debug|Win32
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Debug|x86.Build.0 = Debug|Win32
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Release|Win32.ActiveCfg = Release|Win32
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Release|Win32.Build.0 = Release|Win32
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Release|x64.ActiveCfg = Release|x64
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Release|x64.Build.0 = Release|x64
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Release|x86.ActiveCfg = Release|Win32
+		{9D1B9748-3D86-430D-BCA5-0D52DAB4B0A5}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = PGT2.vsmdi
 	EndGlobalSection
 EndGlobal
